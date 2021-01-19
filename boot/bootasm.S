@@ -63,7 +63,3 @@ gdt:
 gdtdesc:
   .word   (gdtdesc - gdt - 1)             # sizeof(gdt) - 1
   .long   gdt                             # gdt 的地址
-
-  . = _start+510
-  .byte 0x55
-  .byte 0xAA

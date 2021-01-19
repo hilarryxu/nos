@@ -31,6 +31,7 @@ bootmain(void)
   *input++ = '!'; *input++ = color;
 }
 
+/*
 void
 new_bootmain(void)
 {
@@ -111,3 +112,4 @@ readseg(uchar* pa, uint count, uint offset)
   for(; pa < epa; pa += SECTSIZE, offset++)
     readsect(pa, offset);
 }
+*/
