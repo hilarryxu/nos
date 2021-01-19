@@ -1,9 +1,6 @@
 *.o
-*.out
-*.disasm
 
 /bochsout.log
-/boot.bin
-/bootblock
+/nos.img
 
 boot/bootblock.asm
