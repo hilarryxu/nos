@@ -40,7 +40,7 @@ start32:
 
   # 设置栈 %esp，然后跳到 C 代码中去
   movl $_start, %esp
-  call bootman
+  call _bootmain
 
   # 触发 Bochs 断点
   movw $0x8a00, %ax            # 0x8a00 -> port 0x8a00
