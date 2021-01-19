@@ -4,3 +4,6 @@
 
 /bochsout.log
 /boot.bin
+/bootblock
+
+boot/bootblock.asm

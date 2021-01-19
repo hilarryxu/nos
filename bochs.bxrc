@@ -1,6 +1,6 @@
 megs: 32
 
-floppya: 1_44=boot.bin, status=inserted
+floppya: 1_44=bootblock, status=inserted
 boot: floppy
 
 log: bochsout.log
