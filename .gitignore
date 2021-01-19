@@ -1,0 +1,6 @@
+*.o
+*.out
+*.disasm
+
+/bochsout.log
+/boot.bin
