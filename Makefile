@@ -19,8 +19,8 @@ bootblock: boot/bootasm.S boot/bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I. -o boot/bootmain.o -c boot/bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -nostdinc -I. -o boot/bootasm.o -c boot/bootasm.S
 	$(LD) $(LDFLAGS) -N -e _start -Ttext 0x7C00 -o boot/bootblock.o boot/bootasm.o boot/bootmain.o
-	$(OBJDUMP) -S boot/bootblock.o > boot/bootblock.asm
-	$(OBJCOPY) -O binary boot/bootblock.o bootblock
+	$(OBJDUMP) -S -M intel boot/bootblock.o > boot/bootblock.asm
+	$(OBJCOPY) -S -O binary -j .text boot/bootblock.o bootblock
 
 clean:
-	rm -f nos.img
+	rm -f bootblock nos.img

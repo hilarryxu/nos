@@ -9,32 +9,6 @@ void readseg(uchar*, uint, uint);
 void
 bootmain(void)
 {
-  uchar *input = (uchar *)0xB8000;
-  uchar color = (0 << 4) | (15 & 0x0F);
-
-  *input++ = 'H'; *input++ = color;
-  *input++ = 'e'; *input++ = color;
-  *input++ = 'l'; *input++ = color;
-  *input++ = 'l'; *input++ = color;
-  *input++ = 'o'; *input++ = color;
-  *input++ = ','; *input++ = color;
-  *input++ = ' '; *input++ = color;
-  *input++ = 'O'; *input++ = color;
-  *input++ = 'S'; *input++ = color;
-  *input++ = ' '; *input++ = color;
-  *input++ = 'K'; *input++ = color;
-  *input++ = 'e'; *input++ = color;
-  *input++ = 'r'; *input++ = color;
-  *input++ = 'n'; *input++ = color;
-  *input++ = 'e'; *input++ = color;
-  *input++ = 'l'; *input++ = color;
-  *input++ = '!'; *input++ = color;
-}
-
-/*
-void
-new_bootmain(void)
-{
   struct elfhdr *elf;
   struct proghdr *ph, *eph;
   void (*entry)(void);
@@ -112,4 +86,3 @@ readseg(uchar* pa, uint count, uint offset)
   for(; pa < epa; pa += SECTSIZE, offset++)
     readsect(pa, offset);
 }
-*/
