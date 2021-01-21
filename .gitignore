@@ -1,7 +1,4 @@
-*.o
+*.bin
 
 /bochsout.log
-/bootblock
 /nos.img
-
-boot/bootblock.asm
