@@ -2,7 +2,8 @@
 
 build:
 	fasm boot/boot.asm
-	cp boot/boot.bin nos.img
+	fasm boot/loader.asm
+	fasm nos.asm
 
 clean:
 	rm -f nos.img bochsout.log boot/*.bin
