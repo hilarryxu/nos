@@ -11,18 +11,21 @@ _start:
   ; 栈由高地址往低地址生长
   mov sp, BOOT_SEG
   mov ds, ax
-  mov ax, LOADER_SEG
-  mov es, ax
+
+  ; 打印 loading
+  mov si, msg
+  call print
 
 load_loader:
-  ; 0x9020(ES):0x0000(BX)
-  mov bx, 0
+  mov ax, LOADER_SEG
+  mov es, ax
+  mov bx, LOADER_OFFSET
   mov ah, 0x02                    ; 读磁盘控制指令
-  mov al, LOADER_SECTOR_NR        ; 读取 2 个扇区
-  mov dl, 0x00                    ; 驱动器为软盘
+  mov dl, BOOT_DRIVER_NO          ; 驱动器为软盘
   mov ch, 0                       ; cylinder <- 0
   mov dh, 0                       ; head <- 0
   mov cl, 2                       ; 从第二个扇区开始读（挨着 MBR）
+  mov al, LOADER_SECTOR_NR        ; 读取 2 个扇区
   int 0x13                        ; 读取数据
   jnc load_loader_ok
   ; 软盘系统复位
@@ -33,11 +36,25 @@ load_loader:
 
 load_loader_ok:
   ; 跳到 0x90200 执行 loader
-  jmp LOADER_SEG:0
+  jmp LOADER_SEG:LOADER_OFFSET
 
 hang:
   hlt
   jmp hang
+
+print:
+  mov ah, 0x0E
+.next:
+  lodsb
+  or al, al
+  jz .done
+  int 0x10
+  jmp .next
+.done:
+  ret
+
+msg db '[+] boot...'
+    db 13, 10, 0
 
 ; 补齐到 510 个字节
 ; $ - $$ 为当前地址减去节的基地址
