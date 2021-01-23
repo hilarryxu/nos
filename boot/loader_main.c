@@ -26,14 +26,28 @@ loader_main(void)
   load_kernel();
 }
 
+void *
+do_memcpy(void *dest, const void *src, int n)
+{
+  uchar *dest8 = (uchar*)dest;
+  uchar *src8 = (uchar*)src;
+  int i;
+
+  for (i=0; i<n; i++) {
+    dest8[i] = src8[i];
+  }
+  return dest;
+}
+
 void
 load_kernel(void)
 {
   void (*entry)(void);
-  void *kernel = (void*)0x8200;
+  void *kernel_dest = (void*)0x100000;
+  void *kernel_src = (void*)0x8200;
 
-  // readseg((uchar*)kernel, 512, 0x1200);
+  do_memcpy(kernel_dest, kernel_src, 4096);
 
-  entry = (void(*)(void))(kernel);
+  entry = (void(*)(void))(kernel_dest);
   entry();
 }
