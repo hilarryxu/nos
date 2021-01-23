@@ -35,7 +35,7 @@ load_loader:
   jmp load_loader
 
 load_loader_ok:
-  ; 跳到 0x90200 执行 loader
+  ; 跳到 loader
   jmp LOADER_SEG:LOADER_OFFSET
 
 hang:

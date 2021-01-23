@@ -15,14 +15,14 @@ use16
 
 include 'boot.inc'
 
-org LOADER_OFFSET
+org 7e00h
 
 _start:
   ; 屏蔽中断
   cli
 
-  ; 段寄存器 DS, ES, SS
-  mov ax, LOADER_SEG
+  ; 清零段寄存器 DS, ES, SS
+  xor ax, ax
   mov ds, ax
   mov es, ax
   mov ss, ax
@@ -41,7 +41,7 @@ _start:
   mov cr0, eax
 
   ; 重载 CS 和 EIP
-  jmp dword 8:start32
+  jmp (SEG_KCODE shl 3):start32
 
 use32
 start32:
