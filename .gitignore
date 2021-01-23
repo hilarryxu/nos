@@ -4,3 +4,6 @@
 /bochsout.log
 /nos.img
 /boot/loaderblock.asm
+/c.img
+/*.lock
+/kernel/kernelblock.asm
