@@ -23,4 +23,4 @@ all:
 	fasm nos.asm
 
 clean:
-	rm -f nos.img bochsout.log boot/*.bin boot/*.o
+	rm -f nos.img bochsout.log boot/*.bin boot/*.o kernel/*.bin kernel/*.o
