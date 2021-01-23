@@ -4,7 +4,7 @@ file 'boot/boot.bin'
 file 'boot/loader.bin'
 file 'boot/loader2.bin'
 
-times (9 * 512)-($-$$) db 0
+times (3 * 512)-($-$$) db 0
 
 kernel:
 file 'kernel/kernel.bin'

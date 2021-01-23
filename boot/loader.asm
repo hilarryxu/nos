@@ -56,7 +56,7 @@ start32:
 
   ; 设置栈 ESP，然后跳到 C 代码中去
   mov esp, BOOT_SEG shl 4
-  JMP 0x8600
+  JMP LOADER2_OFFSET
 
 spin:
   hlt
@@ -85,8 +85,6 @@ gdt_desc:
   dw gdt
   dw 0x0000
 
-; 补齐到 2048 个字节，即 4 个扇区，2KB 大小
-; $ - $$ 为当前地址减去节的基地址
-times 2048-($-$$) db 0
+times 512-($-$$) db 0
 
 ; vim: ft=fasm
