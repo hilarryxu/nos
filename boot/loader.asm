@@ -4,29 +4,31 @@ use16
 include 'boot.inc'
 
 _start:
-  nop
+  mov ax, LOADER_DS_SEG
+  mov ds, ax
 
-do_print:
-  ; BIOS 0x10 中断
-  ; 打印字符
-  mov si, msg_loader
+  ; 打印 loading
+  mov si, msg
+  call print
+  jmp hang
+
 print:
-  mov al, [si]
-  add si, 1
-  ; 结尾的 '\x00'
-  cmp al, 0
-  je print_end
-  mov ah, 0x0E              ; 显示字符，光标前移
-  mov bx, 15                ; AL=字符 BL=前景色
+  mov ah, 0x0E
+.next:
+  lodsb
+  or al, al
+  jz .done
   int 0x10
-  jmp print
-print_end:
+  jmp .next
+.done:
+  ret
 
 hang:
   hlt
   jmp hang
 
-msg_loader db '[+] loader...', 0
+msg db '[+] loader...'
+    db 13, 10, 0
 
 ; 补齐到 2048 个字节，即 4 个扇区，2KB 大小
 ; $ - $$ 为当前地址减去节的基地址
