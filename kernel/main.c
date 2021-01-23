@@ -1,10 +1,13 @@
-#include "nos/types.h"
+#include <sys/types.h>
+
+#include "nos/dbg.h"
+#include "nos/printk.h"
 
 void
 kmain(void)
 {
-  uchar *input = (uchar *)0xB8000;
-  uchar color = (0 << 4) | (15 & 0x0F);
+  u_char *input = (u_char *)0xB8000;
+  u_char color = (0 << 4) | (15 & 0x0F);
 
   *input++ = 'H'; *input++ = color;
   *input++ = 'e'; *input++ = color;
@@ -23,4 +26,8 @@ kmain(void)
   *input++ = 'e'; *input++ = color;
   *input++ = 'l'; *input++ = color;
   *input++ = '!'; *input++ = color;
+
+  bochs_putc('Z');
+
+  printk("hijack asdasdasd asda asdas asasdasd asdasd %d", 1234);
 }

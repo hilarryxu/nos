@@ -11,3 +11,5 @@ boot: floppy
 log: bochsout.log
 
 mouse: enabled=0
+
+port_e9_hack: enabled=1
