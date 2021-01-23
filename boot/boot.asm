@@ -25,7 +25,7 @@ load_loader:
   mov ch, 0                       ; cylinder <- 0
   mov dh, 0                       ; head <- 0
   mov cl, 2                       ; 从第二个扇区开始读（挨着 MBR）
-  mov al, LOADER_SECTOR_NR        ; 读取 2 个扇区
+  mov al, LOADER_SECTOR_NR        ; 读取多少个扇区
   int 0x13                        ; 读取数据
   jnc load_loader_ok
   ; 软盘系统复位

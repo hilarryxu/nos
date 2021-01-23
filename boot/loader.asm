@@ -41,7 +41,7 @@ _start:
   mov cr0, eax
 
   ; 重载 CS 和 EIP
-  jmp (SEG_KCODE shl 3):start32
+  jmp dword 8:start32
 
 use32
 start32:

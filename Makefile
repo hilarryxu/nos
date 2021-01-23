@@ -16,7 +16,7 @@ build:
 	$(LD) $(LDFLAGS) -N -e _start -Ttext 0x500 -o boot/loaderblock.o boot/loader2.o boot/loader_main.o
 	$(OBJDUMP) -S -M intel boot/loaderblock.o > boot/loaderblock.asm
 	$(OBJCOPY) -S -O binary -j .text boot/loaderblock.o boot/loader2.bin
-	# fasm nos.asm
+	fasm nos.asm
 
 clean:
 	rm -f nos.img bochsout.log boot/*.bin
