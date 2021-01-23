@@ -7,3 +7,4 @@
 /c.img
 /*.lock
 /kernel/kernelblock.asm
+/kernel/kernel

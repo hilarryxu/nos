@@ -10,7 +10,7 @@ all:
 	fasm boot/loader.asm
 	fasm boot/loader2.asm
 	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I./include -o boot/loader_main.o -c boot/loader_main.c
-	$(LD) $(LDFLAGS) -N -e _start -Ttext 0x8000 -o boot/loaderblock.o boot/loader2.o boot/loader_main.o
+	$(LD) -melf_i386 -e _start -Ttext 0x8000 -o boot/loaderblock.o boot/loader2.o boot/loader_main.o
 	$(KERNEL_OBJDUMP) -d -S boot/loaderblock.o > boot/loaderblock.asm
 	$(KERNEL_OBJCOPY) -S -O binary -j .text boot/loaderblock.o boot/loader2.bin
 

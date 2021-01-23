@@ -12,7 +12,7 @@ kernel.bin: kernel
 	$(KERNEL_OBJCOPY) -S -O binary -j .text $^ $@
 
 kernel: $(OBJFILES)
-	$(KERNEL_LD) $(LDFLAGS) -N -e _kmain -Ttext 0x100000 -o $@ $(OBJFILES)
+	$(KERNEL_LD) -melf_i386 -e kmain -Ttext 0x100000 -o $@ $(OBJFILES)
 
 kernel.objdump: kernel
 	$(KERNEL_OBJDUMP) -d -S $^ > $@

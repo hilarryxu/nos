@@ -1,10 +1,10 @@
-format MS COFF as 'o'
+format ELF as 'o'
 
-section '.text' code readable executable
+section '.text' executable
 
-extrn _loader_main
+extrn loader_main
 
 public _start
 _start:
-    call _loader_main
+    call loader_main
     jmp $
