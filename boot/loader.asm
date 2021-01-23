@@ -56,7 +56,7 @@ start32:
 
   ; 设置栈 ESP，然后跳到 C 代码中去
   mov esp, BOOT_SEG shl 4
-  ; call _loader_main
+  JMP 0x8600
 
 spin:
   hlt

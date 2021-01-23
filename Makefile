@@ -13,10 +13,10 @@ build:
 	fasm boot/loader.asm
 	fasm boot/loader2.asm
 	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I. -o boot/loader_main.o -c boot/loader_main.c
-	$(LD) $(LDFLAGS) -N -e _start -Ttext 0x500 -o boot/loaderblock.o boot/loader2.o boot/loader_main.o
+	$(LD) $(LDFLAGS) -N -e _start -Ttext 0x8600 -o boot/loaderblock.o boot/loader2.o boot/loader_main.o
 	$(OBJDUMP) -S -M intel boot/loaderblock.o > boot/loaderblock.asm
 	$(OBJCOPY) -S -O binary -j .text boot/loaderblock.o boot/loader2.bin
 	fasm nos.asm
 
 clean:
-	rm -f nos.img bochsout.log boot/*.bin
+	rm -f nos.img bochsout.log boot/*.bin boot/*.o
