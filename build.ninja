@@ -53,6 +53,9 @@ build kernel/vsnprintf.o: cc kernel/vsnprintf.c
 build kernel/printk.o: cc kernel/printk.c
 build kernel/dbg.o: cc kernel/dbg.c
 build kernel/monitor.o: cc kernel/monitor.c
+build kernel/idt.o: cc kernel/idt.c
+build kernel/isr.o: cc kernel/isr.c
+build kernel/interrupt.o: asm kernel/interrupt.asm
 
 build kernel/string.o: cc kernel/string.c
 build kernel/strings.o: cc kernel/strings.c
@@ -62,6 +65,9 @@ build kernel/kernel.bin: link kernel/main.o $
   kernel/printk.o $
   kernel/dbg.o $
   kernel/monitor.o $
+  kernel/idt.o $
+  kernel/isr.o $
+  kernel/interrupt.o $
   kernel/string.o $
   kernel/strings.o
   ldflags = $ldflags -T kernel/kernel.ld
