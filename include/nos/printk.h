@@ -3,4 +3,4 @@
 
 int printk(const char *fmt, ...);
 
-#endif  // _NOS_PRINTK_H_
+#endif // _NOS_PRINTK_H_

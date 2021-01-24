@@ -4,11 +4,11 @@
 #include <sys/types.h>
 
 #ifndef NULL
-  #define NULL ((void*)0)
+#define NULL ((void *)0)
 #endif
 
 #ifndef offsetof
-  #define offsetof(struct_type, member) ((size_t)&(((struct_type*)0)->member))
+#define offsetof(struct_type, member) ((size_t) & (((struct_type *)0)->member))
 #endif
 
-#endif  // _STDDEF_H_
+#endif // _STDDEF_H_

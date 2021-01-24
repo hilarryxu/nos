@@ -3,4 +3,4 @@
 
 void bochs_putc(char c);
 
-#endif  // _NOS_DBG_H_
+#endif // _NOS_DBG_H_
