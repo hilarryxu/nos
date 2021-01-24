@@ -1,5 +1,3 @@
-# gdbstub: enabled=1, port=1234, text_base=0, data_base=0, bss_base=0
-
 megs: 32
 
 romimage: file="$BXSHARE/BIOS-bochs-latest"
@@ -12,4 +10,5 @@ log: bochsout.log
 
 mouse: enabled=0
 
-port_e9_hack: enabled=1
+# port_e9_hack: enabled=1
+# gdbstub: enabled=1, port=1234, text_base=0, data_base=0, bss_base=0

@@ -64,7 +64,7 @@ load_kernel(void)
   eph = ph + elf->phnum;
   for(; ph < eph; ph++){
     pa = (uchar*)ph->paddr;
-    do_memcpy(pa, (uint)elf + (uint)(ph->off), ph->filesz);
+    do_memcpy(pa, (uchar *)elf + (ph->off), ph->filesz);
     if(ph->memsz > ph->filesz)
       stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
   }

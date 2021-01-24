@@ -1,6 +1,9 @@
 *.bin
 *.o
 
+.ninja_deps
+.ninja_log
+
 /bochsout.log
 /nos.img
 /boot/loaderblock.asm

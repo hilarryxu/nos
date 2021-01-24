@@ -1,0 +1,70 @@
+cc = gcc
+asm = fasm
+
+KERNEL_CC = gcc
+KERNEL_LD = ld
+KERNEL_OBJDUMP = objdump
+KERNEL_OBJCOPY = objcopy
+
+KERNEL_CFLAGS = -fno-pic -static -fno-strict-aliasing -O2 -Wall -m32 -fno-omit-frame-pointer -I./include
+KERNEL_LDFLAGS = -melf_i386
+
+cflags = $KERNEL_CFLAGS
+ld = $KERNEL_LD
+ldflags = $KERNEL_LDFLAGS
+
+
+rule asm
+  command = $asm $in
+  description = ASM $out
+
+rule cc
+  command = $cc -MMD -MF $out.d $defines $includes $cflags $cflags_c -c $in -o $out
+  description = CC $out
+  depfile = $out.d
+  deps = gcc
+
+rule link
+  command = $ld $ldflags -o $out $in
+  description = LINK $out
+
+rule r_loader2_bin
+  command = $objcopy -S -O binary -j .text $in $out
+
+rule r_nos_img
+  command = $asm $in
+  description = GENERATE $out
+
+#: boot
+build boot/boot.bin: asm boot/boot.asm | boot/boot.inc
+
+build boot/loader.bin: asm boot/loader.asm | boot/boot.inc
+
+build boot/loader2.o: asm boot/loader2.asm | boot/boot.inc
+build boot/loader_main.o: cc boot/loader_main.c
+build boot/loaderblock.o: link boot/loader2.o boot/loader_main.o
+  ldflags = $ldflags -e _start -Ttext 0x8000
+build boot/loader2.bin: r_loader2_bin boot/loaderblock.o
+  objcopy = $KERNEL_OBJCOPY
+
+#: kernel
+build kernel/main.o: cc kernel/main.c
+build kernel/vsnprintf.o: cc kernel/vsnprintf.c
+build kernel/printk.o: cc kernel/printk.c
+build kernel/dbg.o: cc kernel/dbg.c
+
+build kernel/kernel.bin: link kernel/main.o $
+  kernel/vsnprintf.o $
+  kernel/printk.o $
+  kernel/dbg.o
+  ldflags = $ldflags -T kernel/kernel.ld
+
+#: nos.img
+build nos.img: r_nos_img nos.asm | boot/boot.bin $
+  boot/loader.bin $
+  boot/loader2.bin $
+  kernel/kernel.bin
+
+build all: phony nos.img
+
+default all
