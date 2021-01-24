@@ -1,7 +1,7 @@
 #include <stdarg.h>
 
 #include "nos/vsnprintf.h"
-#include "nos/dbg.h"
+#include "nos/monitor.h"
 
 #define BUF_SIZE 512
 
@@ -29,7 +29,8 @@ printk(char *fmt, ...)
   va_end(args);
 
   for (i = 0; i < n; i++) {
-    bochs_putc(buf[i]);
+    // bochs_putc(buf[i]);
+    monitor_put(buf[i]);
   }
   return n;
 }

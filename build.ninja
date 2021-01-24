@@ -6,10 +6,11 @@ KERNEL_LD = ld
 KERNEL_OBJDUMP = objdump
 KERNEL_OBJCOPY = objcopy
 
-KERNEL_CFLAGS = -fno-pic -static -fno-strict-aliasing -O2 -Wall -m32 -fno-omit-frame-pointer -I./include
+CFLAGS = -fno-pic -static -fno-strict-aliasing -O2 -Wall -m32 -fno-omit-frame-pointer -I./include
+KERNEL_CFLAGS = -fno-pic -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -I./include
 KERNEL_LDFLAGS = -melf_i386
 
-cflags = $KERNEL_CFLAGS
+cflags = $CFLAGS
 ld = $KERNEL_LD
 ldflags = $KERNEL_LDFLAGS
 
@@ -56,6 +57,7 @@ build kernel/monitor.o: cc kernel/monitor.c
 build kernel/gdt.o: cc kernel/gdt.c
 build kernel/idt.o: cc kernel/idt.c
 build kernel/isr.o: cc kernel/isr.c
+  cflags = $KERNEL_CFLAGS
 build kernel/interrupt.o: asm kernel/interrupt.asm
 
 build kernel/string.o: cc kernel/string.c
