@@ -53,6 +53,7 @@ build kernel/vsnprintf.o: cc kernel/vsnprintf.c
 build kernel/printk.o: cc kernel/printk.c
 build kernel/dbg.o: cc kernel/dbg.c
 build kernel/monitor.o: cc kernel/monitor.c
+build kernel/gdt.o: cc kernel/gdt.c
 build kernel/idt.o: cc kernel/idt.c
 build kernel/isr.o: cc kernel/isr.c
 build kernel/interrupt.o: asm kernel/interrupt.asm
@@ -65,6 +66,7 @@ build kernel/kernel.bin: link kernel/main.o $
   kernel/printk.o $
   kernel/dbg.o $
   kernel/monitor.o $
+  kernel/gdt.o $
   kernel/idt.o $
   kernel/isr.o $
   kernel/interrupt.o $

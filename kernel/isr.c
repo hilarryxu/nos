@@ -1,9 +1,12 @@
 #include "nos/isr.h"
 
-#include "nos/printk.h"
+#include "nos/monitor.h"
 
 void
 isr_handler(struct isr_regs regs)
 {
-  printk("recieved interrupt: %d\n", regs.int_no);
+  if (regs.int_no == 3) {
+    monitor_write("recieved interrupt: int 3\n");
+  }
+  // printk("recieved interrupt: %d\n", regs.int_no);
 }

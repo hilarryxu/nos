@@ -4,6 +4,7 @@
 void
 kmain(void)
 {
+  gdt_setup();
   idt_setup();
 
   monitor_clear();
