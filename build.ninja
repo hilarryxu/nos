@@ -59,6 +59,8 @@ build kernel/idt.o: cc kernel/idt.c
 build kernel/isr.o: cc kernel/isr.c
   cflags = $KERNEL_CFLAGS
 build kernel/interrupt.o: asm kernel/interrupt.asm
+build kernel/timer.o: cc kernel/timer.c
+  cflags = $KERNEL_CFLAGS
 
 build kernel/string.o: cc kernel/string.c
 build kernel/strings.o: cc kernel/strings.c
@@ -72,6 +74,7 @@ build kernel/kernel.bin: link kernel/main.o $
   kernel/idt.o $
   kernel/isr.o $
   kernel/interrupt.o $
+  kernel/timer.o $
   kernel/string.o $
   kernel/strings.o
   ldflags = $ldflags -T kernel/kernel.ld
