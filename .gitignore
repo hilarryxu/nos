@@ -1,13 +1,14 @@
 *.bin
 *.o
+*.out
+*.img
 
 .ninja_deps
 .ninja_log
 
+Crosstools/
+
 /bochsout.log
-/nos.img
-/boot/loaderblock.asm
-/c.img
 /*.lock
-/kernel/kernelblock.asm
+/boot/boot
 /kernel/kernel

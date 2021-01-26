@@ -1,89 +1,52 @@
-cc = gcc
-asm = fasm
+CROSS_PREFIX = ./Crosstools/bin/i586-elf-
 
-KERNEL_CC = gcc
-KERNEL_LD = ld
-KERNEL_OBJDUMP = objdump
-KERNEL_OBJCOPY = objcopy
+KERNEL_CC = ${CROSS_PREFIX}gcc
+KERNEL_LD = ${CROSS_PREFIX}ld
+KERNEL_OBJDUMP = ${CROSS_PREFIX}objdump
+KERNEL_OBJCOPY = ${CROSS_PREFIX}objcopy
 
-CFLAGS = -fno-pic -static -fno-strict-aliasing -O2 -Wall -m32 -fno-omit-frame-pointer -I./include
-KERNEL_CFLAGS = -fno-pic -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -I./include
+KERNEL_CFLAGS = -m32 -ffreestanding -Wall -Wextra -I./include
 KERNEL_LDFLAGS = -melf_i386
 
-cflags = $CFLAGS
-ld = $KERNEL_LD
-ldflags = $KERNEL_LDFLAGS
-
-
-rule asm
-  command = $asm $in
-  description = ASM $out
-
-rule cc
-  command = $cc -MMD -MF $out.d $defines $includes $cflags $cflags_c -c $in -o $out
-  description = CC $out
+rule kernel_cc
+  command = $KERNEL_CC -MMD -MF $out.d $KERNEL_CFLAGS -c -o $out $in
+  description = KERNEL_CC $out
   depfile = $out.d
   deps = gcc
 
-rule link
-  command = $ld $ldflags -o $out $in
-  description = LINK $out
+rule kernel_link
+  command = $KERNEL_LD $KERNEL_LDFLAGS -o $out $in
+  description = KERNEL_LINK $out
 
-rule r_loader2_bin
-  command = $objcopy -S -O binary -j .text $in $out
+rule r_boot
+  command = $KERNEL_OBJCOPY -S -O binary -j .text $in $out
 
 rule r_nos_img
-  command = $asm $in
+  command = fasm $in
   description = GENERATE $out
 
 #: boot
-build boot/boot.bin: asm boot/boot.asm | boot/boot.inc
+build boot/boot.o: kernel_cc boot/boot.S
+  KERNEL_CFLAGS = $KERNEL_CFLAGS -nostdinc
 
-build boot/loader.bin: asm boot/loader.asm | boot/boot.inc
+build boot/main.o: kernel_cc boot/main.c
+  KERNEL_CFLAGS = $KERNEL_CFLAGS -nostdinc -Os
 
-build boot/loader2.o: asm boot/loader2.asm | boot/boot.inc
-build boot/loader_main.o: cc boot/loader_main.c
-build boot/loaderblock.o: link boot/loader2.o boot/loader_main.o
-  ldflags = $ldflags -e _start -Ttext 0x8000
-build boot/loader2.bin: r_loader2_bin boot/loaderblock.o
-  objcopy = $KERNEL_OBJCOPY
+build boot/boot.out: kernel_link boot/boot.o $
+  boot/main.o
+  KERNEL_LDFLAGS = $KERNEL_LDFLAGS -N -e start -Ttext 0x7C00
+
+build boot/boot: r_boot boot/boot.out
 
 #: kernel
-build kernel/main.o: cc kernel/main.c
-build kernel/vsnprintf.o: cc kernel/vsnprintf.c
-build kernel/printk.o: cc kernel/printk.c
-build kernel/dbg.o: cc kernel/dbg.c
-build kernel/monitor.o: cc kernel/monitor.c
-build kernel/gdt.o: cc kernel/gdt.c
-build kernel/idt.o: cc kernel/idt.c
-build kernel/isr.o: cc kernel/isr.c
-  cflags = $KERNEL_CFLAGS
-build kernel/interrupt.o: asm kernel/interrupt.asm
-build kernel/timer.o: cc kernel/timer.c
-  cflags = $KERNEL_CFLAGS
+build kernel/kmain.o: kernel_cc kernel/kmain.c
 
-build kernel/string.o: cc kernel/string.c
-build kernel/strings.o: cc kernel/strings.c
-
-build kernel/kernel.bin: link kernel/main.o $
-  kernel/vsnprintf.o $
-  kernel/printk.o $
-  kernel/dbg.o $
-  kernel/monitor.o $
-  kernel/gdt.o $
-  kernel/idt.o $
-  kernel/isr.o $
-  kernel/interrupt.o $
-  kernel/timer.o $
-  kernel/string.o $
-  kernel/strings.o
-  ldflags = $ldflags -T kernel/kernel.ld
+build kernel/kernel: kernel_link kernel/kmain.o | kernel/kernel.ld
+  KERNEL_LDFLAGS = $KERNEL_LDFLAGS -T kernel/kernel.ld -nostdlib
 
 #: nos.img
-build nos.img: r_nos_img nos.asm | boot/boot.bin $
-  boot/loader.bin $
-  boot/loader2.bin $
-  kernel/kernel.bin
+build nos.img: r_nos_img nos.asm | boot/boot $
+  kernel/kernel
 
 build all: phony nos.img
 

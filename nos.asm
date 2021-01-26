@@ -1,13 +1,11 @@
 format binary as 'img'
 
-file 'boot/boot.bin'
-file 'boot/loader.bin'
-file 'boot/loader2.bin'
-
-times (3 * 512)-($-$$) db 0
+file 'boot/boot'
+times (510)-($-$$) db 0
+db 0x55,0xAA
 
 kernel:
-file 'kernel/kernel.bin'
-times (20 * 1024)-($-kernel) db 0
+file 'kernel/kernel'
+times (10*1024*1024)-($-$$) db 0
 
 ; vim: ft=fasm
