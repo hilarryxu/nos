@@ -3,4 +3,4 @@
 
 #define __nos_libc 1
 
-#endif
+#endif /* !_SYS_CDEFS_H_ */

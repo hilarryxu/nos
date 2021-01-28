@@ -8,3 +8,5 @@ ata0-master: type=disk, mode=flat, path="nos.img"
 boot: disk
 
 mouse: enabled=0
+
+port_e9_hack: enabled=1

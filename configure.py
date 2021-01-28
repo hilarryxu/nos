@@ -145,6 +145,7 @@ all_targets = []
 #: kernel and boot
 n.variable('kernel_cc', '${cross_gcc_prefix}$cc')
 n.variable('kernel_ld', '${cross_gcc_prefix}ld')
+n.variable('kernel_ar', '${cross_gcc_prefix}$ar')
 n.variable('kernel_objcopy', '${cross_gcc_prefix}objcopy')
 n.variable('kernel_objdump', '${cross_gcc_prefix}objdump')
 n.newline()
@@ -152,7 +153,8 @@ n.newline()
 kernel_cflags = [
     '-m32', '-ffreestanding',
     '-Wall', '-Wextra',
-    '-I./kernel',
+    '-D__is_nos_kernel',
+    '-I$root/kernel', '-I$root/libc/include',
 ]
 kernel_ldflags = [
     '-melf_i386'
@@ -169,7 +171,7 @@ n.rule('kernel_cc',
 n.newline()
 
 n.rule('kernel_ar',
-       command='rm -f $out && $kernel_ar crs $out $in',
+       command='$kernel_ar crs $out $in',
        description='KERNEL_AR $out')
 n.newline()
 
@@ -190,17 +192,54 @@ def kernel_src(filename):
 def kernel_cc(name, **kwargs):
     return n.build(kernel_built(name + objext), 'kernel_cc', kernel_src(name + '.c'), **kwargs)
 
+
+#: libk
+libk_objs = []
+for name in [
+    # stdio
+    'libc/stdio/putchar',
+    'libc/stdio/puts',
+    'libc/stdio/printf',
+    # stdlib
+    'libc/stdlib/abort',
+    # string
+    'libc/string/memcmp',
+    'libc/string/memcpy',
+    'libc/string/memset',
+    'libc/string/memmove',
+    'libc/string/strlen',
+    # ctype
+    'libc/ctype/ctype',
+]:
+    libk_objs += n.build(
+        built(name + objext),
+        'kernel_cc',
+        src(name + '.c'),
+        variables=dict(
+            cflags='$cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include'
+        )
+    )
+
+libk = n.build(
+    built('libc/libk.a'),
+    'kernel_ar',
+    libk_objs
+)
+
+all_targets += libk
+n.newline()
+
 #: boot
 boot_objs = []
 boot_objs += n.build(
     built('boot/boot' + objext),
     'kernel_cc',
-    'boot/boot.S'
+    src('boot/boot.S')
 )
 boot_objs += n.build(
     built('boot/main' + objext),
     'kernel_cc',
-    'boot/main.c',
+    src('boot/main.c'),
     variables=dict(
         kernel_cflags='$kernel_cflags -Os'
     )
@@ -217,12 +256,17 @@ boot_out = n.build(
 n.rule('r_boot',
        command='$kernel_objcopy -S -O binary -j .text $in $out')
 boot_binary = n.build(built('boot/boot'), 'r_boot', boot_out)
+
 all_targets += boot_binary
 n.newline()
 
 #: kernel
 kernel_objs = []
-for name in ['start']:
+for name in [
+    'start',
+    # drv
+    'drv/vga',
+]:
     kernel_objs += kernel_cc(name)
 
 kernel_elf = n.build(
@@ -232,9 +276,11 @@ kernel_elf = n.build(
     variables=dict(
         kernel_ldflags='$kernel_ldflags -T {0} -nostdlib'.format(
             kernel_src('arch/$arch/kernel.ld')
-        )
+        ),
+        libs='-L$builddir/libc -lk'
     )
 )
+
 all_targets += kernel_elf
 n.newline()
 
@@ -245,6 +291,7 @@ n.rule('r_nos_img',
 nos_img = n.build('nos.img', 'r_nos_img', 'nos.asm',
     implicit=[] + boot_binary + kernel_elf
 )
+
 all_targets += nos_img
 n.newline()
 

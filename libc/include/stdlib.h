@@ -7,11 +7,10 @@
 extern "C" {
 #endif
 
-__attribute__((__noreturn__))
-void abort(void);
+__attribute__((__noreturn__)) void abort(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* !_STDLIB_H_ */

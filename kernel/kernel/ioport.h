@@ -45,4 +45,4 @@ outl(uint16_t _port, uint32_t _data)
   asm volatile("outl %0, %1" ::"a"(_data), "Nd"(_port));
 }
 
-#endif // !_KERNEL_IOPORT_H_
+#endif /* !_KERNEL_IOPORT_H_ */

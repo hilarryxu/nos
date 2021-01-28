@@ -17,10 +17,12 @@ ldflags =
 
 kernel_cc = ${cross_gcc_prefix}$cc
 kernel_ld = ${cross_gcc_prefix}ld
+kernel_ar = ${cross_gcc_prefix}$ar
 kernel_objcopy = ${cross_gcc_prefix}objcopy
 kernel_objdump = ${cross_gcc_prefix}objdump
 
-kernel_cflags = -m32 -ffreestanding -Wall -Wextra -I./kernel
+kernel_cflags = -m32 -ffreestanding -Wall -Wextra -D__is_nos_kernel $
+    -I$root/kernel -I$root/libc/include
 kernel_ldflags = -melf_i386
 
 rule kernel_cc
@@ -31,15 +33,42 @@ rule kernel_cc
   deps = gcc
 
 rule kernel_ar
-  command = rm -f $out && $kernel_ar crs $out $in
+  command = $kernel_ar crs $out $in
   description = KERNEL_AR $out
 
 rule kernel_link
   command = $kernel_ld $ldflags $kernel_ldflags -o $out $in $libs
   description = KERNEL_LINK $out
 
-build $builddir\boot/boot.o: kernel_cc boot/boot.S
-build $builddir\boot/main.o: kernel_cc boot/main.c
+build $builddir\libc/stdio/putchar.o: kernel_cc $root\libc/stdio/putchar.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/stdio/puts.o: kernel_cc $root\libc/stdio/puts.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/stdio/printf.o: kernel_cc $root\libc/stdio/printf.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/stdlib/abort.o: kernel_cc $root\libc/stdlib/abort.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/string/memcmp.o: kernel_cc $root\libc/string/memcmp.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/string/memcpy.o: kernel_cc $root\libc/string/memcpy.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/string/memset.o: kernel_cc $root\libc/string/memset.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/string/memmove.o: kernel_cc $root\libc/string/memmove.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/string/strlen.o: kernel_cc $root\libc/string/strlen.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/ctype/ctype.o: kernel_cc $root\libc/ctype/ctype.c
+  cflags = $cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include
+build $builddir\libc/libk.a: kernel_ar $builddir\libc/stdio/putchar.o $
+    $builddir\libc/stdio/puts.o $builddir\libc/stdio/printf.o $
+    $builddir\libc/stdlib/abort.o $builddir\libc/string/memcmp.o $
+    $builddir\libc/string/memcpy.o $builddir\libc/string/memset.o $
+    $builddir\libc/string/memmove.o $builddir\libc/string/strlen.o $
+    $builddir\libc/ctype/ctype.o
+
+build $builddir\boot/boot.o: kernel_cc $root\boot/boot.S
+build $builddir\boot/main.o: kernel_cc $root\boot/main.c
   kernel_cflags = $kernel_cflags -Os
 build $builddir\boot/boot.out: kernel_link $builddir\boot/boot.o $
     $builddir\boot/main.o
@@ -49,7 +78,10 @@ rule r_boot
 build $builddir\boot/boot: r_boot $builddir\boot/boot.out
 
 build $builddir\kernel\start.o: kernel_cc $root\kernel\start.c
-build $builddir\kernel\kernel: kernel_link $builddir\kernel\start.o
+build $builddir\kernel\drv/vga.o: kernel_cc $root\kernel\drv/vga.c
+build $builddir\kernel\kernel: kernel_link $builddir\kernel\start.o $
+    $builddir\kernel\drv/vga.o
+  libs = -L$builddir/libc -lk
   kernel_ldflags = $kernel_ldflags -T $root\kernel\arch/$arch/kernel.ld $
       -nostdlib
 
@@ -60,4 +92,5 @@ build nos.img: r_nos_img nos.asm | $builddir\boot/boot $builddir\kernel\kernel
 
 default nos.img
 
-build all: phony $builddir\boot/boot $builddir\kernel\kernel nos.img
+build all: phony $builddir\libc/libk.a $builddir\boot/boot $
+    $builddir\kernel\kernel nos.img
