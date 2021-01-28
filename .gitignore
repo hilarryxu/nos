@@ -3,14 +3,12 @@
 *.out
 *.img
 *.py[co]
+__pycache__/
 
 .ninja_deps
 .ninja_log
-
-Crosstools/
-__pycache__/
-
 /bochsout.log
 /*.lock
-/boot/boot
-/kernel/kernel
+
+build/
+Crosstools/

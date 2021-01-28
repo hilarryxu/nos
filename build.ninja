@@ -2,12 +2,12 @@
 
 ninja_required_version = 1.3
 
-configure_args = --verbose
+configure_args = 
 
 root = .
 builddir = build
 
-cross_gcc_prefix = ./Crosstools/bin/i586-elf-
+cross_gcc_prefix = 
 cc = gcc
 ar = ar
 

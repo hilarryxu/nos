@@ -122,7 +122,7 @@ n.variable('root', root)
 n.variable('builddir', 'build')
 n.newline()
 
-n.variable('cross_gcc_prefix', './Crosstools/bin/i586-elf-')
+n.variable('cross_gcc_prefix', configure_env.get('CROSS_GCC_PREFIX', ''))
 n.variable('cc', CC)
 n.variable('ar', configure_env.get('AR', 'ar'))
 n.newline()
