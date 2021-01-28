@@ -1,5 +1,9 @@
 #!/bin/sh
 
-rg --files include/ --type c | xargs clang-format -i
-rg --files boot/ --type c | xargs clang-format -i
-rg --files kernel/ --type c | xargs clang-format -i
+if [ -z $MSYSTEM ]; then
+  rg --files boot/ --type c | xargs clang-format -i
+  rg --files kernel/ --type c | xargs clang-format -i
+else
+  rg --path-separator '//' --files boot/ --type c | xargs clang-format -i
+  rg --path-separator '//' --files kernel/ --type c | xargs clang-format -i
+fi

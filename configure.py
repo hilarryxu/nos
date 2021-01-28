@@ -16,7 +16,7 @@ import ninja_syntax
 
 
 class Platform(object):
-    def __init__(self, platform):
+    def __init__(self, platform=None):
         self._platform = platform
         if self._platform is not None:
             return
@@ -46,10 +46,9 @@ class Platform(object):
 parser = OptionParser()
 parser.add_option('--verbose', action='store_true',
                   help='enable verbose build')
-parser.add_option('--platform',
-                  help='target platform (' +
-                       '/'.join(Platform.known_platforms()) + ')',
-                  choices=Platform.known_platforms())
+parser.add_option('--arch',
+                  help='target arch',
+                  default='i386')
 parser.add_option('--host',
                   help='host platform (' +
                        '/'.join(Platform.known_platforms()) + ')',
@@ -60,11 +59,7 @@ if args:
     print('ERROR: extra unparsed command-line arguments:', args)
     sys.exit(1)
 
-platform = Platform(options.platform)
-if options.host:
-    host = Platform(options.host)
-else:
-    host = platform
+platform = Platform()
 
 BUILD_FILENAME = 'build.ninja'
 ninja_writer = ninja_syntax.Writer(open(BUILD_FILENAME, 'w'))
@@ -120,9 +115,14 @@ if root == os.getcwd():
 
 n.variable('root', root)
 n.variable('builddir', 'build')
+n.variable('arch', options.arch)
 n.newline()
 
-n.variable('cross_gcc_prefix', configure_env.get('CROSS_GCC_PREFIX', ''))
+default_cross_gcc_prefix = ''
+if platform.is_windows():
+    default_cross_gcc_prefix = './Crosstools/bin/i586-elf-'
+
+n.variable('cross_gcc_prefix', configure_env.get('CROSS_GCC_PREFIX', default_cross_gcc_prefix))
 n.variable('cc', CC)
 n.variable('ar', configure_env.get('AR', 'ar'))
 n.newline()
@@ -152,7 +152,7 @@ n.newline()
 kernel_cflags = [
     '-m32', '-ffreestanding',
     '-Wall', '-Wextra',
-    '-I./include',
+    '-I./kernel',
 ]
 kernel_ldflags = [
     '-melf_i386'
@@ -222,7 +222,7 @@ n.newline()
 
 #: kernel
 kernel_objs = []
-for name in ['kmain']:
+for name in ['start']:
     kernel_objs += kernel_cc(name)
 
 kernel_elf = n.build(
@@ -231,7 +231,7 @@ kernel_elf = n.build(
     kernel_objs,
     variables=dict(
         kernel_ldflags='$kernel_ldflags -T {0} -nostdlib'.format(
-            kernel_src('kernel.ld')
+            kernel_src('arch/$arch/kernel.ld')
         )
     )
 )

@@ -6,8 +6,9 @@ configure_args =
 
 root = .
 builddir = build
+arch = i386
 
-cross_gcc_prefix = 
+cross_gcc_prefix = ./Crosstools/bin/i586-elf-
 cc = gcc
 ar = ar
 
@@ -19,7 +20,7 @@ kernel_ld = ${cross_gcc_prefix}ld
 kernel_objcopy = ${cross_gcc_prefix}objcopy
 kernel_objdump = ${cross_gcc_prefix}objdump
 
-kernel_cflags = -m32 -ffreestanding -Wall -Wextra -I./include
+kernel_cflags = -m32 -ffreestanding -Wall -Wextra -I./kernel
 kernel_ldflags = -melf_i386
 
 rule kernel_cc
@@ -37,25 +38,26 @@ rule kernel_link
   command = $kernel_ld $ldflags $kernel_ldflags -o $out $in $libs
   description = KERNEL_LINK $out
 
-build $builddir/boot/boot.o: kernel_cc boot/boot.S
-build $builddir/boot/main.o: kernel_cc boot/main.c
+build $builddir\boot/boot.o: kernel_cc boot/boot.S
+build $builddir\boot/main.o: kernel_cc boot/main.c
   kernel_cflags = $kernel_cflags -Os
-build $builddir/boot/boot.out: kernel_link $builddir/boot/boot.o $
-    $builddir/boot/main.o
+build $builddir\boot/boot.out: kernel_link $builddir\boot/boot.o $
+    $builddir\boot/main.o
   kernel_ldflags = $kernel_ldflags -N -e start -Ttext 0x7C00
 rule r_boot
   command = $kernel_objcopy -S -O binary -j .text $in $out
-build $builddir/boot/boot: r_boot $builddir/boot/boot.out
+build $builddir\boot/boot: r_boot $builddir\boot/boot.out
 
-build $builddir/kernel/kmain.o: kernel_cc $root/kernel/kmain.c
-build $builddir/kernel/kernel: kernel_link $builddir/kernel/kmain.o
-  kernel_ldflags = $kernel_ldflags -T $root/kernel/kernel.ld -nostdlib
+build $builddir\kernel\start.o: kernel_cc $root\kernel\start.c
+build $builddir\kernel\kernel: kernel_link $builddir\kernel\start.o
+  kernel_ldflags = $kernel_ldflags -T $root\kernel\arch/$arch/kernel.ld $
+      -nostdlib
 
 rule r_nos_img
   command = fasm $in
   description = BUILD_IMG $out
-build nos.img: r_nos_img nos.asm | $builddir/boot/boot $builddir/kernel/kernel
+build nos.img: r_nos_img nos.asm | $builddir\boot/boot $builddir\kernel\kernel
 
 default nos.img
 
-build all: phony $builddir/boot/boot $builddir/kernel/kernel nos.img
+build all: phony $builddir\boot/boot $builddir\kernel\kernel nos.img
