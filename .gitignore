@@ -2,11 +2,13 @@
 *.o
 *.out
 *.img
+*.py[co]
 
 .ninja_deps
 .ninja_log
 
 Crosstools/
+__pycache__/
 
 /bochsout.log
 /*.lock
