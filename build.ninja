@@ -11,6 +11,7 @@ arch = i386
 cross_gcc_prefix = ./Crosstools/bin/i586-elf-
 cc = gcc
 ar = ar
+asm = fasm
 
 cflags = 
 ldflags = 
@@ -18,6 +19,7 @@ ldflags =
 kernel_cc = ${cross_gcc_prefix}$cc
 kernel_ld = ${cross_gcc_prefix}ld
 kernel_ar = ${cross_gcc_prefix}$ar
+kernel_asm = $asm
 kernel_objcopy = ${cross_gcc_prefix}objcopy
 kernel_objdump = ${cross_gcc_prefix}objdump
 
@@ -31,6 +33,10 @@ rule kernel_cc
   description = KERNEL_CC $out
   depfile = $out.d
   deps = gcc
+
+rule kernel_asm
+  command = $kernel_asm $in $out
+  description = KERNEL_ASM $out
 
 rule kernel_ar
   command = $kernel_ar crs $out $in
@@ -78,9 +84,13 @@ rule r_boot
 build $builddir\boot/boot: r_boot $builddir\boot/boot.out
 
 build $builddir\kernel\start.o: kernel_cc $root\kernel\start.c
+build $builddir\kernel\kernel/gdt.o: kernel_cc $root\kernel\kernel/gdt.c
 build $builddir\kernel\drv/vga.o: kernel_cc $root\kernel\drv/vga.c
-build $builddir\kernel\kernel: kernel_link $builddir\kernel\start.o $
-    $builddir\kernel\drv/vga.o
+build $builddir\kernel\arch/$arch/arch.o: kernel_asm $
+    $root\kernel\arch/$arch/arch.asm
+build $builddir\kernel\kernel.bin: kernel_link $builddir\kernel\start.o $
+    $builddir\kernel\kernel/gdt.o $builddir\kernel\drv/vga.o $
+    $builddir\kernel\arch/$arch/arch.o
   libs = -L$builddir/libc -lk
   kernel_ldflags = $kernel_ldflags -T $root\kernel\arch/$arch/kernel.ld $
       -nostdlib
@@ -88,9 +98,10 @@ build $builddir\kernel\kernel: kernel_link $builddir\kernel\start.o $
 rule r_nos_img
   command = fasm $in
   description = BUILD_IMG $out
-build nos.img: r_nos_img nos.asm | $builddir\boot/boot $builddir\kernel\kernel
+build nos.img: r_nos_img nos.asm | $builddir\boot/boot $
+    $builddir\kernel\kernel.bin
 
 default nos.img
 
 build all: phony $builddir\libc/libk.a $builddir\boot/boot $
-    $builddir\kernel\kernel nos.img
+    $builddir\kernel\kernel.bin nos.img

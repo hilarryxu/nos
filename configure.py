@@ -125,6 +125,7 @@ if platform.is_windows():
 n.variable('cross_gcc_prefix', configure_env.get('CROSS_GCC_PREFIX', default_cross_gcc_prefix))
 n.variable('cc', CC)
 n.variable('ar', configure_env.get('AR', 'ar'))
+n.variable('asm', configure_env.get('ASM', 'fasm'))
 n.newline()
 
 cflags = []
@@ -146,6 +147,7 @@ all_targets = []
 n.variable('kernel_cc', '${cross_gcc_prefix}$cc')
 n.variable('kernel_ld', '${cross_gcc_prefix}ld')
 n.variable('kernel_ar', '${cross_gcc_prefix}$ar')
+n.variable('kernel_asm', '$asm')
 n.variable('kernel_objcopy', '${cross_gcc_prefix}objcopy')
 n.variable('kernel_objdump', '${cross_gcc_prefix}objdump')
 n.newline()
@@ -168,6 +170,11 @@ n.rule('kernel_cc',
     depfile='$out.d',
     deps='gcc',
     description='KERNEL_CC $out')
+n.newline()
+
+n.rule('kernel_asm',
+       command='$kernel_asm $in $out',
+       description='KERNEL_ASM $out')
 n.newline()
 
 n.rule('kernel_ar',
@@ -264,13 +271,21 @@ n.newline()
 kernel_objs = []
 for name in [
     'start',
+    'kernel/gdt',
     # drv
     'drv/vga',
 ]:
     kernel_objs += kernel_cc(name)
 
+arch_asm_obj = n.build(
+    kernel_built('arch/$arch/arch' + objext),
+    'kernel_asm',
+    kernel_src('arch/$arch/arch.asm')
+)
+kernel_objs += arch_asm_obj
+
 kernel_elf = n.build(
-    kernel_built('kernel'),
+    kernel_built('kernel.bin'),
     'kernel_link',
     kernel_objs,
     variables=dict(
