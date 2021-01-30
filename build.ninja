@@ -81,27 +81,27 @@ build $builddir\boot/boot.out: kernel_link $builddir\boot/boot.o $
   kernel_ldflags = $kernel_ldflags -N -e start -Ttext 0x7C00
 rule r_boot
   command = $kernel_objcopy -S -O binary -j .text $in $out
-build $builddir\boot/boot: r_boot $builddir\boot/boot.out
+build $builddir\boot/boot.bin: r_boot $builddir\boot/boot.out
 
 build $builddir\kernel\start.o: kernel_cc $root\kernel\start.c
 build $builddir\kernel\kernel/gdt.o: kernel_cc $root\kernel\kernel/gdt.c
 build $builddir\kernel\drv/vga.o: kernel_cc $root\kernel\drv/vga.c
 build $builddir\kernel\arch/$arch/arch.o: kernel_asm $
     $root\kernel\arch/$arch/arch.asm
-build $builddir\kernel\kernel.bin: kernel_link $builddir\kernel\start.o $
+build $builddir\kernel\kernel.elf: kernel_link $builddir\kernel\start.o $
     $builddir\kernel\kernel/gdt.o $builddir\kernel\drv/vga.o $
-    $builddir\kernel\arch/$arch/arch.o
+    $builddir\kernel\arch/$arch/arch.o | $builddir\libc/libk.a
   libs = -L$builddir/libc -lk
   kernel_ldflags = $kernel_ldflags -T $root\kernel\arch/$arch/kernel.ld $
       -nostdlib
 
 rule r_nos_img
-  command = fasm $in
+  command = $kernel_asm $in $out
   description = BUILD_IMG $out
-build nos.img: r_nos_img nos.asm | $builddir\boot/boot $
-    $builddir\kernel\kernel.bin
+build nos.img: r_nos_img nos.asm | $builddir\boot/boot.bin $
+    $builddir\kernel\kernel.elf
 
 default nos.img
 
-build all: phony $builddir\libc/libk.a $builddir\boot/boot $
-    $builddir\kernel\kernel.bin nos.img
+build all: phony $builddir\libc/libk.a $builddir\boot/boot.bin $
+    $builddir\kernel\kernel.elf nos.img

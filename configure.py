@@ -159,7 +159,7 @@ kernel_cflags = [
     '-I$root/kernel', '-I$root/libc/include',
 ]
 kernel_ldflags = [
-    '-melf_i386'
+    '-melf_i386',
 ]
 n.variable('kernel_cflags', ' '.join(shell_escape(flag) for flag in kernel_cflags))
 n.variable('kernel_ldflags', ' '.join(shell_escape(flag) for flag in kernel_ldflags))
@@ -262,9 +262,9 @@ boot_out = n.build(
 
 n.rule('r_boot',
        command='$kernel_objcopy -S -O binary -j .text $in $out')
-boot_binary = n.build(built('boot/boot'), 'r_boot', boot_out)
+boot_bin = n.build(built('boot/boot.bin'), 'r_boot', boot_out)
 
-all_targets += boot_binary
+all_targets += boot_bin
 n.newline()
 
 #: kernel
@@ -285,7 +285,7 @@ arch_asm_obj = n.build(
 kernel_objs += arch_asm_obj
 
 kernel_elf = n.build(
-    kernel_built('kernel.bin'),
+    kernel_built('kernel.elf'),
     'kernel_link',
     kernel_objs,
     variables=dict(
@@ -293,7 +293,8 @@ kernel_elf = n.build(
             kernel_src('arch/$arch/kernel.ld')
         ),
         libs='-L$builddir/libc -lk'
-    )
+    ),
+    implicit=[] + libk
 )
 
 all_targets += kernel_elf
@@ -301,10 +302,10 @@ n.newline()
 
 #: nos.img
 n.rule('r_nos_img',
-       command='fasm $in',
+       command='$kernel_asm $in $out',
        description='BUILD_IMG $out')
 nos_img = n.build('nos.img', 'r_nos_img', 'nos.asm',
-    implicit=[] + boot_binary + kernel_elf
+    implicit=[] + boot_bin + kernel_elf
 )
 
 all_targets += nos_img
