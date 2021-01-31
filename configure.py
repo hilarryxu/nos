@@ -28,7 +28,7 @@ class Platform(object):
 
     @staticmethod
     def known_platforms():
-      return ['linux', 'win']
+        return ['linux', 'win']
 
     def platform(self):
         return self._platform
@@ -44,15 +44,13 @@ class Platform(object):
 
 
 parser = OptionParser()
-parser.add_option('--verbose', action='store_true',
-                  help='enable verbose build')
-parser.add_option('--arch',
-                  help='target arch',
-                  default='i386')
-parser.add_option('--host',
-                  help='host platform (' +
-                       '/'.join(Platform.known_platforms()) + ')',
-                  choices=Platform.known_platforms())
+parser.add_option('--verbose', action='store_true', help='enable verbose build')
+parser.add_option('--arch', help='target arch', default='i386')
+parser.add_option(
+    '--host',
+    help='host platform (' + '/'.join(Platform.known_platforms()) + ')',
+    choices=Platform.known_platforms()
+)
 
 (options, args) = parser.parse_args()
 if args:
@@ -76,8 +74,9 @@ n.variable('configure_args', ' '.join(configure_args))
 env_keys = set(['CC', 'AR', 'CFLAGS', 'LDFLAGS'])
 configure_env = dict((k, os.environ[k]) for k in os.environ if k in env_keys)
 if configure_env:
-    config_str = ' '.join([k + '=' + pipes.quote(configure_env[k])
-                           for k in configure_env])
+    config_str = ' '.join(
+        [k + '=' + pipes.quote(configure_env[k]) for k in configure_env]
+    )
     n.variable('configure_env', config_str + '$ ')
 n.newline()
 
@@ -103,7 +102,7 @@ def binary(name):
 
 def shell_escape(str):
     if platform.is_windows():
-      return str
+        return str
     if '"' in str:
         return "'%s'" % str.replace("'", "\\'")
     return str
@@ -122,7 +121,10 @@ default_cross_gcc_prefix = ''
 if platform.is_windows():
     default_cross_gcc_prefix = './Crosstools/bin/i586-elf-'
 
-n.variable('cross_gcc_prefix', configure_env.get('CROSS_GCC_PREFIX', default_cross_gcc_prefix))
+n.variable(
+    'cross_gcc_prefix',
+    configure_env.get('CROSS_GCC_PREFIX', default_cross_gcc_prefix)
+)
 n.variable('cc', CC)
 n.variable('ar', configure_env.get('AR', 'ar'))
 n.variable('asm', configure_env.get('ASM', 'fasm'))
@@ -153,38 +155,52 @@ n.variable('kernel_objdump', '${cross_gcc_prefix}objdump')
 n.newline()
 
 kernel_cflags = [
-    '-m32', '-ffreestanding',
-    '-Wall', '-Wextra',
+    '-m32',
+    '-ffreestanding',
+    '-Wall',
+    '-Wextra',
     '-D__is_nos_kernel',
-    '-I$root/kernel', '-I$root/libc/include',
+    '-I$root/kernel',
+    '-I$root/libc/include',
 ]
 kernel_ldflags = [
     '-melf_i386',
 ]
-n.variable('kernel_cflags', ' '.join(shell_escape(flag) for flag in kernel_cflags))
-n.variable('kernel_ldflags', ' '.join(shell_escape(flag) for flag in kernel_ldflags))
+n.variable(
+    'kernel_cflags', ' '.join(shell_escape(flag) for flag in kernel_cflags)
+)
+n.variable(
+    'kernel_ldflags', ' '.join(shell_escape(flag) for flag in kernel_ldflags)
+)
 n.newline()
 
-n.rule('kernel_cc',
-    command='$kernel_cc -MMD -MT $out -MF $out.d $cflags $kernel_cflags -c $in -o $out',
+n.rule(
+    'kernel_cc',
+    command=
+    '$kernel_cc -MMD -MT $out -MF $out.d $cflags $kernel_cflags -c $in -o $out',
     depfile='$out.d',
     deps='gcc',
-    description='KERNEL_CC $out')
+    description='KERNEL_CC $out'
+)
 n.newline()
 
-n.rule('kernel_asm',
-       command='$kernel_asm $in $out',
-       description='KERNEL_ASM $out')
+n.rule(
+    'kernel_asm', command='$kernel_asm $in $out', description='KERNEL_ASM $out'
+)
 n.newline()
 
-n.rule('kernel_ar',
-       command='$kernel_ar crs $out $in',
-       description='KERNEL_AR $out')
+n.rule(
+    'kernel_ar',
+    command='$kernel_ar crs $out $in',
+    description='KERNEL_AR $out'
+)
 n.newline()
 
-n.rule('kernel_link',
+n.rule(
+    'kernel_link',
     command='$kernel_ld $ldflags $kernel_ldflags -o $out $in $libs',
-    description='KERNEL_LINK $out')
+    description='KERNEL_LINK $out'
+)
 n.newline()
 
 
@@ -197,7 +213,10 @@ def kernel_src(filename):
 
 
 def kernel_cc(name, **kwargs):
-    return n.build(kernel_built(name + objext), 'kernel_cc', kernel_src(name + '.c'), **kwargs)
+    return n.build(
+        kernel_built(name + objext), 'kernel_cc', kernel_src(name + '.c'),
+        **kwargs
+    )
 
 
 #: libk
@@ -223,15 +242,12 @@ for name in [
         'kernel_cc',
         src(name + '.c'),
         variables=dict(
-            cflags='$cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include'
+            cflags=
+            '$cflags -std=gnu11 -D__USE_NOS -D__is_nos_libk -I$root/libc/include'
         )
     )
 
-libk = n.build(
-    built('libc/libk.a'),
-    'kernel_ar',
-    libk_objs
-)
+libk = n.build(built('libc/libk.a'), 'kernel_ar', libk_objs)
 
 all_targets += libk
 n.newline()
@@ -239,29 +255,22 @@ n.newline()
 #: boot
 boot_objs = []
 boot_objs += n.build(
-    built('boot/boot' + objext),
-    'kernel_cc',
-    src('boot/boot.S')
+    built('boot/boot' + objext), 'kernel_cc', src('boot/boot.S')
 )
 boot_objs += n.build(
     built('boot/main' + objext),
     'kernel_cc',
     src('boot/main.c'),
-    variables=dict(
-        kernel_cflags='$kernel_cflags -Os'
-    )
+    variables=dict(kernel_cflags='$kernel_cflags -Os')
 )
 boot_out = n.build(
     built('boot/boot.out'),
     'kernel_link',
     boot_objs,
-    variables=dict(
-        kernel_ldflags='$kernel_ldflags -N -e start -Ttext 0x7C00'
-    )
+    variables=dict(kernel_ldflags='$kernel_ldflags -N -e start -Ttext 0x7C00')
 )
 
-n.rule('r_boot',
-       command='$kernel_objcopy -S -O binary -j .text $in $out')
+n.rule('r_boot', command='$kernel_objcopy -S -O binary -j .text $in $out')
 boot_bin = n.build(built('boot/boot.bin'), 'r_boot', boot_out)
 
 all_targets += boot_bin
@@ -278,8 +287,7 @@ for name in [
     kernel_objs += kernel_cc(name)
 
 arch_asm_obj = n.build(
-    kernel_built('arch/$arch/arch' + objext),
-    'kernel_asm',
+    kernel_built('arch/$arch/arch' + objext), 'kernel_asm',
     kernel_src('arch/$arch/arch.asm')
 )
 kernel_objs += arch_asm_obj
@@ -301,11 +309,11 @@ all_targets += kernel_elf
 n.newline()
 
 #: nos.img
-n.rule('r_nos_img',
-       command='$kernel_asm $in $out',
-       description='BUILD_IMG $out')
-nos_img = n.build('nos.img', 'r_nos_img', 'nos.asm',
-    implicit=[] + boot_bin + kernel_elf
+n.rule(
+    'r_nos_img', command='$kernel_asm $in $out', description='BUILD_IMG $out'
+)
+nos_img = n.build(
+    'nos.img', 'r_nos_img', 'nos.asm', implicit=[] + boot_bin + kernel_elf
 )
 
 all_targets += nos_img
