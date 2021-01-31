@@ -3,9 +3,7 @@
 
 #include <sys/cdefs.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS
 
 #define _toupper(c) toupper(c)
 #define _tolower(c) tolower(c)
@@ -25,8 +23,6 @@ int ispunct(int c);
 char tolower(int c);
 char toupper(int c);
 
-#ifdef __cplusplus
-}
-#endif
+__END_DECLS
 
 #endif /* !_CTYPE_H_ */

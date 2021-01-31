@@ -4,9 +4,7 @@
 #include <sys/cdefs.h>
 #include <stddef.h> /* size_t */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS
 
 int memcmp(const void *, const void *, size_t);
 void *memcpy(void *__restrict, const void *__restrict, size_t);
@@ -15,8 +13,6 @@ void *memset(void *, int, size_t);
 
 size_t strlen(const char *);
 
-#ifdef __cplusplus
-}
-#endif
+__END_DECLS
 
 #endif /* !_STRING_H_ */

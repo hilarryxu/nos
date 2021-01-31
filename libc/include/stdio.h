@@ -5,16 +5,12 @@
 
 #define EOF (-1)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS
 
 int printf(const char *__restrict, ...);
 int putchar(int);
 int puts(const char *);
 
-#ifdef __cplusplus
-}
-#endif
+__END_DECLS
 
 #endif /* !_STDIO_H_ */
