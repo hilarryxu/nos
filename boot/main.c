@@ -30,7 +30,7 @@
  **********************************************************************/
 
 #define SECTSIZE 512
-#define ELFHDR ((struct Elf *)0x10000) // scratch space
+#define ELFHDR ((struct Elf *)0x10000)  // scratch space
 
 void readsect(void *, uint32_t);
 void readseg(uint32_t, uint32_t, uint32_t);
@@ -109,12 +109,12 @@ readsect(void *dst, uint32_t offset)
   // wait for disk to be ready
   waitdisk();
 
-  outb(0x1F2, 1); // count = 1
+  outb(0x1F2, 1);  // count = 1
   outb(0x1F3, offset);
   outb(0x1F4, offset >> 8);
   outb(0x1F5, offset >> 16);
   outb(0x1F6, (offset >> 24) | 0xE0);
-  outb(0x1F7, 0x20); // cmd 0x20 - read sectors
+  outb(0x1F7, 0x20);  // cmd 0x20 - read sectors
 
   // wait for disk to be ready
   waitdisk();
