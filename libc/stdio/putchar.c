@@ -11,7 +11,7 @@ putchar(int ic)
   char c = (char)ic;
   vga_text_printchar(c);
 #else
-  // TODO: Implement stdio and the write system call.
+  /* TODO: Implement stdio and the write system call. */
 #endif
   return ic;
 }
