@@ -28,7 +28,7 @@ print_number(int value, int base, int sign)
 
   /* Handle sign */
   neg = 0;
-  if (sgn && value < 0) {
+  if (sign && value < 0) {
     neg = 1;
     uvalue = -value;
   } else {
@@ -41,7 +41,7 @@ print_number(int value, int base, int sign)
     buf[i] = "0123456789ABCDEF"[uvalue % base];
   }
   if (neg) {
-    buf[i--] = '-'
+    buf[i--] = '-';
   }
 
   len = 33 - i;
@@ -107,11 +107,6 @@ printf(const char *restrict format, ...)
       format++;
       int value = va_arg(parameters, int);
       size_t len = print_number(value, 8, 1);
-      written += len;
-    } else if (*format == 'b') {
-      format++;
-      int value = va_arg(parameters, int);
-      size_t len = print_number(value, 2, 0);
       written += len;
     } else {
       /* Set format back to %_ ... */
