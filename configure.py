@@ -124,6 +124,8 @@ n.newline()
 default_cross_gcc_prefix = ''
 if platform.is_windows():
     default_cross_gcc_prefix = './Crosstools/bin/i586-elf-'
+elif platform.is_mac():
+    default_cross_gcc_prefix = 'i686-elf-'
 
 default_asm = 'fasm'
 if platform.is_mac():
@@ -330,9 +332,16 @@ all_targets += kernel_elf
 n.newline()
 
 #: nos.img
-n.rule(
-    'r_nos_img', command='$kernel_asm $in $out', description='BUILD_IMG $out'
-)
+if asm_engine == 'nasm':
+    n.rule(
+        'r_nos_img', command='lua scripts/build_img.lua',
+        description='BUILD_IMG $out'
+    )
+else:
+    n.rule(
+        'r_nos_img', command='$kernel_asm $in $out',
+        description='BUILD_IMG $out'
+    )
 nos_img = n.build(
     'nos.img', 'r_nos_img', 'nos.asm', implicit=[] + boot_bin + kernel_elf
 )
