@@ -334,16 +334,18 @@ n.newline()
 #: nos.img
 if asm_engine == 'nasm':
     n.rule(
-        'r_nos_img', command='lua scripts/build_img.lua',
+        'r_nos_img', command='lua $in',
         description='BUILD_IMG $out'
     )
+    nos_img_in = 'scripts/build_img.lua'
 else:
     n.rule(
         'r_nos_img', command='$kernel_asm $in $out',
         description='BUILD_IMG $out'
     )
+    nos_img_in = 'nos.asm'
 nos_img = n.build(
-    'nos.img', 'r_nos_img', 'nos.asm', implicit=[] + boot_bin + kernel_elf
+    'nos.img', 'r_nos_img', nos_img_in, implicit=[] + boot_bin + kernel_elf
 )
 
 all_targets += nos_img

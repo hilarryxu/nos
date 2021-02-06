@@ -24,12 +24,14 @@ local kernel = io.readfile("build/kernel/kernel.elf")
 
 local nos_img = io.open("nos.img", "w+b")
 
+-- 512 byte bootsect
 nos_img:write(boot_bin)
 nos_img:write(string.rep("\x00", 510 - #boot_bin))
 nos_img:write("\x55\xAA")
 
+-- 10M hard disk img
 nos_img:write(kernel)
-local nleft = (10*1024*1024) - #kernel - 512
+local nleft = (10 * 1024 * 1024) - #kernel - 512
 nos_img:write(string.rep("\x00", nleft))
 
 nos_img:close()
