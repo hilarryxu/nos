@@ -127,19 +127,13 @@ if platform.is_windows():
 elif platform.is_mac():
     default_cross_gcc_prefix = 'i686-elf-'
 
-default_asm = 'fasm'
-if platform.is_mac():
-    default_asm = 'nasm'
-current_asm = configure_env.get('ASM', default_asm)
-asm_engine = 'fasm' if 'fasm' in current_asm else 'nasm'
-
 n.variable(
     'cross_gcc_prefix',
     configure_env.get('CROSS_GCC_PREFIX', default_cross_gcc_prefix)
 )
 n.variable('cc', CC)
 n.variable('ar', configure_env.get('AR', 'ar'))
-n.variable('asm', current_asm)
+n.variable('asm', configure_env.get('ASM', 'nasm'))
 n.newline()
 
 cflags = []
@@ -196,14 +190,9 @@ n.rule(
 )
 n.newline()
 
-if asm_engine == 'nasm':
-    n.rule(
-        'kernel_asm', command='$kernel_asm -f elf32 -o $out $in', description='KERNEL_ASM $out'
-    )
-else:
-    n.rule(
-        'kernel_asm', command='$kernel_asm $in $out', description='KERNEL_ASM $out'
-    )
+n.rule(
+    'kernel_asm', command='$kernel_asm -f elf32 -o $out $in', description='KERNEL_ASM $out'
+)
 n.newline()
 
 n.rule(
@@ -219,12 +208,6 @@ n.rule(
     description='KERNEL_LINK $out'
 )
 n.newline()
-
-
-def asm_fn(filename):
-    if asm_engine == 'nasm':
-        return 'n_' + filename
-    return filename
 
 
 def kernel_built(filename):
@@ -311,7 +294,7 @@ for name in [
 
 arch_asm_obj = n.build(
     kernel_built('arch/$arch/arch' + objext), 'kernel_asm',
-    kernel_src('arch/$arch/' + asm_fn('arch.asm'))
+    kernel_src('arch/$arch/arch.asm')
 )
 kernel_objs += arch_asm_obj
 
@@ -332,20 +315,13 @@ all_targets += kernel_elf
 n.newline()
 
 #: nos.img
-if asm_engine == 'nasm':
-    n.rule(
-        'r_nos_img', command='lua $in',
-        description='BUILD_IMG $out'
-    )
-    nos_img_in = 'scripts/build_img.lua'
-else:
-    n.rule(
-        'r_nos_img', command='$kernel_asm $in $out',
-        description='BUILD_IMG $out'
-    )
-    nos_img_in = 'nos.asm'
+n.rule(
+    'r_nos_img', command='lua $in',
+    description='BUILD_IMG $out'
+)
 nos_img = n.build(
-    'nos.img', 'r_nos_img', nos_img_in, implicit=[] + boot_bin + kernel_elf
+    'nos.img', 'r_nos_img', 'scripts/build_img.lua',
+    implicit=[] + boot_bin + kernel_elf
 )
 
 all_targets += nos_img

@@ -1,10 +1,6 @@
-format ELF
-
-section '.text' executable
-
 ; 刷新 GDT
 ; void gdt_flush(struct pseudo_desc *gdt_desc);
-public gdt_flush
+[GLOBAL gdt_flush]
 gdt_flush:
   ; 获取 GDT 结构指针
   mov eax, [esp+4]
