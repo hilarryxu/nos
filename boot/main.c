@@ -29,34 +29,38 @@
  *  * bootmain() in this file takes over, reads in the kernel and jumps to it.
  **********************************************************************/
 
+// 扇区大小为 512 字节
 #define SECTSIZE 512
+// 临时存放 ELF 文件头部的内存地址
 #define ELFHDR ((struct Elf *)0x10000)  // scratch space
 
 void readsect(void *, uint32_t);
 void readseg(uint32_t, uint32_t, uint32_t);
 
+// 加载 ELF 格式的内核文件，并运行
 void
 bootmain(void)
 {
   struct Proghdr *ph, *eph;
 
-  // read 1st page off disk
+  // 从硬盘读 4K 的数据到内存中（能涵盖 ELF 文件头就可以了）
   readseg((uint32_t)ELFHDR, SECTSIZE * 8, 0);
 
-  // is this a valid ELF?
+  // 判断是否是有效的 ELF 可执行文件
   if (ELFHDR->e_magic != ELF_MAGIC)
     goto bad;
 
-  // load each program segment (ignores ph flags)
+  // 遍历程序段，读取磁盘中文件内容到相应内存中（忽略段标识位）
   ph = (struct Proghdr *)((uint8_t *)ELFHDR + ELFHDR->e_phoff);
   eph = ph + ELFHDR->e_phnum;
   for (; ph < eph; ph++)
-    // p_pa is the load address of this segment (as well
-    // as the physical address)
+    // p_pa 为待加载到内存中的物理地址
+    // p_memsz 为段在内存中的大小
+    // p_offset 为段在文件中偏移
+    // 读取段到内存中去
     readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
 
-  // call the entry point from the ELF header
-  // note: does not return!
+  // 跳转到内核入口函数执行，永远不会返回
   ((void (*)(void))(ELFHDR->e_entry))();
 
 bad:
@@ -66,8 +70,8 @@ bad:
     /* do nothing */;
 }
 
-// Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
-// Might copy more than asked
+// 从内核文件 offset 偏移处开始读取 count 字节的数据到物理内存 pa 指定的内存中去
+// 因为对齐的原因，实际读的数据比预期的多
 void
 readseg(uint32_t pa, uint32_t count, uint32_t offset)
 {
@@ -75,30 +79,27 @@ readseg(uint32_t pa, uint32_t count, uint32_t offset)
 
   end_pa = pa + count;
 
-  // round down to sector boundary
+  // 按 512 字节向下对齐
   pa &= ~(SECTSIZE - 1);
 
-  // translate from bytes to sectors, and kernel starts at sector 1
+  // 计算扇区号（从 0 开始编号）
+  // NOTE: 注意这里的 +1，因为内核紧挨着 MBR，从第二个扇区开始计算
   offset = (offset / SECTSIZE) + 1;
 
-  // If this is too slow, we could read lots of sectors at a time.
-  // We'd write more to memory than asked, but it doesn't matter --
-  // we load in increasing order.
+  // 正向依次读取，所以不必担心内存区域重叠的问题
   while (pa < end_pa) {
-    // Since we haven't enabled paging yet and we're using
-    // an identity segment mapping (see boot.S), we can
-    // use physical addresses directly.  This won't be the
-    // case once JOS enables the MMU.
+    // 还没开启分页，这里都是直接操作的物理地址
     readsect((uint8_t *)pa, offset);
+    // 每次读一个扇区
     pa += SECTSIZE;
     offset++;
   }
 }
 
+// 等待硬盘准备好
 void
 waitdisk(void)
 {
-  // wait for disk reaady
   while ((inb(0x1F7) & 0xC0) != 0x40)
     /* do nothing */;
 }
