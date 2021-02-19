@@ -162,6 +162,7 @@ kernel_cflags = [
     '-ffreestanding',
     '-Wall',
     '-Wextra',
+    '-fno-pic',
     '-I$root/kernel',
     '-I$root/include',
 ]
