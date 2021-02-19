@@ -7,6 +7,8 @@ __pycache__/
 
 .ninja_deps
 .ninja_log
+
+/build.ninja
 /bochsout.log
 /*.lock
 
