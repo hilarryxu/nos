@@ -159,6 +159,7 @@ n.newline()
 
 kernel_cflags = [
     '-m32',
+    '-std=gnu99',
     '-ffreestanding',
     '-Wall',
     '-Wextra',
@@ -232,6 +233,32 @@ def kernel_cc(name, **kwargs):
     )
 
 
+#: boot
+boot_objs = []
+boot_objs += n.build(
+    built('boot/boot' + objext),
+    'kernel_asm',
+    src('boot/boot.S')
+)
+boot_objs += n.build(
+    built('boot/main' + objext),
+    'kernel_cc',
+    src('boot/main.c'),
+    variables=dict(kernel_cflags='$kernel_cflags -Os')
+)
+boot_out = n.build(
+    built('boot/boot.out'),
+    'kernel_link',
+    boot_objs,
+    variables=dict(kernel_ldflags='$kernel_ldflags -N -e start -Ttext 0x7C00')
+)
+
+n.rule('r_boot', command='$kernel_objcopy -S -O binary -j .text $in $out')
+boot_bin = n.build(built('boot/boot.bin'), 'r_boot', boot_out)
+
+all_targets += boot_bin
+n.newline()
+
 #: kernel
 kernel_objs = []
 
@@ -260,9 +287,26 @@ kernel_elf = n.build(
 all_targets += kernel_elf
 n.newline()
 
+#: nos.img
+if platform.is_windows():
+    n.rule(
+        'r_nos_img',
+        command='fasm $in $out',
+        description='BUILD_IMG $out'
+    )
+    nos_img = n.build(
+        'nos.img', 'r_nos_img', 'nos.asm',
+        implicit=[] + boot_bin + kernel_elf
+    )
+
+    all_targets += nos_img
+    n.newline()
 
 #: DONE
-n.default(kernel_elf)
+if platform.is_windows():
+    n.default(nos_img)
+else:
+    n.default(kernel_elf)
 n.newline()
 n.build('all', 'phony', all_targets)
 
