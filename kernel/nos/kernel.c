@@ -1,3 +1,4 @@
+#include <nos/nos.h>
 #include <nos/drvs/cga.h>
 
 //---------------------------------------------------------------------
@@ -19,9 +20,6 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 初始化 CGA 子系统
   cga_setup();
 
-  // 输出 hello world
-  const char hw[] = "Hello World!";
-  for (int i = 0; hw[i] != '\0'; i++) {
-    cga_putchar(hw[i]);
-  }
+  // 试下 printk
+  printk("Hello nos, magic=%d, addr=0x%X", magic, addr);
 }

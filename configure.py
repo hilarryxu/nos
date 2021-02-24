@@ -270,6 +270,7 @@ kernel_objs += n.build(
 for name in [
     'kernel',
     'drvs/cga',
+    'printk',
 ]:
     kernel_objs += kernel_cc(name)
 
