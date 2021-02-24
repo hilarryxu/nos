@@ -250,7 +250,7 @@ kernel_elf = n.build(
     'kernel_link',
     kernel_objs,
     variables=dict(
-        kernel_ldflags='$kernel_ldflags -Ttext=0x100000'
+        kernel_ldflags='$kernel_ldflags -Ttext 0x100000'
     )
 )
 
