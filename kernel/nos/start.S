@@ -22,8 +22,8 @@
 /*
  * 定义 multiboot 头部标志
  *
- * MULTIBOOT_PAGE_ALIGN  	页对齐 multiboot_info 结构体
- * MULTIBOOT_MEMORY_INFO  	multiboot_info 中包含内存信息
+ * MULTIBOOT_PAGE_ALIGN     页对齐 multiboot_info 结构体
+ * MULTIBOOT_MEMORY_INFO    multiboot_info 中包含内存信息
  */
 #define MULTIBOOT_HEADER_FLAGS          MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | 0
 
@@ -53,10 +53,10 @@ _start:
     pushl $0
     popf
 
-    /* 调用 kmain(unsigned long magic, unsigned long addr) */
-    pushl %ebx  /* ebx 为指向 multiboot_info 结构体的指针 */
-    pushl %eax  /* eax 为 multiboot magic 值 */
-    call EXT_C(kmain)  /* 用到前面提到的 EXT_C 宏引用 C 语言中的函数 */
+    /* 调用 kernel_main(unsigned long addr, unsigned long magic) */
+    pushl %eax                  /* eax 为 multiboot magic 值 */
+    pushl %ebx                  /* ebx 为指向 multiboot_info 结构体的指针 */
+    call EXT_C(kernel_main)     /* 用到前面提到的 EXT_C 宏引用 C 语言中的函数 */
 
 /* 死循环 */
 loop:
