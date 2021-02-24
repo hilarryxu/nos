@@ -4,6 +4,7 @@
 *.img
 *.py[co]
 __pycache__/
+*.idb
 
 .ninja_deps
 .ninja_log

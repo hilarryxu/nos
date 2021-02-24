@@ -280,8 +280,9 @@ kernel_elf = n.build(
     'kernel_link',
     kernel_objs,
     variables=dict(
-        kernel_ldflags='$kernel_ldflags -T{0}'.format(
-            kernel_src('kernel.ld')
+        kernel_ldflags='$kernel_ldflags -T{0} -Map {1}'.format(
+            kernel_src('kernel.ld'),
+            built('kernel.map')
         )
     )
 )
