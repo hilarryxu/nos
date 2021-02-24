@@ -1,5 +1,6 @@
 #include <nos/nos.h>
 #include <nos/drvs/cga.h>
+#include <nos/gdt.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -19,6 +20,8 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 初始化 CGA 子系统
   cga_setup();
+  // 初始化 GDT 全局描述符表
+  gdt_setup();
 
   // 试下 printk
   printk("Hello nos!\n  magic=%d, addr=0x%X", magic, addr);

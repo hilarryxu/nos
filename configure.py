@@ -271,6 +271,7 @@ for name in [
     'kernel',
     'drvs/cga',
     'printk',
+    'gdt',
 ]:
     kernel_objs += kernel_cc(name)
 
