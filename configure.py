@@ -242,6 +242,7 @@ kernel_objs += n.build(
 
 for name in [
     'kernel',
+    'drvs/cga',
 ]:
     kernel_objs += kernel_cc(name)
 

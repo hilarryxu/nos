@@ -2,6 +2,8 @@
 
 if [ -z $MSYSTEM ]; then
   rg --files kernel/ --type c | xargs clang-format -i
+  rg --files include/nos/ --type c | xargs clang-format -i
 else
   rg --path-separator '//' --files kernel/ --type c | xargs clang-format -i
+  rg --path-separator '//' --files include/nos/ --type c | xargs clang-format -i
 fi
