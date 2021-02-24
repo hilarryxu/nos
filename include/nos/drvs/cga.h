@@ -15,8 +15,8 @@ struct cga_cursor {
 };
 
 #define CGA_ADDRESS 0xB8000
-#define CGA_WIDTH 80
-#define CGA_HEIGHT 25
+#define CGA_COLUMN 80
+#define CGA_LINE 25
 
 #define CGA_COLOR_DEFAULT 0x07
 

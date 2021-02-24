@@ -21,5 +21,5 @@ kernel_main(unsigned long addr, unsigned long magic)
   cga_setup();
 
   // 试下 printk
-  printk("Hello nos, magic=%d, addr=0x%X", magic, addr);
+  printk("Hello nos!\n  magic=%d, addr=0x%X", magic, addr);
 }
