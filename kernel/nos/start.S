@@ -30,8 +30,8 @@
 /* .text 代码段 */
 .text
 
-/* 声明外部函数 kmain */
-.extern kmain
+/* 声明外部函数 kernel_main */
+.extern EXT_C(kernel_main)
 
 /* 按 2^2 = 4 bytes = 32 bits 对齐*/
 .p2align 2
@@ -55,7 +55,7 @@ _start:
 
     /* 调用 kernel_main(unsigned long addr, unsigned long magic) */
     pushl %eax                  /* eax 为 multiboot magic 值 */
-    pushl %ebx                  /* ebx 为指向 multiboot_info 结构体的指针 */
+    pushl %ebx                  /* ebx 为指向 multiboot_header 结构体的指针 */
     call EXT_C(kernel_main)     /* 用到前面提到的 EXT_C 宏引用 C 语言中的函数 */
 
 /* 死循环 */
