@@ -27,11 +27,8 @@
  */
 #define MULTIBOOT_HEADER_FLAGS          MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | 0
 
-/* .text 代码段 */
-.text
-
-/* 声明外部函数 kernel_main */
-.extern EXT_C(kernel_main)
+/* .multiboot 段 */
+.section .multiboot
 
 /* 按 2^2 = 4 bytes = 32 bits 对齐*/
 .p2align 2
@@ -40,6 +37,13 @@
 .long MULTIBOOT_HEADER_MAGIC
 .long MULTIBOOT_HEADER_FLAGS
 .long -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
+
+
+/* .text 代码段 */
+.text
+
+/* 声明外部函数 kernel_main */
+.extern EXT_C(kernel_main)
 
 /* 同时导出 start, _start 符号，有的编译器会自动给导出的符号加下划线 */
 /* 这里两个都写出来是为了兼容加下划线和不加下划线的情况，链接脚本中使用 _start 即可 */
