@@ -3,6 +3,8 @@
 
 #include <nos/drvs/cga.h>
 
+#define MAX_PRINT_INT_BIT_NR 32
+
 static void
 kprint_char(char chr)
 {
@@ -21,10 +23,9 @@ kprint_str(char *str)
 static void
 kprint_uint(unsigned int value, int radix, int uppercase)
 {
-  const char *digits = uppercase ? "0123456789ABCDEFGHIJKLMOPQRSTUVWXYZ"
-                                 : "0123456789abcdefghijklmopqrstuvwxyz";
-  char buf[68];
-  char *p = buf + 67;
+  const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
+  char buf[MAX_PRINT_INT_BIT_NR + 1];
+  char *p = buf + MAX_PRINT_INT_BIT_NR;
 
   *p = '\0';
 
@@ -39,11 +40,10 @@ kprint_uint(unsigned int value, int radix, int uppercase)
 static void
 kprint_int(int value, int radix, int uppercase)
 {
-  const char *digits = uppercase ? "0123456789ABCDEFGHIJKLMOPQRSTUVWXYZ"
-                                 : "0123456789abcdefghijklmopqrstuvwxyz";
-  char buf[68];
+  const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
+  char buf[MAX_PRINT_INT_BIT_NR + 1];
+  char *p = buf + MAX_PRINT_INT_BIT_NR;
   int sign = 0;
-  char *p = buf + 67;
 
   if (value < 0) {
     value = -value;
