@@ -98,6 +98,8 @@ vakprintf(char *format, va_list args)
   }
 }
 
+// printk
+// 内核编程中使用的 printf 函数（调试必备函数）
 void
 printk(char *format, ...)
 {
