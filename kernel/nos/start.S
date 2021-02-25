@@ -50,6 +50,9 @@
 .global start, _start
 start:
 _start:
+    /* 关掉中断先 */
+    cli
+
     /* 设置栈（栈由高地址往低地址生长） */
     movl $(stack + STACK_SIZE), %esp
 

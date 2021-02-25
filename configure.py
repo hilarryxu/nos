@@ -266,12 +266,19 @@ kernel_objs += n.build(
     kernel_built('start' + objext), 'kernel_asm',
     kernel_src('start.S')
 )
+kernel_objs += n.build(
+    kernel_built('trap_stub' + objext), 'kernel_asm',
+    kernel_src('trap_stub.S')
+)
 
 for name in [
     'kernel',
     'drvs/cga',
     'printk',
     'gdt',
+    'idt',
+    'exception',
+    'pic',
 ]:
     kernel_objs += kernel_cc(name)
 
