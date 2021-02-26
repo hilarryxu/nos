@@ -18,8 +18,8 @@ pic_setup()
 
   // ICW1
   // 初始化
-  outb(PIC1_COMMAND, ICW1_INIT, ICW1_ICW4);
-  outb(PIC2_COMMAND, ICW1_INIT, ICW1_ICW4);
+  outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);
+  outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
 
   // ICW2
   // remap 重映射
