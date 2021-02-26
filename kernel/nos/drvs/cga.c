@@ -85,4 +85,10 @@ cga_putchar(char chr)
   //          sizeof(*cga_video) * CGA_LINE * CGA_COLUMN);
   //   cga_cursor.y = CGA_LINE - 1;
   // }
+
+  // FIXME(xcc): 这里偷懒先回来最开始位置
+  if (cga_cursor.y >= CGA_LINE) {
+    cga_cursor.x = 0;
+    cga_cursor.y = 0;
+  }
 }
