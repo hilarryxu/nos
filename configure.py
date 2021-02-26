@@ -300,6 +300,27 @@ kernel_elf = n.build(
 all_targets += kernel_elf
 n.newline()
 
+#: user apps
+user_test_objs = []
+user_test_objs += n.build(
+    built('user/test/test' + objext),
+    'kernel_cc',
+    src('user/test/test.c')
+)
+user_test_bin = n.build(
+    built('user/test/test.bin'),
+    'kernel_link',
+    user_test_objs,
+    variables=dict(
+        kernel_ldflags='$kernel_ldflags -T{0}'.format(
+            src('user/test/test.ld'),
+        )
+    )
+)
+
+all_targets += user_test_bin
+n.newline()
+
 #: nos.img
 if platform.is_windows():
     n.rule(
