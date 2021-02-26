@@ -5,6 +5,14 @@
 #include <nos/gdt.h>
 #include <nos/mm/pmm.h>
 
+struct task {
+  struct trap_frame *tf;
+  struct task *next;
+};
+
+static struct task *first_task = NULL;
+static struct task *current_task = NULL;
+
 static void
 task_a()
 {
@@ -37,7 +45,7 @@ task_d()
   }
 }
 
-struct trap_frame *
+struct task *
 task_init(void *entry)
 {
   uint8_t *kstack = (uint8_t *)pmm_alloc();
@@ -61,33 +69,39 @@ task_init(void *entry)
   struct trap_frame *tf = (void *)(kstack + 4096 - sizeof(task_state));
   *tf = task_state;
 
-  return tf;
+  struct task *task = (struct task *)pmm_alloc();
+  task->tf = tf;
+  task->next = first_task;
+  first_task = task;
+  return task;
 }
-
-static int current_task = -1;
-static int num_tasks = 4;
-static struct trap_frame *task_states[4];
 
 void
 task_setup()
 {
-  task_states[0] = task_init(task_a);
-  task_states[1] = task_init(task_b);
-  task_states[2] = task_init(task_c);
-  task_states[3] = task_init(task_d);
+  task_init(task_a);
+  task_init(task_b);
+  task_init(task_c);
+  task_init(task_d);
 }
 
 struct trap_frame *
 schedule(struct trap_frame *tf)
 {
-  if (current_task >= 0) {
-    task_states[current_task] = tf;
+  if (current_task != NULL) {
+    current_task->tf = tf;
   }
 
-  current_task++;
-  current_task %= num_tasks;
+  if (current_task == NULL) {
+    current_task = first_task;
+  } else {
+    current_task = current_task->next;
+    if (current_task == NULL) {
+      current_task = first_task;
+    }
+  }
 
-  tf = task_states[current_task];
+  tf = current_task->tf;
 
   return tf;
 }
