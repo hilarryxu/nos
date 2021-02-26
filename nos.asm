@@ -6,6 +6,6 @@ db 0x55,0xAA
 
 kernel:
 file 'build/kernel/nos/kernel.elf'
-times (10*1024*1024)-($-$$) db 0
+times 10321920-($-$$) db 0
 
 ; vim: ft=fasm

@@ -4,9 +4,10 @@ romimage: file="$BXSHARE/BIOS-bochs-latest"
 vgaromimage: file="$BXSHARE/VGABIOS-lgpl-latest"
 
 ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-ata0-master: type=disk, mode=flat, path="nos.img"
+# total sectors=20160 total size=9.84 megabytes 10,321,920 bytes
+ata0-master: type=disk, path="nos.img", mode=flat, cylinders=20, heads=16, spt=63
 boot: disk
 
 mouse: enabled=0
 
-port_e9_hack: enabled=1
+# port_e9_hack: enabled=1

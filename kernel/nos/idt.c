@@ -30,6 +30,7 @@ extern void intr_stub_18(void);
 extern void intr_stub_19(void);
 
 extern void intr_stub_32(void);
+extern void intr_stub_33(void);
 
 // IDT 表项
 //
@@ -111,6 +112,8 @@ idt_setup()
   // IRQ handlers
   // Timer
   set_intr_handler(32, intr_stub_32);
+  // 键盘
+  set_intr_handler(33, intr_stub_33);
 
   struct {
     uint16_t limit;
@@ -140,6 +143,7 @@ handle_interrupt(struct trap_frame *tf)
       asm volatile("cli; hlt");
     }
   } else if (tf->trap_no >= T_IRQ0 && tf->trap_no <= 0x2F) {
+    // IRQs [32, 47]
     pic_send_eoi(tf->trap_no - T_IRQ0);
   } else {
     // 其他暂未处理的中断号

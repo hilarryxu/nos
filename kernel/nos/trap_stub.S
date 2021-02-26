@@ -40,6 +40,8 @@ intr_stub 19
 # IRQs
 # IRQ0 : (0x20) Timer
 intr_stub 32
+# IRQ1 : (0x21) 键盘
+intr_stub 33
 
 # 通用中断处理流程
 .extern handle_interrupt

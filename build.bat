@@ -10,7 +10,7 @@ REM   python (如果已经生成好 build.ninja，可以不需要)
 REM 运行需要：
 REM   bochs
 
-REM set path=%path%;.\scripts
+set path=%path%;.\Crosstools\bin
 
 python configure.py
 
