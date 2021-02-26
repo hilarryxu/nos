@@ -132,7 +132,9 @@ task_setup(struct multiboot_info *mb_info)
 {
   if (mb_info && mb_info->mods_count > 0) {
     multiboot_module_t *modules = (multiboot_module_t *)mb_info->mods_addr;
-    load_elf((void *)modules[0].mod_start);
+    for (size_t i = 0; i < mb_info->mods_count; i++) {
+      load_elf((void *)modules[i].mod_start);
+    }
   } else {
     task_init(task_a);
     task_init(task_b);
