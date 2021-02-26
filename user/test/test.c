@@ -1,14 +1,13 @@
 #include <stdint.h>
 
-uint16_t *videomem = (uint16_t *)0xb8000;
+int i = 0;
 
 void
 _start(void)
 {
-  int i;
+  int j = i + 5;
 
-  for (i = 0; i < 5; i++) {
-    // *videomem++ = (0x07 << 8) | ('0' + i);
+  for (; i < j; i++) {
     asm("int $0x30" : : "a"(0), "b"('0' + i));
   }
 
