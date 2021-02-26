@@ -5,6 +5,7 @@
 #include <nos/idt.h>
 #include <nos/pic.h>
 #include <nos/pit.h>
+#include <nos/mm/pmm.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -21,6 +22,10 @@ kernel_main(unsigned long addr, unsigned long magic)
 {
   // 初始化 CGA
   cga_setup();
+
+  // 初始化物理内存分配子系统
+  pmm_setup();
+
   // 初始化 GDT
   gdt_setup();
   task_setup();

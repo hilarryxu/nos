@@ -281,6 +281,7 @@ for name in [
     'pic',
     'pit',
     'task',
+    'mm/pmm',
 ]:
     kernel_objs += kernel_cc(name)
 

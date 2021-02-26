@@ -3,6 +3,7 @@
 #include <nos/nos.h>
 #include <nos/trap.h>
 #include <nos/gdt.h>
+#include <nos/mm/pmm.h>
 
 static void
 task_a()
@@ -20,15 +21,28 @@ task_b()
   }
 }
 
-static uint8_t stack_a[4096];
-static uint8_t stack_b[4096];
+static void
+task_c()
+{
+  while (1) {
+    printk("C");
+  }
+}
 
-static uint8_t user_stack_a[4096];
-static uint8_t user_stack_b[4096];
+static void
+task_d()
+{
+  while (1) {
+    printk("D");
+  }
+}
 
 struct trap_frame *
-task_init(uint8_t *stack, uint8_t *user_stack, void *entry)
+task_init(void *entry)
 {
+  uint8_t *kstack = (uint8_t *)pmm_alloc();
+  uint8_t *user_stack = (uint8_t *)pmm_alloc();
+
   struct trap_frame task_state = {
       .eax = 0,
       .ebx = 0,
@@ -44,21 +58,23 @@ task_init(uint8_t *stack, uint8_t *user_stack, void *entry)
       .esp = (uint32_t)user_stack + 4096,
   };
 
-  struct trap_frame *tf = (void *)(stack + 4096 - sizeof(task_state));
+  struct trap_frame *tf = (void *)(kstack + 4096 - sizeof(task_state));
   *tf = task_state;
 
   return tf;
 }
 
 static int current_task = -1;
-static int num_tasks = 2;
-static struct trap_frame *task_states[2];
+static int num_tasks = 4;
+static struct trap_frame *task_states[4];
 
 void
 task_setup()
 {
-  task_states[0] = task_init(stack_a, user_stack_a, task_a);
-  task_states[1] = task_init(stack_b, user_stack_b, task_b);
+  task_states[0] = task_init(task_a);
+  task_states[1] = task_init(task_b);
+  task_states[2] = task_init(task_c);
+  task_states[3] = task_init(task_d);
 }
 
 struct trap_frame *
