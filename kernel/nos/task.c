@@ -5,6 +5,7 @@
 #include <nos/gdt.h>
 #include <nos/mm/pmm.h>
 #include <nos/multiboot.h>
+#include <inc/elf.h>
 
 struct task {
   struct trap_frame *tf;
@@ -44,6 +45,18 @@ task_d()
   while (1) {
     printk("D");
   }
+}
+
+static inline void *
+memset(void *buf, uint8_t c, size_t n)
+{
+  uint8_t *p = buf;
+
+  while (n--) {
+    *p++ = c;
+  }
+
+  return buf;
 }
 
 static inline void *
@@ -91,15 +104,35 @@ task_init(void *entry)
 }
 
 void
+load_elf(void *image)
+{
+  struct Elf *elfhdr = (struct Elf *)image;
+  struct Proghdr *ph, *eph;
+
+  if (elfhdr->e_magic != ELF_MAGIC) {
+    printk("Not a elf app\n");
+    return;
+  }
+
+  ph = (struct Proghdr *)((uint8_t *)image + elfhdr->e_phoff);
+  eph = ph + elfhdr->e_phnum;
+  for (; ph < eph; ph++) {
+    if (ph->p_type != ELF_PROG_LOAD) {
+      continue;
+    }
+    memset((void *)ph->p_pa, 0, ph->p_memsz);
+    memcpy((void *)ph->p_pa, ((uint8_t *)image) + ph->p_offset, ph->p_filesz);
+  }
+
+  task_init((void *)elfhdr->e_entry);
+}
+
+void
 task_setup(struct multiboot_info *mb_info)
 {
   if (mb_info && mb_info->mods_count > 0) {
     multiboot_module_t *modules = (multiboot_module_t *)mb_info->mods_addr;
-    size_t len = modules[0].mod_end - modules[0].mod_start;
-    void *load_addr = (void *)0x200000;
-
-    memcpy(load_addr, (void *)modules[0].mod_start, len);
-    task_init(load_addr);
+    load_elf((void *)modules[0].mod_start);
   } else {
     task_init(task_a);
     task_init(task_b);

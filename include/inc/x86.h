@@ -1,7 +1,7 @@
 #ifndef JOS_INC_X86_H
 #define JOS_INC_X86_H
 
-#include <inc/types.h>
+#include <stdint.h>
 
 static __inline uint8_t inb(int port) __attribute__((always_inline));
 static __inline void insl(int port, void *addr, int cnt)
