@@ -5,6 +5,7 @@
 #include <nos/nos.h>
 #include <nos/trap.h>
 #include <nos/gdt.h>
+#include <nos/pic.h>
 #include <nos/ioport.h>
 
 extern void intr_stub_0(void);
@@ -54,11 +55,14 @@ struct idt_entry {
   uint16_t offset_1;  // 段内偏移 31..16
 } __attribute__((packed));
 
+// 中断存在标志位（表示有效）
 #define IDT_ATTR_PRESENT 0x80
 
+// 中断描述符表总共 256 项
 #define IDT_ENTRIES_NR 256
 static struct idt_entry idt[IDT_ENTRIES_NR];
 
+// 设置内核才能使用的中断门类型处理函数
 static inline void
 set_intr_handler(uint8_t idt_no, void *handler)
 {
@@ -66,6 +70,7 @@ set_intr_handler(uint8_t idt_no, void *handler)
                 DPL_0);
 }
 
+// 设置中断描述符表项
 void
 idt_set_entry(uint8_t entry_no, uint16_t selector, void *offset, uint8_t type,
               uint8_t dpl)
@@ -77,10 +82,11 @@ idt_set_entry(uint8_t entry_no, uint16_t selector, void *offset, uint8_t type,
   entry->type_attr = (type & 0xF) | ((dpl & 0x3) << 5) | IDT_ATTR_PRESENT;
 }
 
+// 初始化 IDT
 void
 idt_setup()
 {
-  // excpetion handlers
+  // Excpetions 异常
   set_intr_handler(0, intr_stub_0);
   set_intr_handler(1, intr_stub_1);
   set_intr_handler(2, intr_stub_2);
@@ -103,6 +109,7 @@ idt_setup()
   set_intr_handler(19, intr_stub_19);
 
   // IRQ handlers
+  // Timer
   set_intr_handler(32, intr_stub_32);
 
   struct {
@@ -122,22 +129,20 @@ idt_setup()
   asm volatile("sti");
 }
 
+// 派发中断
 void
 handle_interrupt(struct trap_frame *tf)
 {
   if (tf->trap_no <= 0x1F) {
+    // 异常 [0, 31]
     printk("Exception %d\n", tf->trap_no);
     while (1) {
       asm volatile("cli; hlt");
     }
-  } else if (tf->trap_no >= 0x20 && tf->trap_no <= 0x2F) {
-    if (tf->trap_no >= 0x28) {
-      // EOI Slave-PIC
-      outb(0xA0, 0x20);
-    }
-    // EOI Master-PIC
-    outb(0x20, 0x20);
+  } else if (tf->trap_no >= T_IRQ0 && tf->trap_no <= 0x2F) {
+    pic_send_eoi(tf->trap_no - T_IRQ0);
   } else {
+    // 其他暂未处理的中断号
     printk("Unkown interrupt %d\n", tf->trap_no);
     while (1) {
       asm volatile("cli; hlt");
