@@ -11,11 +11,12 @@
 
 // 中断栈帧结构
 struct trap_frame {
-  // pusha 压入的通用寄存器组
+  // 压入的通用寄存器组
   uint32_t edi;
   uint32_t esi;
   uint32_t ebp;
-  uint32_t oesp;  // 这个值没用，用下面的那个 esp
+  // esp 暂时不保存恢复，因为后面多任务示例中
+  // 会手工修改 esp 在任务间跳来跳去（非正常用法）
   uint32_t ebx;
   uint32_t edx;
   uint32_t ecx;

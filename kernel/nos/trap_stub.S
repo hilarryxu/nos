@@ -47,10 +47,17 @@ intr_stub 33
 .extern handle_interrupt
 intr_common_handler:
     # FIXME(xcc): 后面再处理段寄存器的保存恢复
-    # 目前都是运行在内核态
+    # 目前都是运行在内核态，段寄存器没有变化
 
     # 入栈通用寄存器组
-    pushal
+    # 暂时不保存恢复 esp，因为后面会非正常手段修改 esp 的值
+    push %eax
+    push %ecx
+    push %edx
+    push %ebx
+    push %ebp
+    push %esi
+    push %edi
 
     # 压入 struct trap_frame *tf
     push %esp
@@ -60,7 +67,13 @@ intr_common_handler:
     add $4, %esp
 
     # 弹出通用寄存器组
-    popal
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %ebx
+    pop %edx
+    pop %ecx
+    pop %eax
 
     # 弹出中断号和错误码
     add $8, %esp
