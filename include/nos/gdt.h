@@ -11,6 +11,9 @@
 // rpl 请求特权级
 #define KERNEL_CODE_SELECTOR 0x08  // (1 << 3) | (0 << 2) | 0 = 0x08
 #define KERNEL_DATA_SELECTOR 0x10  // (2 << 3) | (0 << 2) | 0 = 0x10
+#define USER_CODE_SELECTOR 0x1B    // (3 << 3) | (0 << 2) | 3 = 0x18
+#define USER_DATA_SELECTOR 0x23    // (4 << 3) | (0 << 2) | 3 = 0x23
+#define TSS_SELECTOR 0x28          // (5 << 3) | (0 << 2) | 0 = 0x28
 
 // DPL 描述符特权级
 enum dpl {

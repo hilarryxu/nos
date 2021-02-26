@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <nos/trap.h>
+
 // GDT 表项
 //
 // 大小为 8 字节
@@ -37,9 +39,14 @@ struct gdt_entry {
   uint8_t base_2;  // 基地址 31..24
 } __attribute__((packed));
 
-#define GDT_ENTRIES_NR 3
-// GDT 表（目前只放了 3 个条目）
+#define GDT_ENTRIES_NR 6
+// GDT 表
 static struct gdt_entry gdt[GDT_ENTRIES_NR];
+
+static struct tss tss = {
+    .esp0 = 0,
+    .ss0 = KERNEL_DATA_SELECTOR,
+};
 
 static inline struct gdt_entry *
 get_descriptor(uint16_t selector)
@@ -76,15 +83,36 @@ set_code_data(uint16_t selector, uint32_t base, uint32_t limit,
   descriptor->access = 0x92 | ((dpl & 0x3) << 5) | ((code_or_data & 0x1) << 3);
 }
 
+// 安装 TSS 描述符
+void
+gdt_install_tss(uint32_t base, uint32_t limit)
+{
+  struct gdt_entry *descriptor = get_descriptor(TSS_SELECTOR);
+  set_base_limit(descriptor, base, limit);
+
+  descriptor->flags = 0;
+  // 0x89 = 1000_1001b
+  // S=0 系统描述符
+  // TYPE=1001b TSS 描述符
+  descriptor->access = 0x89 | (DPL_0 << 5);
+}
+
 // 初始化 GDT
 void
 gdt_setup()
 {
-  // 默认第一项为全零
-  // 第二项：内核代码段 [0, 0xFFFFF*4KB=4G)
-  // 第三项：内核数据段 [0, 0xFFFFFFFF)
+  // 默认第 1 项为全零
+  // 第 2 项：内核代码段 [0, 0xFFFFF*4KB=4G)
+  // 第 3 项：内核数据段 [0, 0xFFFFFFFF)
+  // 第 4 项：用户代码段
+  // 第 5 项：用户数据段
+  // 第 6 项：TSS
   set_code_data(KERNEL_CODE_SELECTOR, 0, 0xFFFFF, 1, DPL_0);
   set_code_data(KERNEL_DATA_SELECTOR, 0, 0xFFFFF, 0, DPL_0);
+  set_code_data(USER_CODE_SELECTOR, 0, 0xFFFFF, 1, DPL_3);
+  set_code_data(USER_DATA_SELECTOR, 0, 0xFFFFF, 0, DPL_3);
+  uint32_t base = (uint32_t)&tss;
+  gdt_install_tss(base, base + sizeof(tss) - 1);
 
   struct {
     uint16_t limit;
