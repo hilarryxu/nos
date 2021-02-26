@@ -14,7 +14,7 @@ set path=%path%;.\Crosstools\bin
 
 python configure.py
 
-ninja -t clean
+REM ninja -t clean
 ninja all
 
 pause

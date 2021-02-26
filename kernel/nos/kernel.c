@@ -4,6 +4,7 @@
 #include <nos/exception.h>
 #include <nos/idt.h>
 #include <nos/pic.h>
+#include <nos/pit.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -27,6 +28,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   exception_setup();
   // 初始化 PIC
   pic_setup();
+  // 初始化 PIT
+  pit_setup();
   // 初始化 IDT
   idt_setup();
 

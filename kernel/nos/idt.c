@@ -7,6 +7,7 @@
 #include <nos/gdt.h>
 #include <nos/pic.h>
 #include <nos/ioport.h>
+#include <nos/pit.h>
 
 extern void intr_stub_0(void);
 extern void intr_stub_1(void);
@@ -146,6 +147,7 @@ handle_interrupt(struct trap_frame *tf)
     }
   } else if (tf->trap_no >= T_IRQ0 && tf->trap_no <= 0x2F) {
     if (tf->trap_no == T_IRQ0 + IRQ_TIMER) {
+      g_ticks++;
       new_tf = schedule(tf);
     }
     // IRQs [32, 47]
