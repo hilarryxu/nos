@@ -5,10 +5,12 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <nos/multiboot.h>
+
 // 打印输出函数
 void printk(char *format, ...);
 
-void task_setup();
+void task_setup(struct multiboot_info *mb_info);
 
 struct trap_frame *schedule(struct trap_frame *tf);
 

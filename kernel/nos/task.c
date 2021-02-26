@@ -4,6 +4,7 @@
 #include <nos/trap.h>
 #include <nos/gdt.h>
 #include <nos/mm/pmm.h>
+#include <nos/multiboot.h>
 
 struct task {
   struct trap_frame *tf;
@@ -45,6 +46,19 @@ task_d()
   }
 }
 
+static inline void *
+memcpy(void *dst, const void *src, size_t n)
+{
+  uint8_t *d = dst;
+  const uint8_t *s = src;
+
+  while (n--) {
+    *d++ = *s++;
+  }
+
+  return dst;
+}
+
 struct task *
 task_init(void *entry)
 {
@@ -77,12 +91,21 @@ task_init(void *entry)
 }
 
 void
-task_setup()
+task_setup(struct multiboot_info *mb_info)
 {
-  task_init(task_a);
-  task_init(task_b);
-  task_init(task_c);
-  task_init(task_d);
+  if (mb_info && mb_info->mods_count > 0) {
+    multiboot_module_t *modules = (multiboot_module_t *)mb_info->mods_addr;
+    size_t len = modules[0].mod_end - modules[0].mod_start;
+    void *load_addr = (void *)0x200000;
+
+    memcpy(load_addr, (void *)modules[0].mod_start, len);
+    task_init(load_addr);
+  } else {
+    task_init(task_a);
+    task_init(task_b);
+    task_init(task_c);
+    task_init(task_d);
+  }
 }
 
 struct trap_frame *
