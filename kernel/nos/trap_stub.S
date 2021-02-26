@@ -43,6 +43,9 @@ intr_stub 32
 # IRQ1 : (0x21) 键盘
 intr_stub 33
 
+# syscall
+intr_stub 48
+
 # 通用中断处理流程
 .extern handle_interrupt
 intr_common_handler:

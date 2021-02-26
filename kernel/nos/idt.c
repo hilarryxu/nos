@@ -33,6 +33,8 @@ extern void intr_stub_19(void);
 extern void intr_stub_32(void);
 extern void intr_stub_33(void);
 
+extern void intr_stub_48(void);
+
 // IDT 表项
 //
 // 大小为 8 字节
@@ -116,6 +118,10 @@ idt_setup()
   // 键盘
   set_intr_handler(33, intr_stub_33);
 
+  // syscall
+  idt_set_entry(48, KERNEL_CODE_SELECTOR, intr_stub_48, IDT_INTERRUPT_GATE,
+                DPL_3);
+
   struct {
     uint16_t limit;
     void *pointer;
@@ -131,6 +137,18 @@ idt_setup()
 
   // 开中断
   asm volatile("sti");
+}
+
+struct trap_frame *
+syscall(struct trap_frame *tf)
+{
+  switch (tf->eax) {
+  case 0:
+    printk("%c", tf->ebx);
+    break;
+  }
+
+  return tf;
 }
 
 // 派发中断
@@ -159,6 +177,8 @@ handle_interrupt(struct trap_frame *tf)
     }
     // IRQs [32, 47]
     pic_send_eoi(tf->trap_no - T_IRQ0);
+  } else if (tf->trap_no == 0x30) {
+    new_tf = syscall(tf);
   } else {
     // 其他暂未处理的中断号
     printk("Unkown interrupt %d\n", tf->trap_no);
