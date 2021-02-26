@@ -149,6 +149,13 @@ handle_interrupt(struct trap_frame *tf)
     if (tf->trap_no == T_IRQ0 + IRQ_TIMER) {
       g_ticks++;
       new_tf = schedule(tf);
+      // 每次将 esp0 设为新任务的内核栈底
+      // 下次中断触发就会在这个新任务的内核栈上保存其状态
+      // 然后又切换到另外一个任务的内核堆栈去恢复下一个任务
+      // 如此反复
+      //
+      // 这个 +1 是必须的，不然会栈溢出
+      tss.esp0 = (uint32_t)(new_tf + 1);
     }
     // IRQs [32, 47]
     pic_send_eoi(tf->trap_no - T_IRQ0);

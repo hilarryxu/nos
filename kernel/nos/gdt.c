@@ -43,7 +43,7 @@ struct gdt_entry {
 // GDT 表
 static struct gdt_entry gdt[GDT_ENTRIES_NR];
 
-static struct tss tss = {
+struct tss tss = {
     .esp0 = 0,
     .ss0 = KERNEL_DATA_SELECTOR,
 };
@@ -112,7 +112,7 @@ gdt_setup()
   set_code_data(USER_CODE_SELECTOR, 0, 0xFFFFF, 1, DPL_3);
   set_code_data(USER_DATA_SELECTOR, 0, 0xFFFFF, 0, DPL_3);
   uint32_t base = (uint32_t)&tss;
-  gdt_install_tss(base, base + sizeof(tss) - 1);
+  gdt_install_tss(base, sizeof(tss) - 1);
 
   struct {
     uint16_t limit;
@@ -136,4 +136,7 @@ gdt_setup()
                "mov %ax, %ss;"
                "ljmp $0x8, $.1;"
                ".1:");
+
+  // 将 TSS 段描述符的选择子加载到任务状态寄存器中
+  asm volatile("ltr %%ax" : : "a"(TSS_SELECTOR));
 }

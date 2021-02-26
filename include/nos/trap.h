@@ -65,7 +65,9 @@ struct tss {
   uint32_t ldtr;
   uint16_t trap;
   uint16_t iomap;
-};
+} __attribute__((packed));
+
+extern struct tss tss;
 
 // 派发中断
 struct trap_frame *handle_interrupt(struct trap_frame *tf);

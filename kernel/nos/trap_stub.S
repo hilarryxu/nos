@@ -59,12 +59,22 @@ intr_common_handler:
     push %esi
     push %edi
 
+    # 切换为内核数据段
+    mov $0x10, %ax
+    mov %ax, %ds
+    mov %ax, %es
+
     # 压入 struct trap_frame *tf
     push %esp
     # void handle_interrupt(tf)
     call handle_interrupt
     # 弹出 tf
     mov %eax, %esp
+
+    # 切换为用户数据段
+    mov $0x23, %ax
+    mov %ax, %ds
+    mov %ax, %es
 
     # 弹出通用寄存器组
     pop %edi

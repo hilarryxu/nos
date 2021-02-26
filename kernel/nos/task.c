@@ -2,6 +2,7 @@
 
 #include <nos/nos.h>
 #include <nos/trap.h>
+#include <nos/gdt.h>
 
 static void
 task_a()
@@ -22,8 +23,11 @@ task_b()
 static uint8_t stack_a[4096];
 static uint8_t stack_b[4096];
 
+static uint8_t user_stack_a[4096];
+static uint8_t user_stack_b[4096];
+
 struct trap_frame *
-task_init(uint8_t *stack, void *entry)
+task_init(uint8_t *stack, uint8_t *user_stack, void *entry)
 {
   struct trap_frame task_state = {
       .eax = 0,
@@ -33,9 +37,11 @@ task_init(uint8_t *stack, void *entry)
       .esi = 0,
       .edi = 0,
 
-      .cs = 0x08,
+      .cs = USER_CODE_SELECTOR,
       .eip = (uint32_t)entry,
       .eflags = 0x200,
+      .ss = USER_DATA_SELECTOR,
+      .esp = (uint32_t)user_stack + 4096,
   };
 
   struct trap_frame *tf = (void *)(stack + 4096 - sizeof(task_state));
@@ -51,8 +57,8 @@ static struct trap_frame *task_states[2];
 void
 task_setup()
 {
-  task_states[0] = task_init(stack_a, task_a);
-  task_states[1] = task_init(stack_b, task_b);
+  task_states[0] = task_init(stack_a, user_stack_a, task_a);
+  task_states[1] = task_init(stack_b, user_stack_b, task_b);
 }
 
 struct trap_frame *
