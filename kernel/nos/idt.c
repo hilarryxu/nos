@@ -133,9 +133,11 @@ idt_setup()
 }
 
 // 派发中断
-void
+struct trap_frame *
 handle_interrupt(struct trap_frame *tf)
 {
+  struct trap_frame *new_tf = tf;
+
   if (tf->trap_no <= 0x1F) {
     // 异常 [0, 31]
     printk("Exception %d\n", tf->trap_no);
@@ -143,6 +145,9 @@ handle_interrupt(struct trap_frame *tf)
       asm volatile("cli; hlt");
     }
   } else if (tf->trap_no >= T_IRQ0 && tf->trap_no <= 0x2F) {
+    if (tf->trap_no == T_IRQ0 + IRQ_TIMER) {
+      new_tf = schedule(tf);
+    }
     // IRQs [32, 47]
     pic_send_eoi(tf->trap_no - T_IRQ0);
   } else {
@@ -152,4 +157,6 @@ handle_interrupt(struct trap_frame *tf)
       asm volatile("cli; hlt");
     }
   }
+
+  return new_tf;
 }

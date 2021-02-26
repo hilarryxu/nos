@@ -64,7 +64,7 @@ intr_common_handler:
     # void handle_interrupt(tf)
     call handle_interrupt
     # 弹出 tf
-    add $4, %esp
+    mov %eax, %esp
 
     # 弹出通用寄存器组
     pop %edi

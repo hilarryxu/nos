@@ -8,4 +8,8 @@
 // 打印输出函数
 void printk(char *format, ...);
 
+void task_setup();
+
+struct trap_frame *schedule(struct trap_frame *tf);
+
 #endif  // !_NOS_NOS_H

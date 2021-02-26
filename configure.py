@@ -279,6 +279,7 @@ for name in [
     'idt',
     'exception',
     'pic',
+    'task',
 ]:
     kernel_objs += kernel_cc(name)
 

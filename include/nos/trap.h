@@ -37,6 +37,6 @@ struct trap_frame {
 };
 
 // 派发中断
-void handle_interrupt(struct trap_frame *tf);
+struct trap_frame *handle_interrupt(struct trap_frame *tf);
 
 #endif  // !_NOS_TRAP_H

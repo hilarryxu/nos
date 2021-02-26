@@ -22,6 +22,7 @@ kernel_main(unsigned long addr, unsigned long magic)
   cga_setup();
   // 初始化 GDT
   gdt_setup();
+  task_setup();
   // 初始化异常处理
   exception_setup();
   // 初始化 PIC
