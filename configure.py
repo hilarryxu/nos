@@ -163,6 +163,7 @@ kernel_cflags = [
     '-ffreestanding',
     '-Wall',
     '-Wextra',
+    '-Werror',
     '-fno-pic',
     '-I$root/kernel',
     '-I$root/include',
@@ -282,6 +283,7 @@ for name in [
     'pit',
     'task',
     'mm/pmm',
+    'mm/vmm',
 ]:
     kernel_objs += kernel_cc(name)
 

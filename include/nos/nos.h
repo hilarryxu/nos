@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <nos/macros.h>
 #include <nos/multiboot.h>
 
 // 打印输出函数

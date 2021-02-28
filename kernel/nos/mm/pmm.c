@@ -14,12 +14,12 @@ pmm_setup()
 
   while (pa < mem_end_addr) {
     pmm_free(pa);
-    pa += PMM_PAGE_SIZE;
+    pa += PAGE_SIZE;
     physical_page_count++;
   }
 }
 
-uint32_t
+phys_addr_t
 pmm_alloc()
 {
   uint32_t pa = pmm_stack[pmm_stack_top--];
@@ -28,7 +28,7 @@ pmm_alloc()
 }
 
 void
-pmm_free(uint32_t pa)
+pmm_free(phys_addr_t pa)
 {
   pmm_stack[++pmm_stack_top] = pa;
 }

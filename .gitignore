@@ -5,6 +5,7 @@
 *.py[co]
 __pycache__/
 *.idb
+tags
 
 .ninja_deps
 .ninja_log
@@ -12,6 +13,7 @@ __pycache__/
 /build.ninja
 /bochsout.log
 /*.lock
+/*.log
 
 build/
 Crosstools/

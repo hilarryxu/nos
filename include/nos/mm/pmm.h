@@ -3,16 +3,18 @@
 
 #include <stdint.h>
 
+#include <nos/macros.h>
+
 // 256MB
 #define PMM_MAX_MEM_SIZE 0x10000000
 // 4KB
-#define PMM_PAGE_SIZE 0x1000
+#define PAGE_SIZE 0x1000
 
-#define PMM_MAX_PAGE (PMM_MAX_MEM_SIZE / PMM_PAGE_SIZE)
+#define PMM_MAX_PAGE (PMM_MAX_MEM_SIZE / PAGE_SIZE)
 
 void pmm_setup();
 
-uint32_t pmm_alloc();
-void pmm_free(uint32_t pa);
+phys_addr_t pmm_alloc();
+void pmm_free(phys_addr_t pa);
 
 #endif  // !_NOS_MM_PMM_H
