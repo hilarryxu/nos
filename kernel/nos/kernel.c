@@ -33,7 +33,7 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 初始化物理内存子系统
   pmm_setup();
   // 初始化虚拟内存子系统
-  // vmm_setup();
+  vmm_setup();
 
   // 初始化 GDT
   gdt_setup();

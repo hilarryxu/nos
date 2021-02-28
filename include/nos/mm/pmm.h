@@ -4,11 +4,10 @@
 #include <stdint.h>
 
 #include <nos/macros.h>
+#include <nos/mm/memlayout.h>
 
 // 256MB
 #define PMM_MAX_MEM_SIZE 0x10000000
-// 4KB
-#define PAGE_SIZE 0x1000
 
 #define PMM_MAX_PAGE (PMM_MAX_MEM_SIZE / PAGE_SIZE)
 
