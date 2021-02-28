@@ -8,8 +8,8 @@ uint32_t physical_page_count = 0;
 void
 pmm_setup()
 {
-  uint32_t mem_start_addr = 0x100000 * 4;
-  uint32_t mem_end_addr = 0x100000 * 8;
+  uint32_t mem_start_addr = 0x100000 * 2;
+  uint32_t mem_end_addr = 0x100000 * 4 - 0x2000;
   uint32_t pa = mem_start_addr;
 
   while (pa < mem_end_addr) {

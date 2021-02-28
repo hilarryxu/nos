@@ -161,6 +161,7 @@ kernel_cflags = [
     '-m32',
     '-std=gnu99',
     '-ffreestanding',
+    '-g -ggdb -gstabs+',
     '-Wall',
     '-Wextra',
     '-Werror',
