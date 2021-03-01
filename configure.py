@@ -166,6 +166,7 @@ kernel_cflags = [
     '-Wextra',
     '-Werror',
     '-fno-pic',
+    '-I$root/libk/include',
     '-I$root/kernel',
     '-I$root/include',
 ]
@@ -261,6 +262,28 @@ boot_bin = n.build(built('boot/boot.bin'), 'r_boot', boot_out)
 all_targets += boot_bin
 n.newline()
 
+#: libk
+libk_objs = []
+for name in [
+    'libk/src/stdlib',
+    'libk/src/string',
+    'libk/src/ctype',
+]:
+    libk_objs += n.build(
+        built(name + objext),
+        'kernel_cc',
+        src(name + '.c'),
+        variables=dict(
+            cflags=
+            '$cflags -D_KERNEL_ -I$root/libk/include'
+        )
+    )
+
+libk = n.build(built('lib/libk.a'), 'kernel_ar', libk_objs)
+
+all_targets += libk
+n.newline()
+
 #: kernel
 kernel_objs = []
 
@@ -297,8 +320,10 @@ kernel_elf = n.build(
         kernel_ldflags='$kernel_ldflags -T{0} -Map {1}'.format(
             kernel_src('kernel.ld'),
             built('kernel.map')
-        )
-    )
+        ),
+        libs='-L$builddir/lib -lk'
+    ),
+    implicit=[] + libk
 )
 
 all_targets += kernel_elf

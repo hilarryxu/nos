@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 
 #include <nos/nos.h>
 #include <nos/trap.h>
@@ -45,31 +46,6 @@ task_d()
   while (1) {
     printk("D");
   }
-}
-
-static inline void *
-memset(void *buf, uint8_t c, size_t n)
-{
-  uint8_t *p = buf;
-
-  while (n--) {
-    *p++ = c;
-  }
-
-  return buf;
-}
-
-static inline void *
-memcpy(void *dst, const void *src, size_t n)
-{
-  uint8_t *d = dst;
-  const uint8_t *s = src;
-
-  while (n--) {
-    *d++ = *s++;
-  }
-
-  return dst;
 }
 
 struct task *

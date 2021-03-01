@@ -1,5 +1,7 @@
 #include <nos/drvs/cga.h>
 
+#include <string.h>
+
 #include <nos/ioport.h>
 
 // 显存首地址
@@ -77,18 +79,9 @@ cga_putchar(char chr)
   }
 
   // 滚屏
-  // 等后面实现了基本的 C 库再开启
-
-  // scroll up
-  // if (cga_cursor.y >= CGA_LINE) {
-  //   memcpy(cga_video, cga_video + (1 * CGA_COLUMN),
-  //          sizeof(*cga_video) * CGA_LINE * CGA_COLUMN);
-  //   cga_cursor.y = CGA_LINE - 1;
-  // }
-
-  // FIXME(xcc): 这里偷懒先回来最开始位置
   if (cga_cursor.y >= CGA_LINE) {
-    cga_cursor.x = 0;
-    cga_cursor.y = 0;
+    memcpy(cga_video, cga_video + (1 * CGA_COLUMN),
+           sizeof(*cga_video) * CGA_LINE * CGA_COLUMN);
+    cga_cursor.y = CGA_LINE - 1;
   }
 }
