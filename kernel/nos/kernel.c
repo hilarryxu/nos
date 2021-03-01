@@ -8,6 +8,7 @@
 #include <nos/pit.h>
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
+#include <nos/drvs/serial.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -27,6 +28,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   }
   struct multiboot_info *mb_info = (struct multiboot_info *)addr;
 
+  // 初始化串口
+  serial_setup();
   // 初始化 CGA
   cga_setup();
 

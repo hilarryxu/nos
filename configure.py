@@ -285,6 +285,7 @@ for name in [
     'task',
     'mm/pmm',
     'mm/vmm',
+    'drvs/serial',
 ]:
     kernel_objs += kernel_cc(name)
 
