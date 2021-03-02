@@ -56,7 +56,7 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 试下 printk
   ASSERT(magic == MULTIBOOT_BOOTLOADER_MAGIC);
-  loga("Hello nos!\n  magic=%X, addr=0x%X\n", magic, addr);
+  printk("Hello nos!\n  magic=%X, addr=0x%X\n", magic, addr);
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);

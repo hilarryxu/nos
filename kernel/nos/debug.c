@@ -136,13 +136,13 @@ _log(const char *file, int line, int panic, const char *fmt, ...)
 {
   va_list args;
 
-  kprint_str(file);
-  kprint_char(':');
-  kprint_uint(line, 10, 0);
-  kprint_char(' ');
+  // kprint_str(file);
+  // kprint_char(':');
+  // kprint_uint(line, 10, 0);
+  // kprint_char(' ');
 
   va_start(args, fmt);
-  log_vakprintf(fmt, args);
+  vakprintf(fmt, args);
   va_end(args);
 
   if (panic) {

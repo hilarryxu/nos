@@ -64,7 +64,7 @@ kprint_int(int value, int radix, int uppercase)
   }
 }
 
-static void
+void
 vakprintf(char *format, va_list args)
 {
   while (*format) {

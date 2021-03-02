@@ -9,7 +9,7 @@ __attribute__((__noreturn__)) void
 abort(void)
 {
 #if defined(_KERNEL_)
-  printk("kernel: panic: abort()\n");
+  printk("\nkernel: panic: abort()\n");
 #endif
 
   while (1) {
