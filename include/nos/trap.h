@@ -25,7 +25,7 @@ struct trap_frame {
   // 中断号
   uint32_t trap_no;
   // 错误码
-  uint32_t error;
+  uint32_t error_code;
 
   // 中断触发时 CPU 自己压入的
   uint32_t eip;

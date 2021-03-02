@@ -8,6 +8,7 @@
 #include <nos/pic.h>
 #include <nos/ioport.h>
 #include <nos/pit.h>
+#include <nos/exception.h>
 
 extern void intr_stub_0(void);
 extern void intr_stub_1(void);
@@ -160,8 +161,10 @@ handle_interrupt(struct trap_frame *tf)
   if (tf->trap_no <= 0x1F) {
     // 异常 [0, 31]
     printk("Exception %d\n", tf->trap_no);
-    while (1) {
-      asm volatile("cli; hlt");
+    if (exception_dispatch(tf) != 0) {
+      while (1) {
+        asm volatile("cli; hlt");
+      }
     }
   } else if (tf->trap_no >= T_IRQ0 && tf->trap_no <= 0x2F) {
     if (tf->trap_no == T_IRQ0 + IRQ_TIMER) {
