@@ -164,8 +164,10 @@ kernel_cflags = [
     '-g -ggdb -gstabs+',
     '-Wall',
     '-Wextra',
-    '-Werror',
+    # '-Werror',
     '-fno-pic',
+    '-DNOS_ASSERT_PANIC',
+    '-DNOS_DEBUG_LOG',
     '-I$root/libk/include',
     '-I$root/kernel',
     '-I$root/include',
@@ -309,6 +311,7 @@ for name in [
     'mm/pmm',
     'mm/vmm',
     'drvs/serial',
+    'debug',
 ]:
     kernel_objs += kernel_cc(name)
 

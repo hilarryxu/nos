@@ -9,6 +9,7 @@
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
 #include <nos/drvs/serial.h>
+#include <nos/debug.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -30,6 +31,9 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 初始化串口
   serial_setup();
+  // 初始化调试日志输出
+  debug_setup(LOG_DEBUG);
+
   // 初始化 CGA
   cga_setup();
 
@@ -51,7 +55,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   idt_setup();
 
   // 试下 printk
-  printk("Hello nos!\n  magic=%X, addr=0x%X\n", magic, addr);
+  ASSERT(magic == MULTIBOOT_BOOTLOADER_MAGIC);
+  loga("Hello nos!\n  magic=%X, addr=0x%X\n", magic, addr);
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);

@@ -10,4 +10,6 @@ boot: disk
 
 mouse: enabled=0
 
+com1: enabled=1, mode=file, dev=serial.log
+
 # port_e9_hack: enabled=1
