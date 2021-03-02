@@ -1,6 +1,10 @@
 #ifndef _NOS_DEBUG_H
 #define _NOS_DEBUG_H
 
+#include <nos/macros.h>
+
+#define MAGIC_BREAK asm volatile("xchg %bx, %bx")
+
 #define LOG_EMERG 0   /* system in unusable */
 #define LOG_ALERT 1   /* action must be taken immediately */
 #define LOG_CRIT 2    /* critical conditions */

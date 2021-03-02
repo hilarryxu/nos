@@ -308,6 +308,7 @@ for name in [
     'pic',
     'pit',
     'task',
+    'mm/paging',
     'mm/pmm',
     'mm/vmm',
     'drvs/serial',

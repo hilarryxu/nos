@@ -4,8 +4,8 @@
 #include <nos/macros.h>
 #include <nos/mm/memlayout.h>
 
-#define NR_PDE 1024
-#define NR_PTE 1024
+#define PAGES_PER_DIR 1024
+#define PAGES_PER_TABLE 1024
 
 #define VMM_PDE_INDEX(vaddr) (((uint32_t)(vaddr) >> 22) & 0x3FF)
 
@@ -21,11 +21,11 @@ typedef uint32_t pde_t;
 typedef uint32_t pte_t;
 
 struct page_directory {
-  pde_t entries[NR_PDE];
+  pde_t entries[PAGES_PER_DIR];
 };
 
 struct page_table {
-  pte_t entries[NR_PTE];
+  pte_t entries[PAGES_PER_TABLE];
 };
 
 struct vmm_context {
@@ -34,5 +34,7 @@ struct vmm_context {
 };
 
 void vmm_setup();
+
+void vmm_activate_pgdir(phys_addr_t pgdir);
 
 #endif  // !_NOS_MM_VMM_H

@@ -4,27 +4,19 @@
 
 #include <nos/mm/pmm.h>
 
-static struct vmm_context *kernel_vmm_context;
+// static struct page_directory *current_pgdir;
+// static struct page_directory kernel_pgdir;
 
 struct vmm_context *
 vmm_create_context()
 {
-  struct vmm_context *ctx = (struct vmm_context *)pmm_alloc();
-
-  ctx->page_dir = (struct page_directory *)pmm_alloc();
-  ctx->page_dir_phys = (phys_addr_t)ctx->page_dir;
-
-  for (int i = 0; i < NR_PDE; i++) {
-    ctx->page_dir->entries[i] = 0;
-  }
-
-  return ctx;
+  return NULL;
 }
 
 void
-vmm_activate_context(struct vmm_context *context)
+vmm_activate_pgdir(phys_addr_t pgdir)
 {
-  asm volatile("mov %0, %%cr3" : : "r"(context->page_dir_phys));
+  asm volatile("mov %0, %%cr3" : : "r"(pgdir));
 }
 
 int
@@ -44,8 +36,8 @@ vmm_map_page(struct vmm_context *context, uintptr_t vaddr, phys_addr_t paddr,
   if (page_dir->entries[pde_index] & VMM_PRESENT) {
     page_table = (struct page_table *)(page_dir->entries[pde_index] & ~0xFFF);
   } else {
-    page_table = (struct page_table *)pmm_alloc();
-    for (i = 0; i < NR_PTE; i++) {
+    page_table = (struct page_table *)pmm_alloc_block();
+    for (i = 0; i < PAGES_PER_TABLE; i++) {
       page_table->entries[i] = 0;
     }
     page_dir->entries[pte_index] =
@@ -62,18 +54,4 @@ vmm_map_page(struct vmm_context *context, uintptr_t vaddr, phys_addr_t paddr,
 void
 vmm_setup()
 {
-  uint32_t cr0;
-
-  kernel_vmm_context = vmm_create_context();
-
-  for (int i = 0; i < 1024 * PAGE_SIZE; i += PAGE_SIZE) {
-    vmm_map_page(kernel_vmm_context, i, i, VMM_WRITABLE);
-  }
-
-  vmm_activate_context(kernel_vmm_context);
-
-  // WOW: 开启分页机制
-  asm volatile("mov %%cr0, %0" : "=r"(cr0));
-  cr0 |= (1 << 31);
-  asm volatile("mov %0, %%cr0" : : "r"(cr0));
 }

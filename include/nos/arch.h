@@ -10,8 +10,6 @@ static inline void write_eflags(uint32_t eflags) __attribute__((always_inline));
 static inline uint32_t read_ebp() __attribute__((always_inline));
 static inline uint32_t read_esp() __attribute__((always_inline));
 
-#define MAGIC_BREAK asm volatile("xchg %bx, %bx")
-
 static inline void
 breakpoint(void)
 {

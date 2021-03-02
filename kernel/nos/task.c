@@ -51,8 +51,8 @@ task_d()
 struct task *
 task_init(void *entry)
 {
-  uint8_t *kstack = (uint8_t *)pmm_alloc();
-  uint8_t *user_stack = (uint8_t *)pmm_alloc();
+  uint8_t *kstack = (uint8_t *)pmm_alloc_block();
+  uint8_t *user_stack = (uint8_t *)pmm_alloc_block();
 
   struct trap_frame task_state = {
       .eax = 0,
@@ -72,7 +72,7 @@ task_init(void *entry)
   struct trap_frame *tf = (void *)(kstack + 4096 - sizeof(task_state));
   *tf = task_state;
 
-  struct task *task = (struct task *)pmm_alloc();
+  struct task *task = (struct task *)pmm_alloc_block();
   task->tf = tf;
   task->next = first_task;
   first_task = task;

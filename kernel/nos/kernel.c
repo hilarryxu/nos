@@ -1,4 +1,5 @@
 #include <nos/nos.h>
+#include <nos/debug.h>
 #include <nos/multiboot.h>
 #include <nos/drvs/cga.h>
 #include <nos/gdt.h>
@@ -6,10 +7,10 @@
 #include <nos/idt.h>
 #include <nos/pic.h>
 #include <nos/pit.h>
+#include <nos/mm/paging.h>
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
 #include <nos/drvs/serial.h>
-#include <nos/debug.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -34,13 +35,16 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 初始化调试日志输出
   debug_setup(LOG_DEBUG);
 
+  // 初始化内核页目录并开启分页
+  paging_setup();
+
   // 初始化 CGA
   cga_setup();
 
   // 初始化物理内存子系统
   pmm_setup();
   // 初始化虚拟内存子系统
-  vmm_setup();
+  // vmm_setup();
 
   // 初始化 GDT
   gdt_setup();
