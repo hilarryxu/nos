@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <nos/debug.h>
 #include <nos/trap.h>
 
 // GDT 表项
@@ -101,6 +102,8 @@ gdt_install_tss(uint32_t base, uint32_t limit)
 void
 gdt_setup()
 {
+  log_debug(LOG_INFO, "GDT: Setup");
+
   // 默认第 1 项为全零
   // 第 2 项：内核代码段 [0, 0xFFFFF*4KB=4G)
   // 第 3 项：内核数据段 [0, 0xFFFFFFFF)
@@ -139,4 +142,6 @@ gdt_setup()
 
   // 将 TSS 段描述符的选择子加载到任务状态寄存器中
   asm volatile("ltr %%ax" : : "a"(TSS_SELECTOR));
+
+  log_debug(LOG_INFO, "GDT: Done");
 }

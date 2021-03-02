@@ -105,7 +105,7 @@ log_vakprintf(const char *format, va_list args)
   }
 }
 
-void
+static void
 log_printk(const char *format, ...)
 {
   va_list args;
@@ -136,14 +136,13 @@ _log(const char *file, int line, int panic, const char *fmt, ...)
 {
   va_list args;
 
-  // kprint_str(file);
-  // kprint_char(':');
-  // kprint_uint(line, 10, 0);
-  // kprint_char(' ');
+  log_printk("%s:%d ", file, line);
 
   va_start(args, fmt);
-  vakprintf(fmt, args);
+  log_vakprintf(fmt, args);
   va_end(args);
+
+  kprint_char('\n');
 
   if (panic) {
     abort();
