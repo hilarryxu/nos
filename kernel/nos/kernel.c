@@ -26,29 +26,30 @@
 void
 kernel_main(unsigned long addr, unsigned long magic)
 {
+  phys_addr_t free_addr = ALIGN_UP((phys_addr_t)_kernel_end, PAGE_SIZE);
+  // 初始化内核页目录并开启分页
+  paging_setup();
+  // Note: 下面开始代码运行在虚拟地址访问方式下了
+
   if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
     addr = 0;
   }
   struct multiboot_info *mb_info = (struct multiboot_info *)addr;
 
-  phys_addr_t free_addr = ALIGN_UP((phys_addr_t)_kernel_end, PAGE_SIZE);
-
   // 初始化串口
   serial_setup();
   // 初始化调试日志输出
   debug_setup(LOG_DEBUG);
+  // 初始化 CGA
+  cga_setup();
 
-  // 初始化内核页目录并开启分页
-  paging_setup();
   // 初始化物理内存管理子系统
   pmm_setup(free_addr);
   // 初始化虚拟内存管理子系统
   vmm_setup();
   // 初始化内核堆管理子系统
   kheap_setup();
-
-  // 初始化 CGA
-  cga_setup();
+  // Note: 内核代码可以使用 kmalloc 动态分配内存了
 
   // 初始化 GDT
   gdt_setup();
