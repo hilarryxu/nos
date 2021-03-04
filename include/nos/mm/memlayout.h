@@ -1,8 +1,16 @@
 #ifndef _NOS_MM_MEMLAYOUT_H
 #define _NOS_MM_MEMLAYOUT_H
 
+extern char _kernel_end[];
+
 // 内核基址
 #define KERNEL_BASE 0
+
+#define P2V(paddr) ((paddr) + KERNEL_BASE)
+#define V2P(vaddr) ((vaddr)-KERNEL_BASE)
+
+#define CAST_P2V(addr) (void *)P2V((addr))
+#define CAST_V2P(addr) V2P((phys_addr_t)(addr))
 
 // 页大小 4KB
 #define PAGE_SIZE 0x1000
@@ -18,11 +26,7 @@
 #define KERNEL_PG_1 0x400000
 #define KERNEL_PG_1_LIM 0x800000
 
-// 直接物理内存分配区域 [8MB, 16MB)
-#define PLACEMENT_START 0x800000
-#define PLACEMENT_END 0x1000000
-
-// [0, 16MB) 直接对等映射
-#define NR_IDENTITY_MAP 4
+// [0, 8MB) 直接对等映射
+#define NR_IDENTITY_MAP 2
 
 #endif  // !_NOS_MM_MEMLAYOUT_H

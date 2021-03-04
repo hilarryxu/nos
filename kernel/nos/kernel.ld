@@ -19,7 +19,9 @@ SECTIONS
     }
 
     .bss : ALIGN(4K) {
-        *(.bss)
         *(COMMON)
+        *(.bss)
     }
+
+    PROVIDE( _kernel_end = . );
 }

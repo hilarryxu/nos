@@ -30,6 +30,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   }
   struct multiboot_info *mb_info = (struct multiboot_info *)addr;
 
+  phys_addr_t free_addr = ALIGN_UP((phys_addr_t)_kernel_end, PAGE_SIZE);
+
   // 初始化串口
   serial_setup();
   // 初始化调试日志输出
@@ -42,7 +44,7 @@ kernel_main(unsigned long addr, unsigned long magic)
   cga_setup();
 
   // 初始化物理内存子系统
-  pmm_setup();
+  pmm_setup(free_addr);
   // 初始化虚拟内存子系统
   // vmm_setup();
 

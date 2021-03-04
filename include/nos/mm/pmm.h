@@ -14,10 +14,7 @@
 #define PMM_MAX_FRAME (PMM_MAX_MEM_SIZE / PMM_FRAME_SIZE)
 
 // 初始化物理内存管理子系统
-void pmm_setup();
-
-// 预留区域直接分配物理内存
-phys_addr_t boot_alloc_block();
+void pmm_setup(phys_addr_t free_addr);
 
 // 申请分配一个物理页框
 phys_addr_t pmm_alloc_block();
