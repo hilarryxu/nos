@@ -5,13 +5,6 @@
 #include <nos/mm/pmm.h>
 
 // static struct page_directory *current_pgdir;
-// static struct page_directory kernel_pgdir;
-
-struct vmm_context *
-vmm_create_context()
-{
-  return NULL;
-}
 
 void
 vmm_activate_pgdir(phys_addr_t pgdir)
@@ -20,10 +13,9 @@ vmm_activate_pgdir(phys_addr_t pgdir)
 }
 
 int
-vmm_map_page(struct vmm_context *context, uintptr_t vaddr, phys_addr_t paddr,
-             uint32_t flags)
+vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
+             phys_addr_t paddr, uint32_t flags)
 {
-  struct page_directory *page_dir = context->page_dir;
   uint32_t pde_index = VMM_PDE_INDEX(vaddr);
   uint32_t pte_index = VMM_PTE_INDEX(vaddr);
   struct page_table *page_table;

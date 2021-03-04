@@ -311,6 +311,7 @@ for name in [
     'mm/paging',
     'mm/pmm',
     'mm/vmm',
+    'mm/kheap',
     'drvs/serial',
     'debug',
 ]:

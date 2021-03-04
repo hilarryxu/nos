@@ -10,6 +10,7 @@
 #include <nos/mm/paging.h>
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
+#include <nos/mm/kheap.h>
 #include <nos/drvs/serial.h>
 
 //---------------------------------------------------------------------
@@ -39,14 +40,15 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 初始化内核页目录并开启分页
   paging_setup();
+  // 初始化物理内存管理子系统
+  pmm_setup(free_addr);
+  // 初始化虚拟内存管理子系统
+  vmm_setup();
+  // 初始化内核堆管理子系统
+  kheap_setup();
 
   // 初始化 CGA
   cga_setup();
-
-  // 初始化物理内存子系统
-  pmm_setup(free_addr);
-  // 初始化虚拟内存子系统
-  // vmm_setup();
 
   // 初始化 GDT
   gdt_setup();
@@ -62,6 +64,10 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 试下 printk
   printk("Hello nos!\n  magic=0x%X, addr=0x%X\n", magic, addr);
+  char *p1 = kmalloc(13);
+  char *p2 = kmalloc(13);
+  printk("p1: 0x%X\n", p1);
+  printk("p2: 0x%X\n", p2);
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);

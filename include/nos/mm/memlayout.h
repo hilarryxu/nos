@@ -29,4 +29,8 @@ extern char _kernel_end[];
 // [0, 8MB) 直接对等映射
 #define NR_IDENTITY_MAP 2
 
+// [3.5G, 4G) 内核堆
+#define KERNEL_HEAP_START 0xE0000000
+#define KERNEL_HEAP_END 0xFFFFFFFF
+
 #endif  // !_NOS_MM_MEMLAYOUT_H

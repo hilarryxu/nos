@@ -4,8 +4,7 @@
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
 
-static struct page_directory *kernel_pgdir =
-    (struct page_directory *)KERNEL_PGDIR;
+struct page_directory *kernel_pgdir = (struct page_directory *)KERNEL_PGDIR;
 
 void
 paging_setup()

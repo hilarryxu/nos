@@ -28,13 +28,10 @@ struct page_table {
   pte_t entries[PAGES_PER_TABLE];
 };
 
-struct vmm_context {
-  struct page_directory *page_dir;
-  phys_addr_t page_dir_phys;
-};
-
 void vmm_setup();
 
 void vmm_activate_pgdir(phys_addr_t pgdir);
+int vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
+                 phys_addr_t paddr, uint32_t flags);
 
 #endif  // !_NOS_MM_VMM_H
