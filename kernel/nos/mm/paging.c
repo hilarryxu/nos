@@ -7,6 +7,12 @@
 struct page_directory *kernel_pgdir = (struct page_directory *)KERNEL_PGDIR;
 
 void
+switch_pgdir(phys_addr_t pgdir)
+{
+  asm volatile("mov %0, %%cr3" : : "r"(pgdir));
+}
+
+void
 paging_setup()
 {
   int i, j;
@@ -29,7 +35,7 @@ paging_setup()
     }
   }
 
-  vmm_activate_pgdir((phys_addr_t)kernel_pgdir);
+  switch_pgdir((phys_addr_t)kernel_pgdir);
 
   // WOW: 开启分页机制
   asm volatile("mov %%cr0, %0" : "=r"(cr0));

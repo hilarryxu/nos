@@ -16,6 +16,9 @@ extern char _kernel_end[];
 // 页大小 4KB
 #define PAGE_SIZE 0x1000
 
+// 页掩码，用于 4KB 对齐
+#define PAGE_MASK 0xFFFFF000
+
 // 内核页目录存放位置
 #define KERNEL_PGDIR 0x1000
 // 内核堆栈栈底

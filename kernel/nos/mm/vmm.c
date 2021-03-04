@@ -7,12 +7,6 @@
 
 // static struct page_directory *current_pgdir;
 
-void
-vmm_activate_pgdir(phys_addr_t pgdir)
-{
-  asm volatile("mov %0, %%cr3" : : "r"(pgdir));
-}
-
 struct page_directory *
 vmm_alloc_vaddr_space()
 {
@@ -46,7 +40,8 @@ vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
   }
 
   if (page_dir->entries[pde_index] & VMM_PRESENT) {
-    page_table = (struct page_table *)(page_dir->entries[pde_index] & ~0xFFF);
+    page_table =
+        (struct page_table *)(page_dir->entries[pde_index] & PAGE_MASK);
   } else {
     page_table = (struct page_table *)kmalloc(sizeof(*page_table));
     for (i = 0; i < PAGES_PER_TABLE; i++) {

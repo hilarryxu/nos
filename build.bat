@@ -17,4 +17,4 @@ python configure.py
 REM ninja -t clean
 ninja all
 
-pause
+REM pause
