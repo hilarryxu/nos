@@ -5,6 +5,7 @@ extern char _kernel_end[];
 
 // 内核基址
 #define KERNEL_BASE 0
+#define KERNEL_VIRTUAL_START 0xC0000000
 
 #define P2V(paddr) ((paddr) + KERNEL_BASE)
 #define V2P(vaddr) ((vaddr)-KERNEL_BASE)

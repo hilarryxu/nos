@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <nos/mm/pmm.h>
 #include <nos/mm/kheap.h>
 
 // static struct page_directory *current_pgdir;
@@ -10,6 +11,25 @@ void
 vmm_activate_pgdir(phys_addr_t pgdir)
 {
   asm volatile("mov %0, %%cr3" : : "r"(pgdir));
+}
+
+struct page_directory *
+vmm_alloc_vaddr_space()
+{
+  struct page_directory *page_dir = kmalloc(sizeof(*page_dir));
+
+  if (page_dir) {
+    for (int i = 0; i < PAGES_PER_DIR; ++i)
+      page_dir->entries[i] = VMM_WRITABLE;
+  }
+
+  return page_dir;
+}
+
+void
+vmm_free_vaddr_space(struct page_directory *page_dir)
+{
+  kfree(page_dir);
 }
 
 int

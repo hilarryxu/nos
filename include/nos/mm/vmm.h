@@ -31,6 +31,8 @@ struct page_table {
 void vmm_setup();
 
 void vmm_activate_pgdir(phys_addr_t pgdir);
+struct page_directory *vmm_alloc_vaddr_space();
+
 int vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
                  phys_addr_t paddr, uint32_t flags);
 

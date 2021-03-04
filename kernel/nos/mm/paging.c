@@ -38,3 +38,22 @@ paging_setup()
 
   // MAGIC_BREAK;
 }
+
+void
+paging_copy_kernel_space(struct page_directory *vaddr_space)
+{
+  int i;
+  int kpde_start = VMM_PDE_INDEX((uintptr_t)KERNEL_VIRTUAL_START);
+
+  // Note: 指向的页表不用拷贝，这样才能达到应用进程共享内核虚拟空间
+
+  // 拷贝低端对等映射 [0, 8MB) 区域
+  for (i = 0; i < NR_IDENTITY_MAP; i++) {
+    vaddr_space->entries[i] = kernel_pgdir->entries[i];
+  }
+
+  // 拷贝 [3G, 4G) 内核高端区域的页目录项
+  for (i = kpde_start; i < PAGES_PER_DIR; i++) {
+    vaddr_space->entries[i] = kernel_pgdir->entries[i];
+  }
+}

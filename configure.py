@@ -314,6 +314,7 @@ for name in [
     'mm/kheap',
     'drvs/serial',
     'debug',
+    'proc/process',
 ]:
     kernel_objs += kernel_cc(name)
 
