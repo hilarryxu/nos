@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include <nos/mm/pmm.h>
+#include <nos/mm/kheap.h>
 
 // static struct page_directory *current_pgdir;
 
@@ -28,7 +28,7 @@ vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
   if (page_dir->entries[pde_index] & VMM_PRESENT) {
     page_table = (struct page_table *)(page_dir->entries[pde_index] & ~0xFFF);
   } else {
-    page_table = (struct page_table *)pmm_alloc_block();
+    page_table = (struct page_table *)kmalloc(sizeof(*page_table));
     for (i = 0; i < PAGES_PER_TABLE; i++) {
       page_table->entries[i] = 0;
     }

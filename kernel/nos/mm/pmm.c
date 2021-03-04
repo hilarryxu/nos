@@ -34,8 +34,9 @@ pmm_setup(phys_addr_t free_addr)
 {
   boot_allocator_init(CAST_P2V(free_addr));
 
-  uint32_t mem_start_addr = 0x100000 * 2;
-  uint32_t mem_end_addr = 0x100000 * 4 - 0x2000;
+  // [8MB, 32MB)
+  uint32_t mem_start_addr = KERNEL_PG_1_LIM;
+  uint32_t mem_end_addr = (0x100000 * 32) - 0x1000;
   uint32_t paddr = mem_start_addr;
 
   while (paddr < mem_end_addr) {

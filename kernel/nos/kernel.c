@@ -52,7 +52,7 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 初始化 GDT
   gdt_setup();
-  task_setup(mb_info);
+  // task_setup(mb_info);
   // 初始化异常处理
   exception_setup();
   // 初始化 PIC
@@ -68,6 +68,7 @@ kernel_main(unsigned long addr, unsigned long magic)
   char *p2 = kmalloc(13);
   printk("p1: 0x%X\n", p1);
   printk("p2: 0x%X\n", p2);
+  MAGIC_BREAK;
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);

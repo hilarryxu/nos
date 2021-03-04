@@ -36,5 +36,5 @@ paging_setup()
   cr0 |= 1 << 31;
   asm volatile("mov %0, %%cr0" : : "r"(cr0));
 
-  MAGIC_BREAK;
+  // MAGIC_BREAK;
 }
