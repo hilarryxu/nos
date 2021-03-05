@@ -1,13 +1,16 @@
 #include <stdint.h>
 
-#include <nos/debug.h>
+#include <nos/nos.h>
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
 
-struct page_directory *kernel_pgdir = (struct page_directory *)KERNEL_PGDIR;
+extern char boot_pgdir[];
+
+struct page_directory *kernel_pgdir;
+phys_addr_t kernel_pgdir_phys;
 
 void
-switch_pgdir(phys_addr_t pgdir)
+paging_switch_pgdir(phys_addr_t pgdir)
 {
   asm volatile("mov %0, %%cr3" : : "r"(pgdir));
 }
@@ -15,6 +18,26 @@ switch_pgdir(phys_addr_t pgdir)
 void
 paging_setup()
 {
+  kernel_pgdir = (struct page_directory *)boot_pgdir;
+  kernel_pgdir_phys = CAST_V2P(kernel_pgdir);
+
+  kernel_pgdir->entries[0] = VMM_WRITABLE;
+  kernel_pgdir->entries[1023] =
+      (pde_t)kernel_pgdir_phys | VMM_WRITABLE | VMM_PRESENT;
+
+  paging_switch_pgdir(kernel_pgdir_phys);
+
+  // Note: bochs 打印的页映射关系
+  // (0) Magic breakpoint
+  // Next at t=17566136
+  // (0) [0x0010134f] 0008:c010134f (unk. ctxt): leave                     ; c9
+  // <bochs:2> info tab
+  // cr3: 0x00103000
+  // 0xc0000000-0xc03fffff -> 0x00000000-0x003fffff
+  // 0xfff00000-0xfff00fff -> 0x00000000-0x00000fff
+  // 0xfffff000-0xffffffff -> 0x00103000-0x00103fff
+  MAGIC_BREAK;
+
 #if 0
   int i, j;
   struct page_table *page_table;
@@ -36,15 +59,13 @@ paging_setup()
     }
   }
 
-  switch_pgdir((phys_addr_t)kernel_pgdir);
+  paging_switch_pgdir((phys_addr_t)kernel_pgdir);
 
   // WOW: 开启分页机制
   asm volatile("mov %%cr0, %0" : "=r"(cr0));
   cr0 |= 1 << 31;
   asm volatile("mov %0, %%cr0" : : "r"(cr0));
 #endif
-
-  // MAGIC_BREAK;
 }
 
 void

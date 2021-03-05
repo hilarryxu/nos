@@ -13,6 +13,8 @@
 
 #include <stdint.h>
 
+#include <nos/mm/memlayout.h>
+
 // 显示最小单元
 struct cga_char {
   uint8_t chr;   // 字符
@@ -26,8 +28,8 @@ struct cga_cursor {
   uint8_t color;  // 当前颜色
 };
 
-// 该模式下的显存地址
-#define CGA_ADDRESS 0xB8000
+// 该模式下的显存地址（虚拟地址空间下）
+#define CGA_ADDRESS (KERNEL_BASE + 0xB8000)
 // 总共 80 列
 #define CGA_COLUMN 80
 // 总共 25 行

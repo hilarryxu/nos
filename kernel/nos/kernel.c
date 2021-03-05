@@ -18,7 +18,8 @@
 //
 // addr:
 //   指向 multiboot 信息的结构体指针
-//   struct multiboot_info *addr
+//   multiboot_info_t *
+//   是处在内存低端的物理地址，所以用 P2V 转换成虚拟地址再访问
 //
 // magic:
 //   用于判断是否为 multiboot 规范启动的 magic 值
@@ -26,15 +27,22 @@
 void
 kernel_main(unsigned long addr, unsigned long magic)
 {
+  // 计算内核尾部开始的可用物理地址（不得超过 4MB，需要页对齐）
+  // TODO: 这里直接用的 KERNEL_END_PHYS，后面考虑 multiboot mods 时需重新计算
   phys_addr_t free_addr = ALIGN_UP((phys_addr_t)KERNEL_END_PHYS, PAGE_SIZE);
-  // 初始化内核页目录并开启分页
-  paging_setup();
-  // Note: 下面开始代码运行在虚拟地址访问方式下了
 
-  if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-    addr = 0;
+  // 重新初始化内核页目录
+  // 去掉 [0, 4MB) -> [0, 4MB) 的映射
+  // 页目录的 1023 项设置为递归页目录方式（这个特性可以简化不少代码）
+  paging_setup();
+
+  // 兼容不用 GRUB（用自带简易 bootloader）启动的方式
+  multiboot_info_t *mb_info = NULL;
+  if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
+    mb_info = (multiboot_info_t *)P2V(addr);
   }
-  struct multiboot_info *mb_info = (struct multiboot_info *)addr;
+
+  // Note: 先把串口、日志、屏幕输出等辅助调试的功能初始化好
 
   // 初始化串口
   serial_setup();

@@ -10,6 +10,6 @@ void paging_setup();
 
 void paging_copy_kernel_space(struct page_directory *vaddr_space);
 
-void switch_pgdir(phys_addr_t pgdir);
+void paging_switch_pgdir(phys_addr_t pgdir);
 
 #endif  // !_NOS_MM_PAGING_H
