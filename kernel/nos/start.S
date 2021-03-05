@@ -59,8 +59,9 @@ boot_pgdir:
     # bit 7: 使用 4MB 页大小，而不是默认的 4KB
     # 建立对等映射 [0, 4MB) -> [0, 4MB)
     .long 0x00000083  # [0, 4MB)
+    .long 0x00400083  # [4MB, 8MB)
     # 补齐 KERNEL_PDE_INDEX 之前的页目录项
-    .fill (KERNEL_PDE_INDEX - 1), 4, 0
+    .fill (KERNEL_PDE_INDEX - 2), 4, 0
     # 0xC0000000 虚拟地址对应的页目录项
     # 建立映射 [0xC0000000, 0xC0000000 + 4MB) -> [0, 4MB)
     .long 0x00000083

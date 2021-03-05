@@ -21,7 +21,15 @@ paging_setup()
   kernel_pgdir = (struct page_directory *)boot_pgdir;
   kernel_pgdir_phys = CAST_V2P(kernel_pgdir);
 
+  // 将内核页目录与 [4MB, 8MB) 区间预留的内核页表数组关联起来
+  for (int i = VMM_PDE_INDEX(KERNEL_BASE) + 1; i < 1023; i++) {
+    struct page_table *page_table =
+        (struct page_table *)(KERNEL_PG_1 + (i * PAGE_SIZE));
+    kernel_pgdir->entries[i] = (pde_t)page_table | VMM_WRITABLE | VMM_PRESENT;
+  }
+
   kernel_pgdir->entries[0] = VMM_WRITABLE;
+  kernel_pgdir->entries[1] = VMM_WRITABLE;
   kernel_pgdir->entries[1023] =
       (pde_t)kernel_pgdir_phys | VMM_WRITABLE | VMM_PRESENT;
 
@@ -37,35 +45,6 @@ paging_setup()
   // 0xfff00000-0xfff00fff -> 0x00000000-0x00000fff
   // 0xfffff000-0xffffffff -> 0x00103000-0x00103fff
   MAGIC_BREAK;
-
-#if 0
-  int i, j;
-  struct page_table *page_table;
-  uint32_t cr0;
-  uint32_t paddr;
-
-  paddr = 0;
-  // 将内核页目录与 4MB 的内核页表数组关联起来
-  for (i = 0; i < PAGES_PER_DIR; i++) {
-    page_table = (struct page_table *)(KERNEL_PG_1 + (i * PAGE_SIZE));
-    kernel_pgdir->entries[i] = (pde_t)page_table | VMM_WRITABLE | VMM_PRESENT;
-
-    // 对等映射 [0, 8MB) 区域
-    if (i < NR_IDENTITY_MAP) {
-      for (j = 0; j < PAGES_PER_TABLE; j++) {
-        page_table->entries[j] = (pte_t)paddr | VMM_WRITABLE | VMM_PRESENT;
-        paddr += PAGE_SIZE;
-      }
-    }
-  }
-
-  paging_switch_pgdir((phys_addr_t)kernel_pgdir);
-
-  // WOW: 开启分页机制
-  asm volatile("mov %%cr0, %0" : "=r"(cr0));
-  cr0 |= 1 << 31;
-  asm volatile("mov %0, %%cr0" : : "r"(cr0));
-#endif
 }
 
 void
