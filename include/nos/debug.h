@@ -3,7 +3,10 @@
 
 #include <nos/macros.h>
 
-#define MAGIC_BREAK asm volatile("xchg %bx, %bx")
+#define MAGIC_BREAK()                                                          \
+  do {                                                                         \
+    asm("xchgw %bx, %bx\n");                                                   \
+  } while (0)
 
 #define LOG_EMERG 0   /* system in unusable */
 #define LOG_ALERT 1   /* action must be taken immediately */

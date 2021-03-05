@@ -7,6 +7,8 @@
 typedef unsigned char u_char;
 typedef uint32_t phys_addr_t;
 
+#define UNUSED(param) (void)param
+
 #define NELEMS(a) ((sizeof(a)) / sizeof((a)[0]))
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
