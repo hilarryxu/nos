@@ -32,7 +32,7 @@ kheap_expand(char *end_addr)
 
   for (vaddr = start_addr; vaddr < end_addr; vaddr += PAGE_SIZE) {
     paddr = pmm_alloc_block();
-    vmm_map_page(kernel_pgdir, (uintptr_t)vaddr, paddr, VMM_WRITABLE);
+    vmm_map_page((uintptr_t)vaddr, paddr, VMM_WRITABLE);
   }
 
   return 0;

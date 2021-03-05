@@ -11,6 +11,8 @@
 
 #define VMM_PTE_INDEX(vaddr) (((uint32_t)(vaddr) >> 12) & 0x3FF)
 
+#define VMM_INVALIDATE_PAGE(v_addr) asm("invlpg %0" ::"m"(v_addr))
+
 enum vmm_flag {
   VMM_PRESENT = 0x1,
   VMM_WRITABLE = 0x2,
@@ -32,7 +34,7 @@ void vmm_setup();
 
 struct page_directory *vmm_alloc_vaddr_space();
 
-int vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
-                 phys_addr_t paddr, uint32_t flags);
+void vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags);
+void vmm_unmap_page(uintptr_t vaddr);
 
 #endif  // !_NOS_MM_VMM_H

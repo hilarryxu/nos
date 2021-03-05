@@ -81,22 +81,21 @@ alloc_proc_stacks(struct process *proc)
   phys_addr_t stack = pmm_alloc_block();
   if (!stack)
     return -1;
-  if (vmm_map_page(proc->page_dir,
-                   (uintptr_t)(PROCESS_KERNEL_STACK - PAGE_SIZE), stack,
-                   VMM_WRITABLE) < 0) {
-    pmm_free_block(stack);
-    return -1;
-  }
+
+  vmm_map_page((uintptr_t)(PROCESS_KERNEL_STACK - PAGE_SIZE), stack,
+               VMM_WRITABLE);
+  // pmm_free_block(stack);
+  // return -1;
 
   stack = pmm_alloc_block();
   // FIXME: unmap prev stack
   if (!stack)
     return -1;
-  if (vmm_map_page(proc->page_dir, (uintptr_t)(PROCESS_USER_STACK - PAGE_SIZE),
-                   stack, VMM_WRITABLE | VMM_USER) < 0) {
-    pmm_free_block(stack);
-    return -1;
-  }
+
+  vmm_map_page((uintptr_t)(PROCESS_USER_STACK - PAGE_SIZE), stack,
+               VMM_WRITABLE | VMM_USER);
+  // pmm_free_block(stack);
+  // return -1;
 
   proc->kstack = (char *)PROCESS_KERNEL_STACK;
   proc->user_stack = (char *)PROCESS_USER_STACK;
