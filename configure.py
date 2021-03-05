@@ -319,7 +319,7 @@ for name in [
     kernel_objs += kernel_cc(name)
 
 kernel_elf = n.build(
-    kernel_built('kernel.elf'),
+    built('kernel.bin'),
     'kernel_link',
     kernel_objs,
     variables=dict(

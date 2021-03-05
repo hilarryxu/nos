@@ -32,23 +32,24 @@
  */
 #define MULTIBOOT_HEADER_FLAGS          MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | 0
 
-/* .multiboot 段 */
+# .multiboot 段
 .section .multiboot
 
-/* 按 2^2 = 4 bytes = 32 bits 对齐*/
-.p2align 2
-/* 最小化的 multiboot header 定义了 */
-/* magic, flags, checksum */
-.long MULTIBOOT_HEADER_MAGIC
-.long MULTIBOOT_HEADER_FLAGS
-.long -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
+multiboot_start:
+    # 16 字节对齐
+    .align 16
+    # 最小化的 multiboot header 定义了 magic, flags, checksum
+    .long MULTIBOOT_HEADER_MAGIC
+    .long MULTIBOOT_HEADER_FLAGS
+    .long -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
+multiboot_end:
 
 
 # .data 数据段
 .data
 
-# 引导阶段的临时页目录
-# 用了 4M 页大小，所以只需一级页目录就可以寻址 4G 虚拟空间了
+# 引导阶段的临时页目录（后面会变成内核页目录，复用之）
+# 用了 4M 页大小特性，所以只需一级页目录就可以覆盖 4G 虚拟空间了
 .global boot_pgdir
 boot_pgdir:
     .align 0x1000
@@ -56,12 +57,10 @@ boot_pgdir:
     # bit 0: Present flag 存在位
     # bit 1: 可写
     # bit 7: 使用 4MB 页大小，而不是默认的 4KB
+    # 建立对等映射 [0, 4MB) -> [0, 4MB)
     .long 0x00000083  # [0, 4MB)
-    .long 0x00400083  # [4MB, 8MB)
-    .long 0x00800083  # [8MB, 12MB)
-    .long 0x00C00083  # [12MB, 16MB)
     # 补齐 KERNEL_PDE_INDEX 之前的页目录项
-    .fill (KERNEL_PDE_INDEX - 4), 4, 0
+    .fill (KERNEL_PDE_INDEX - 1), 4, 0
     # 0xC0000000 虚拟地址对应的页目录项
     # 建立映射 [0xC0000000, 0xC0000000 + 4MB) -> [0, 4MB)
     .long 0x00000083
@@ -108,7 +107,8 @@ _start:
 # 从这里开始在高端虚拟地址空间下运行
 _start_higher_half:
     # 设置栈（栈由高地址往低地址生长）
-    movl $(stack + STACK_SIZE), %esp
+    movl $(boot_kstack + STACK_SIZE), %esp
+    mov $0, %ebp
 
     # 重置 eflags 寄存器
     pushl $0
@@ -132,9 +132,6 @@ hang_loop:
     hlt  # 挂起 CPU
     jmp hang_loop
 
-/*
- * stack 为栈底
- *
- * .comm 定义的符号最后会放到 .bss 段中
- */
-.comm stack, STACK_SIZE
+# boot_kstack 为栈底
+# .comm 定义的符号最后会放到 .bss 段中
+.comm boot_kstack, STACK_SIZE

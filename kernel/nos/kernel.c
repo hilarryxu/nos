@@ -64,7 +64,10 @@ kernel_main(unsigned long addr, unsigned long magic)
   idt_setup();
 
   // 试下 printk
-  printk("Hello nos!\n  magic=0x%X, addr=0x%X\n", magic, addr);
+  printk("Nos 0.1\n");
+  printk("Kernel is %d KB large\n", ((uint32_t)KERNEL_SIZE) >> 10);
+  printk("\nmagic=0x%X, addr=0x%X\n", magic, addr);
+
   // char *p1 = kmalloc(13);
   // char *p2 = kmalloc(13);
   // printk("p1: 0x%X\n", p1);
