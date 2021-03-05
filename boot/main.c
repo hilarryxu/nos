@@ -57,7 +57,8 @@ bootmain(void)
 
   // call the entry point from the ELF header
   // note: does not return!
-  ((void (*)(void))(ELFHDR->e_entry))();
+  // Note: 因为 Higher Half Kernel 设计，这里入口地址需要减去 0xC0000000
+  ((void (*)(void))(ELFHDR->e_entry - 0xC0000000))();
 
 bad:
   outw(0x8A00, 0x8A00);

@@ -26,7 +26,7 @@
 void
 kernel_main(unsigned long addr, unsigned long magic)
 {
-  phys_addr_t free_addr = ALIGN_UP((phys_addr_t)_kernel_end, PAGE_SIZE);
+  phys_addr_t free_addr = ALIGN_UP((phys_addr_t)KERNEL_END_PHYS, PAGE_SIZE);
   // 初始化内核页目录并开启分页
   paging_setup();
   // Note: 下面开始代码运行在虚拟地址访问方式下了
@@ -65,10 +65,10 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 试下 printk
   printk("Hello nos!\n  magic=0x%X, addr=0x%X\n", magic, addr);
-  char *p1 = kmalloc(13);
-  char *p2 = kmalloc(13);
-  printk("p1: 0x%X\n", p1);
-  printk("p2: 0x%X\n", p2);
+  // char *p1 = kmalloc(13);
+  // char *p2 = kmalloc(13);
+  // printk("p1: 0x%X\n", p1);
+  // printk("p2: 0x%X\n", p2);
   MAGIC_BREAK;
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {

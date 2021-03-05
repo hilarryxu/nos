@@ -15,6 +15,7 @@ switch_pgdir(phys_addr_t pgdir)
 void
 paging_setup()
 {
+#if 0
   int i, j;
   struct page_table *page_table;
   uint32_t cr0;
@@ -41,6 +42,7 @@ paging_setup()
   asm volatile("mov %%cr0, %0" : "=r"(cr0));
   cr0 |= 1 << 31;
   asm volatile("mov %0, %%cr0" : : "r"(cr0));
+#endif
 
   // MAGIC_BREAK;
 }

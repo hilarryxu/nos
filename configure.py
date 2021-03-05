@@ -329,7 +329,7 @@ kernel_elf = n.build(
         ),
         libs='-L$builddir/lib -lk'
     ),
-    implicit=[] + libk
+    implicit=[kernel_src('kernel.ld')] + libk
 )
 
 all_targets += kernel_elf
