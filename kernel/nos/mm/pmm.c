@@ -58,7 +58,7 @@ pmm_alloc_block()
 void
 pmm_free_block(phys_addr_t paddr)
 {
-  ASSERT((pmm_stack_top == 0) || (pmm_stack_top < max_frames));
+  ASSERT(pmm_stack_top <= max_frames);
   pmm_stack[++pmm_stack_top] = paddr;
 }
 

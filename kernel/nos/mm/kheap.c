@@ -38,6 +38,7 @@ kheap_expand(char *end_addr)
     // 会修改共享给所有用户进程的内核页表
     // 达到一处修改，其他所有进程都可以看到（内核页表是共享的）
     vmm_map_page((uintptr_t)vaddr, paddr, VMM_WRITABLE);
+    allocator.allocated_end_ptr += PAGE_SIZE;
   }
 
   return NOS_OK;
