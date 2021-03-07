@@ -46,11 +46,13 @@ vmm_get_pte_ptr(uintptr_t vaddr, enum vmm_get_pte_ptr_op op, uint32_t flags)
   return NULL;
 }
 
-void
+int
 vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
 {
   pte_t *pte_ptr =
       vmm_get_pte_ptr(vaddr, VMM_CREATE_PAGE_TABLE_E, VMM_WRITABLE);
+  if (pte_ptr == NULL)
+    return -1;
 
   if (*pte_ptr & VMM_PRESENT) {
     log_panic("vmm_map_page: failed to map 0x%X to 0x%X, already has map 0x%X "
@@ -62,6 +64,8 @@ vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
 
   // Note: not support 4MB big pages
   VMM_INVALIDATE_PAGE(vaddr);
+
+  return NOS_OK;
 }
 
 void

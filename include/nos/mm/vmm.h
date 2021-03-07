@@ -36,7 +36,7 @@ extern struct page_directory *kernel_pgdir;
 // 初始化虚拟内存管理
 void vmm_setup();
 
-void vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags);
+int vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags);
 void vmm_unmap_page(uintptr_t vaddr);
 
 // 切换地址空间
