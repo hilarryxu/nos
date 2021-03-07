@@ -29,15 +29,13 @@ paging_setup()
   kernel_pgdir = (struct page_directory *)boot_pgdir;
   kernel_pgdir_phys = CAST_V2P(kernel_pgdir);
 
-  MAGIC_BREAK();
-
   // 去掉低端 [0, 4MB) 的映射
   kernel_pgdir->entries[0] = 0;
 
   // [3G, 3G + 16MB) -> [0, 16MB) 按 4M 页大小映射
-  for (i = KERNEL_PDE_INDEX; i < KERNEL_PDE_INDEX + NR_IDENTITY_MAP; i++) {
-    kernel_pgdir->entries[i] =
-        (pde_t)(0 + (i * 0x400000)) | VMM_PG_4M | VMM_WRITABLE | VMM_PRESENT;
+  for (i = KERNEL_PDE_INDEX + 1; i < KERNEL_PDE_INDEX + NR_IDENTITY_MAP; i++) {
+    kernel_pgdir->entries[i] = (pde_t)((i - KERNEL_PDE_INDEX) * 0x400000) |
+                               VMM_PG_4M | VMM_WRITABLE | VMM_PRESENT;
   }
 
   // 将内核页目录与 [4MB, 8MB) 区间预留的内核页表数组关联起来
