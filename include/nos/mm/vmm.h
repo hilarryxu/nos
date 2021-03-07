@@ -14,9 +14,10 @@
 #define VMM_INVALIDATE_PAGE(v_addr) asm("invlpg %0" ::"m"(v_addr))
 
 enum vmm_flag {
-  VMM_PRESENT = 0x1,
-  VMM_WRITABLE = 0x2,
-  VMM_USER = 0x4,
+  VMM_PRESENT = BIT(0),
+  VMM_WRITABLE = BIT(1),
+  VMM_USER = BIT(2),
+  VMM_PG_4M = BIT(7),
 };
 
 typedef uint32_t pde_t;

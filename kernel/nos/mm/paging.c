@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 
 #include <nos/nos.h>
 #include <nos/mm/pmm.h>
@@ -24,20 +25,34 @@ paging_switch_pgdir(phys_addr_t pgdir)
 void
 paging_setup()
 {
+  uint32_t i;
   kernel_pgdir = (struct page_directory *)boot_pgdir;
   kernel_pgdir_phys = CAST_V2P(kernel_pgdir);
 
-  // 将内核页目录与 [4MB, 8MB) 区间预留的内核页表数组关联起来
-  for (int i = KERNEL_PDE_INDEX + 1; i < 1023; i++) {
-    struct page_table *page_table =
-        (struct page_table *)(KERNEL_PG_1 + (i * PAGE_SIZE));
-    kernel_pgdir->entries[i] = (pde_t)page_table | VMM_WRITABLE | VMM_PRESENT;
+  MAGIC_BREAK();
+
+  // 去掉低端 [0, 4MB) 的映射
+  kernel_pgdir->entries[0] = 0;
+
+  // [3G, 3G + 16MB) -> [0, 16MB) 按 4M 页大小映射
+  for (i = KERNEL_PDE_INDEX; i < KERNEL_PDE_INDEX + NR_IDENTITY_MAP; i++) {
+    kernel_pgdir->entries[i] =
+        (pde_t)(0 + (i * 0x400000)) | VMM_PG_4M | VMM_WRITABLE | VMM_PRESENT;
   }
 
-  kernel_pgdir->entries[0] = VMM_WRITABLE;
-  kernel_pgdir->entries[1] = VMM_WRITABLE;
+  // 将内核页目录与 [4MB, 8MB) 区间预留的内核页表数组关联起来
+  // 以后就不用再创建内核页表了（浪费了些内存，操作方便一些）
+  // bzero(CAST_P2V(KERNEL_PG_1), 0x400000);
+  for (i = KERNEL_PDE_INDEX + NR_IDENTITY_MAP; i < 1023; i++) {
+    phys_addr_t pt_paddr = (phys_addr_t)(KERNEL_PG_1 + (i * PAGE_SIZE));
+    kernel_pgdir->entries[i] = (pde_t)pt_paddr | VMM_WRITABLE | VMM_PRESENT;
+  }
+
+  // 递归页目录
   kernel_pgdir->entries[1023] =
       (pde_t)kernel_pgdir_phys | VMM_WRITABLE | VMM_PRESENT;
+
+  MAGIC_BREAK();
 
   paging_switch_pgdir(kernel_pgdir_phys);
 
@@ -50,7 +65,7 @@ paging_setup()
   // 0xc0000000-0xc03fffff -> 0x00000000-0x003fffff
   // 0xfff00000-0xfff00fff -> 0x00000000-0x00000fff
   // 0xfffff000-0xffffffff -> 0x00103000-0x00103fff
-  MAGIC_BREAK();
+  // MAGIC_BREAK();
 }
 
 //---------------------------------------------------------------------

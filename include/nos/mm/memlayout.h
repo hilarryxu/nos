@@ -34,8 +34,8 @@ extern char KERNEL_SIZE[];
 #define KERNEL_PG_1 0x400000
 #define KERNEL_PG_1_LIM 0x800000
 
-// [0, 8MB) 直接对等映射
-#define NR_IDENTITY_MAP 2
+// [0, 16MB) 直接对等映射
+#define NR_IDENTITY_MAP 4
 
 // [3G + 12MB, 3G + 16MB) 的虚拟空间留给用户进程的页目录表
 // 也就是最多支持 1024 个用户进程
