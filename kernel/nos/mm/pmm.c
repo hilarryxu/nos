@@ -1,7 +1,5 @@
 #include <nos/mm/pmm.h>
 
-#include <nos/debug.h>
-
 struct boot_allocator {
   char *start_addr;
   char *free_addr;
@@ -29,16 +27,19 @@ boot_alloc(size_t size)
   return vaddr;
 }
 
+//---------------------------------------------------------------------
+// 初始化物理内存管理
+//---------------------------------------------------------------------
 void
 pmm_setup(phys_addr_t free_addr)
 {
+  // 暂时没用到
   boot_allocator_init(CAST_P2V(free_addr));
 
-  // [8MB, 32MB)
-  uint32_t mem_start_addr = KERNEL_PG_1_LIM;
-  uint32_t mem_end_addr = (0x100000 * 32) - 0x1000;
-  uint32_t paddr = mem_start_addr;
-
+  // [16MB, 32MB)
+  uint32_t mem_begin_addr = DEFAULT_PHYS_ADDR_BEGIN;
+  uint32_t mem_end_addr = DEFAULT_PHYS_ADDR_END;
+  uint32_t paddr = mem_begin_addr;
   while (paddr < mem_end_addr) {
     pmm_free_block(paddr);
     paddr += PMM_FRAME_SIZE;
@@ -57,7 +58,7 @@ pmm_alloc_block()
 void
 pmm_free_block(phys_addr_t paddr)
 {
-  // ASSERT(pmm_stack_top < max_frames);
+  ASSERT((pmm_stack_top == 0) || (pmm_stack_top < max_frames));
   pmm_stack[++pmm_stack_top] = paddr;
 }
 

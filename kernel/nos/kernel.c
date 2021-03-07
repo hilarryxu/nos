@@ -76,10 +76,10 @@ kernel_main(unsigned long addr, unsigned long magic)
   printk("Kernel is %d KB large\n", ((uint32_t)KERNEL_SIZE) >> 10);
   printk("\nmagic=0x%X, addr=0x%X\n", magic, addr);
 
-  // char *p1 = kmalloc(13);
-  // char *p2 = kmalloc(13);
-  // printk("p1: 0x%X\n", p1);
-  // printk("p2: 0x%X\n", p2);
+  char *p1 = kmalloc(13);
+  char *p2 = kmalloc(13);
+  printk("p1: 0x%X\n", p1);
+  printk("p2: 0x%X\n", p2);
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);

@@ -53,8 +53,9 @@ vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
       vmm_get_pte_ptr(vaddr, VMM_CREATE_PAGE_TABLE_E, VMM_WRITABLE);
 
   if (*pte_ptr & VMM_PRESENT) {
-    log_panic("vmm_map_page: failed to map 0x%X to 0x%X", vaddr, paddr, vaddr,
-              *pte_ptr & PAGE_FRAME_MASK);
+    log_panic("vmm_map_page: failed to map 0x%X to 0x%X, already has map 0x%X "
+              "to 0x%X",
+              vaddr, paddr, vaddr, *pte_ptr & PAGE_FRAME_MASK);
   }
 
   *pte_ptr = (pte_t)paddr | flags | VMM_PRESENT;
