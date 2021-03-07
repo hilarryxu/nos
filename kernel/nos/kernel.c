@@ -31,11 +31,6 @@ kernel_main(unsigned long addr, unsigned long magic)
   // TODO: 这里直接用的 KERNEL_END_PHYS，后面考虑 multiboot mods 时需重新计算
   phys_addr_t free_addr = ALIGN_UP((phys_addr_t)KERNEL_END_PHYS, PAGE_SIZE);
 
-  // 重新初始化内核页目录
-  // 去掉 [0, 4MB) -> [0, 4MB) 的映射
-  // 页目录的 1023 项设置为递归页目录方式（这个特性可以简化不少代码）
-  paging_setup();
-
   // 兼容不用 GRUB（用自带简易 bootloader）启动的方式
   multiboot_info_t *mb_info = NULL;
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
@@ -50,6 +45,11 @@ kernel_main(unsigned long addr, unsigned long magic)
   debug_setup(LOG_DEBUG);
   // 初始化 CGA
   cga_setup();
+
+  // 重新初始化内核页目录
+  // 去掉 [0, 4MB) -> [0, 4MB) 的映射
+  // 页目录的 1023 项设置为递归页目录方式（这个特性可以简化不少代码）
+  paging_setup();
 
   // 初始化物理内存管理子系统
   pmm_setup(free_addr);
@@ -92,10 +92,10 @@ kernel_main(unsigned long addr, unsigned long magic)
     printk("mmap_addr: 0x%X\n", mb_info->mmap_addr);
     printk("mmap_length: %d\n", mb_info->mmap_length);
     struct multiboot_mmap_entry *mmap_entry =
-        (struct multiboot_mmap_entry *)mb_info->mmap_addr;
+        (struct multiboot_mmap_entry *)CAST_P2V(mb_info->mmap_addr);
     struct multiboot_mmap_entry *mmap_end =
-        (struct multiboot_mmap_entry *)(mb_info->mmap_addr +
-                                        mb_info->mmap_length);
+        (struct multiboot_mmap_entry *)CAST_P2V(mb_info->mmap_addr +
+                                                mb_info->mmap_length);
     while (mmap_entry < mmap_end) {
       if (mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
         uint32_t addr = mmap_entry->addr;

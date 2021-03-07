@@ -36,11 +36,12 @@ paging_setup()
   for (i = KERNEL_PDE_INDEX + 1; i < KERNEL_PDE_INDEX + NR_IDENTITY_MAP; i++) {
     kernel_pgdir->entries[i] = (pde_t)((i - KERNEL_PDE_INDEX) * 0x400000) |
                                VMM_PG_4M | VMM_WRITABLE | VMM_PRESENT;
+    loga("i = %d, pde = 0x%X", i, kernel_pgdir->entries[i]);
   }
 
   // 将内核页目录与 [4MB, 8MB) 区间预留的内核页表数组关联起来
   // 以后就不用再创建内核页表了（浪费了些内存，操作方便一些）
-  // bzero(CAST_P2V(KERNEL_PG_1), 0x400000);
+  bzero(CAST_P2V(KERNEL_PG_1), 0x400000);
   for (i = KERNEL_PDE_INDEX + NR_IDENTITY_MAP; i < 1023; i++) {
     phys_addr_t pt_paddr = (phys_addr_t)(KERNEL_PG_1 + (i * PAGE_SIZE));
     kernel_pgdir->entries[i] = (pde_t)pt_paddr | VMM_WRITABLE | VMM_PRESENT;
@@ -49,6 +50,10 @@ paging_setup()
   // 递归页目录
   kernel_pgdir->entries[1023] =
       (pde_t)kernel_pgdir_phys | VMM_WRITABLE | VMM_PRESENT;
+  loga("i = %d, pde = 0x%X", 0, kernel_pgdir->entries[0]);
+  loga("i = %d, pde = 0x%X", KERNEL_PDE_INDEX,
+       kernel_pgdir->entries[KERNEL_PDE_INDEX]);
+  loga("i = %d, pde = 0x%X", 1023, kernel_pgdir->entries[1023]);
 
   MAGIC_BREAK();
 
