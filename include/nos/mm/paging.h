@@ -4,7 +4,6 @@
 #include <nos/nos.h>
 
 struct page_directory;
-extern struct page_directory *kernel_pgdir;
 
 void paging_setup();
 

@@ -14,6 +14,8 @@ typedef uint32_t phys_addr_t;
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+#define BIT(n) (1 << (n))
+
 // {4095, 4096, 4097} = {0, 4096, 4096}
 #define ALIGN_DOWN(base, size) ((base) & -((__typeof__(base))(size)))
 // {4095, 4096, 4097} = {4096, 4096, 8192}

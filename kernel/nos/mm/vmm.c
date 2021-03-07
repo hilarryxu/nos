@@ -54,7 +54,7 @@ vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
 
   if (*pte_ptr & VMM_PRESENT) {
     log_panic("vmm_map_page: failed to map 0x%X to 0x%X", vaddr, paddr, vaddr,
-              *pte_ptr & PAGE_MASK);
+              *pte_ptr & PAGE_FRAME_MASK);
   }
 
   *pte_ptr = (pte_t)paddr | flags | VMM_PRESENT;
@@ -69,7 +69,7 @@ vmm_unmap_page(uintptr_t vaddr)
   pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, VMM_NOT_CREATE_PAGE_TABLE_E, 0);
 
   if (pte_ptr) {
-    pmm_free_block(*pte_ptr & PAGE_MASK);
+    pmm_free_block(*pte_ptr & PAGE_FRAME_MASK);
     *pte_ptr = 0;
   }
 }
@@ -102,7 +102,7 @@ vmm_v2p(uintptr_t vaddr, phys_addr_t *paddr_ptr)
     return -1;
 
   if (paddr_ptr) {
-    return (((uintptr_t)*pte_ptr) & PAGE_MASK) + (vaddr & 0xFFF);
+    return (((uintptr_t)*pte_ptr) & PAGE_FRAME_MASK) + (vaddr & 0xFFF);
   }
 
   return NOS_OK;
@@ -142,7 +142,7 @@ old_vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
 
   if (page_dir->entries[pde_index] & VMM_PRESENT) {
     page_table =
-        (struct page_table *)(page_dir->entries[pde_index] & PAGE_MASK);
+        (struct page_table *)(page_dir->entries[pde_index] & PAGE_FRAME_MASK);
   } else {
     page_table = (struct page_table *)kmalloc(sizeof(*page_table));
     for (i = 0; i < PAGES_PER_TABLE; i++) {

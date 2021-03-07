@@ -8,9 +8,10 @@ extern char KERNEL_SIZE[];
 // 内核基址
 #define KERNEL_BASE 0xC0000000
 #define KERNEL_VIRTUAL_START 0xC0000000
+#define KERNEL_PDE_INDEX (KERNEL_VIRTUAL_START >> 22)
 
-#define P2V(paddr) ((paddr) + KERNEL_BASE)
-#define V2P(vaddr) ((vaddr)-KERNEL_BASE)
+#define P2V(paddr) ((paddr) + (KERNEL_BASE))
+#define V2P(vaddr) ((vaddr) - (KERNEL_BASE))
 
 #define CAST_P2V(addr) (void *)P2V((addr))
 #define CAST_V2P(addr) V2P((phys_addr_t)(addr))
@@ -19,7 +20,10 @@ extern char KERNEL_SIZE[];
 #define PAGE_SIZE 0x1000
 
 // 页掩码，用于 4KB 对齐
-#define PAGE_MASK 0xFFFFF000
+#define PAGE_FRAME_MASK 0xFFFFF000
+
+// 页标志掩码
+#define PAGE_FLAG_MASK 0xFFF
 
 // 内核堆栈栈底
 #define KERNEL_STACK 0x9FC00
@@ -32,6 +36,11 @@ extern char KERNEL_SIZE[];
 
 // [0, 8MB) 直接对等映射
 #define NR_IDENTITY_MAP 2
+
+// [3G + 12MB, 3G + 16MB) 的虚拟空间留给用户进程的页目录表
+// 也就是最多支持 1024 个用户进程
+#define PGDIR_AREA_BEGIN (KERNEL_BASE + 0x00C00000)
+#define PGDIR_AREA_END (KERNEL_BASE + 0x01000000)
 
 // [3.5G, 4G) 内核堆
 #define KERNEL_HEAP_START 0xE0000000
