@@ -1,7 +1,7 @@
 #ifndef _NOS_MM_VMM_H
 #define _NOS_MM_VMM_H
 
-#include <nos/macros.h>
+#include <nos/nos.h>
 #include <nos/mm/memlayout.h>
 
 #define PAGES_PER_DIR 1024
@@ -33,14 +33,11 @@ struct page_table {
 
 extern struct page_directory *kernel_pgdir;
 
+// 初始化虚拟内存管理
 void vmm_setup();
-
-struct page_directory *vmm_alloc_vaddr_space();
 
 void vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags);
 void vmm_unmap_page(uintptr_t vaddr);
-
-struct page_directory *vaddr_space_create(phys_addr_t *p_pgdir_phys);
 
 // 切换地址空间
 void vmm_switch_pgdir(phys_addr_t pgdir);

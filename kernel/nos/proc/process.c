@@ -9,8 +9,8 @@
 
 typedef short pid_t;
 
-#define PROCESS_KERNEL_STACK (KERNEL_VIRTUAL_START - 16 * PAGE_SIZE)
-#define PROCESS_USER_STACK (KERNEL_VIRTUAL_START - 1024 * PAGE_SIZE)
+#define PROCESS_KERNEL_STACK (KERNEL_BASE - (16 * PAGE_SIZE))
+#define PROCESS_USER_STACK (KERNEL_BASE - (1024 * PAGE_SIZE))
 
 struct kstack_context {
   uint32_t edi;
@@ -117,7 +117,7 @@ static int
 init_from_elf(struct process *proc, const char *elf, size_t size)
 {
   // TODO: need page_dir's phys_addr
-  proc->page_dir = vmm_alloc_vaddr_space();
+  proc->page_dir = vaddr_space_create(NULL);
   if (!proc->page_dir)
     return -1;
 
@@ -127,8 +127,7 @@ init_from_elf(struct process *proc, const char *elf, size_t size)
   if (alloc_proc_stacks(proc) != NOS_OK)
     return -1;
 
-  copy_kernel_space(proc->page_dir);
-  return 0;
+  return NOS_OK;
 }
 
 int

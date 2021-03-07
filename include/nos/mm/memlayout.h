@@ -7,8 +7,7 @@ extern char KERNEL_SIZE[];
 
 // 内核基址
 #define KERNEL_BASE 0xC0000000
-#define KERNEL_VIRTUAL_START 0xC0000000
-#define KERNEL_PDE_INDEX (KERNEL_VIRTUAL_START >> 22)
+#define KERNEL_PDE_INDEX (KERNEL_BASE >> 22)
 
 #define P2V(paddr) ((paddr) + (KERNEL_BASE))
 #define V2P(vaddr) ((vaddr) - (KERNEL_BASE))
