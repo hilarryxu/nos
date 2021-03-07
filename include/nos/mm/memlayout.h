@@ -16,6 +16,8 @@ extern char KERNEL_SIZE[];
 #define CAST_P2V(addr) (void *)P2V((addr))
 #define CAST_V2P(addr) V2P((phys_addr_t)(addr))
 
+#define SIZE_4MB 0x400000
+
 // 页大小 4KB
 #define PAGE_SIZE 0x1000
 

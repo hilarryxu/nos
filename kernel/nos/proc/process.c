@@ -5,6 +5,7 @@
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
 #include <nos/mm/kheap.h>
+#include <nos/mm/vaddr_space.h>
 
 typedef short pid_t;
 
@@ -126,7 +127,7 @@ init_from_elf(struct process *proc, const char *elf, size_t size)
   if (alloc_proc_stacks(proc) != NOS_OK)
     return -1;
 
-  paging_copy_kernel_space(proc->page_dir);
+  copy_kernel_space(proc->page_dir);
   return 0;
 }
 

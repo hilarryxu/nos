@@ -42,4 +42,7 @@ void vmm_unmap_page(uintptr_t vaddr);
 
 struct page_directory *vaddr_space_create(phys_addr_t *p_pgdir_phys);
 
-#endif  // !_NOS_MM_VMM_H
+// 切换地址空间
+void vmm_switch_pgdir(phys_addr_t pgdir);
+
+#endif  // _NOS_MM_VMM_H
