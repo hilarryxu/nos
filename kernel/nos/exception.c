@@ -66,8 +66,6 @@ page_fault(struct trap_frame *tf)
   // bit 4: 为 1 表示访问代码，为 0 表示数据访问
   if (tf->error_code & 0x10) {
     printk("  -> Occurs when the instruction is fetched\n");
-  } else {
-    printk("  -> Occurs when fetching data\n");
   }
 
   return 0;

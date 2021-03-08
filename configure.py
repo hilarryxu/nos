@@ -317,6 +317,7 @@ for name in [
     'drvs/serial',
     'debug',
     'proc/process',
+    'sync/spinlock',
 ]:
     kernel_objs += kernel_cc(name)
 

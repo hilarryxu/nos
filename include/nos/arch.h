@@ -3,13 +3,6 @@
 
 #include <stdint.h>
 
-static inline void breakpoint() __attribute__((always_inline));
-static inline uint32_t read_cr2() __attribute__((always_inline));
-static inline uint32_t read_eflags() __attribute__((always_inline));
-static inline void write_eflags(uint32_t eflags) __attribute__((always_inline));
-static inline uint32_t read_ebp() __attribute__((always_inline));
-static inline uint32_t read_esp() __attribute__((always_inline));
-
 static inline void
 breakpoint(void)
 {
@@ -53,5 +46,38 @@ read_esp()
   asm volatile("movl %%esp, %0" : "=r"(esp));
   return esp;
 }
+
+static inline void
+interrupt_disable()
+{
+  asm volatile("cli");
+}
+
+static inline void
+interrupt_enable()
+{
+  asm volatile("sti");
+}
+
+static inline void
+cpu_hlt()
+{
+  asm volatile("hlt");
+}
+
+#define local_irq_save(x)                                                      \
+  asm volatile("pushfl \n\t"                                                   \
+               "popl %0 \n\t"                                                  \
+               "cli"                                                           \
+               : "=g"(x)                                                       \
+               :                                                               \
+               : "memory")
+
+#define local_irq_restore(x)                                                   \
+  asm volatile("pushl %0 \n\t"                                                 \
+               "popfl"                                                         \
+               :                                                               \
+               : "g"(x)                                                        \
+               : "memory")
 
 #endif  // !_NOS_ARCH_H
