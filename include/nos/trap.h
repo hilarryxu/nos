@@ -15,12 +15,17 @@ struct trap_frame {
   uint32_t edi;
   uint32_t esi;
   uint32_t ebp;
-  // esp 暂时不保存恢复，因为后面多任务示例中
-  // 会手工修改 esp 在任务间跳来跳去（非正常用法）
+  uint32_t oesp;  // 被忽略的无用值，popal 不会读取该值覆盖 esp 寄存器
   uint32_t ebx;
   uint32_t edx;
   uint32_t ecx;
   uint32_t eax;
+
+  // 保存段寄存器（cs, ss 在后面）
+  uint32_t gs;
+  uint32_t fs;
+  uint32_t es;
+  uint32_t ds;
 
   // 中断号
   uint32_t trap_no;
@@ -39,8 +44,8 @@ struct trap_frame {
 // TSS
 struct tss {
   uint32_t prev_tss;
-  uint32_t esp0;
-  uint32_t ss0;
+  uint32_t esp0;  // 特权级变化时内核栈的 esp 在这里获取
+  uint32_t ss0;   // 一般是保持不变的内核数据段
   uint32_t esp1;
   uint32_t ss1;
   uint32_t esp2;
@@ -67,9 +72,7 @@ struct tss {
   uint16_t iomap;
 } __attribute__((packed));
 
-extern struct tss tss;
-
 // 派发中断
 struct trap_frame *handle_interrupt(struct trap_frame *tf);
 
-#endif  // !_NOS_TRAP_H
+#endif  // _NOS_TRAP_H

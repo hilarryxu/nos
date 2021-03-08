@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 
+#include "nc_sys_queue.h"
+
 #include <nos/mm/vmm.h>
 
 // 进程 id 类型
@@ -43,7 +45,7 @@ struct process {
   void *entry;
   int exit_code;
   size_t flags;
-  struct process *next;
+  TAILQ_ENTRY(process) processes;
   char name[16];
 };
 
