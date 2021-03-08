@@ -13,6 +13,7 @@
 #include <nos/mm/kheap.h>
 #include <nos/drvs/serial.h>
 #include <nos/proc/scheduler.h>
+#include <nos/fs/jamfs.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -84,6 +85,10 @@ kernel_main(unsigned long addr, unsigned long magic)
   char *p2 = kmalloc(13);
   printk("p1: 0x%X\n", p1);
   printk("p2: 0x%X\n", p2);
+
+  printk("sizeof(struct jamfs_header): %d\n", sizeof(struct jamfs_header));
+  printk("sizeof(struct jamfs_file_header): %d\n",
+         sizeof(struct jamfs_file_header));
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);

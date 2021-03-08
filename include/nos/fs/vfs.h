@@ -68,8 +68,8 @@ struct vfs_node *vfs_finddir(struct vfs_node *vnode, const char *name);
 int vfs_mkdir(struct vfs_node *vnode, const char *name);
 int vfs_stat(struct vfs_node *vnode, struct vfs_stat *st);
 
-struct vfs_node *vfs_mount(const char *path, vfs_node *root);
+struct vfs_node *vfs_mount(const char *path, struct vfs_node *root);
 struct vfs_node *vfs_unmount(const char *path);
 struct vfs_node *vfs_namei(const char *path);
 
-#endif  // !_NOS_FS_VFS_H
+#endif  // _NOS_FS_VFS_H
