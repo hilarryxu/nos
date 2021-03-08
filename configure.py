@@ -298,6 +298,10 @@ kernel_objs += n.build(
     kernel_built('trap_stub' + objext), 'kernel_asm',
     kernel_src('trap_stub.S')
 )
+kernel_objs += n.build(
+    kernel_built('proc/switch_to' + objext), 'kernel_asm',
+    kernel_src('proc/switch_to.S')
+)
 
 for name in [
     'kernel',
@@ -318,6 +322,7 @@ for name in [
     'debug',
     'proc/process',
     'sync/spinlock',
+    'proc/scheduler',
 ]:
     kernel_objs += kernel_cc(name)
 

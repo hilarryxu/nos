@@ -5,8 +5,17 @@
 
 #include <nos/mm/vmm.h>
 
+// 进程 id 类型
 typedef short pid_t;
 
+// call switch_to 导致被调用者需要保存这些寄存器（x86 函数调用规范约定的）,
+// 最上面的 eip 就是调用 switch_to 返回后的下一条指令地址。
+//
+// Note: 除了第一次运行进程需要自己修改 eip 换成自己的处理函数
+// 最终执行 iret 切换到用户态运行外（即在用户进程自己的内核栈上
+// 构造中断栈帧以及上下文）
+// 其他情况下多半就是时钟中断那里自动压栈切换到其他进程再切换回来
+// 继续运行直到中断返回又回到了用户态，无需手工干涉了。
 struct kstack_context {
   uint32_t edi;
   uint32_t esi;
