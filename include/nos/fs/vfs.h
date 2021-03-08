@@ -9,7 +9,7 @@ struct file_operations;
 struct mount;
 
 struct vfs_node {
-  char *name;
+  char *path;
   const struct mount *mount;
   const struct file_operations *op;
   struct inode *inode;

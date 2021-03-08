@@ -324,6 +324,8 @@ for name in [
     'sync/spinlock',
     'proc/scheduler',
     'drvs/keyboard',
+    'fs/vfs',
+    'fs/jamfs',
 ]:
     kernel_objs += kernel_cc(name)
 
