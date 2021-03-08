@@ -323,6 +323,7 @@ for name in [
     'proc/process',
     'sync/spinlock',
     'proc/scheduler',
+    'drvs/keyboard',
 ]:
     kernel_objs += kernel_cc(name)
 
