@@ -1,6 +1,8 @@
 #ifndef _NOS_GDT_H
 #define _NOS_GDT_H
 
+#include <stdint.h>
+
 // GDT 选择子
 // (index << 3) | (ti << 2) | rpl
 //
@@ -25,5 +27,8 @@ enum dpl {
 
 // 初始化 GDT
 void gdt_setup();
+
+// 设置 TSS 的 esp0，并刷新 tr 寄存器
+void tss_set_kstack(uint32_t esp0);
 
 #endif  // !_NOS_GDT_H

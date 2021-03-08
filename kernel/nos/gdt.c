@@ -145,3 +145,11 @@ gdt_setup()
 
   log_debug(LOG_INFO, "GDT: Done");
 }
+
+void
+tss_set_kstack(uint32_t esp0)
+{
+  tss.esp0 = esp0;
+
+  asm volatile("ltr %%ax" : : "a"(TSS_SELECTOR));
+}

@@ -12,6 +12,7 @@
 #include <nos/mm/vmm.h>
 #include <nos/mm/kheap.h>
 #include <nos/drvs/serial.h>
+#include <nos/proc/scheduler.h>
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -71,6 +72,9 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 初始化 IDT
   idt_setup();
 
+  // 初始化进程调度器
+  scheduler_steup();
+
   // 试下 printk
   printk("Nos 0.1\n");
   printk("Kernel is %d KB large\n", ((uint32_t)KERNEL_SIZE) >> 10);
@@ -106,5 +110,5 @@ kernel_main(unsigned long addr, unsigned long magic)
     }
   }
 
-  // asm volatile("ud2");
+  // scheduler();
 }

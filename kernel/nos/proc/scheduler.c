@@ -1,10 +1,11 @@
+#include <nos/proc/scheduler.h>
+
 #include <string.h>
 
 #include <nos/nos.h>
 #include <nos/arch.h>
 #include <nos/gdt.h>
 #include <nos/trap.h>
-#include <nos/proc/process.h>
 
 #define EFLAGS_IF (1 << 9)
 
@@ -88,10 +89,10 @@ scheduler()
 
     // lock
     // p <-
+    ASSERT(p != NULL);
     current_process = p;
-    // tss
-    // cr3
-    // first init process
+    tss_set_kstack((uint32_t)p->kernel_stack);
+    vmm_switch_pgdir(p->page_dir_phys);
     if (!p->context) {
       init_process_context(p);
     }
@@ -102,4 +103,21 @@ scheduler()
     current_process = NULL;
     // unlock
   }
+}
+
+void
+scheduler_add_process(struct process *process)
+{
+  UNUSED(process);
+}
+
+void
+scheduler_remove_process(struct process *process)
+{
+  UNUSED(process);
+}
+
+void
+scheduler_steup()
+{
 }
