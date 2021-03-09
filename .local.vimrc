@@ -7,8 +7,9 @@ let s:path = expand('<sfile>:p:h')
 
 lcd <sfile>:h
 
+noremap <F3> :AsyncRun -cwd=<root> ctags -R --sort=foldcase --extra=+fq --fields=+iaS --exclude=Crosstools --exclude=build<CR>
 noremap <F6> :AsyncRun -mode=term -cwd=<root> -pos=thelp build.bat<CR>
-nnoremap <F10> :call asyncrun#quickfix_toggle(8)<CR>
+noremap <F10> :call asyncrun#quickfix_toggle(8)<CR>
 
 if !has('win32')
   let g:gutentags_ctags_exclude = ['toolchain']
