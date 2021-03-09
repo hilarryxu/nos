@@ -1,9 +1,20 @@
 #ifndef _NOS_MM_MEMLAYOUT_H
 #define _NOS_MM_MEMLAYOUT_H
 
-extern char KERNEL_BEGIN_PHYS[];
+extern char KERNEL_START_PHYS[];
 extern char KERNEL_END_PHYS[];
+extern char KERNEL_START[];
+extern char KERNEL_END[];
 extern char KERNEL_SIZE[];
+
+extern char KERNEL_TEXT_START[];
+extern char KERNEL_TEXT_END[];
+extern char KERNEL_DATA_START[];
+extern char KERNEL_DATA_END[];
+extern char KERNEL_RODATA_START[];
+extern char KERNEL_RODATA_END[];
+extern char KERNEL_BSS_START[];
+extern char KERNEL_BSS_END[];
 
 // 内核基址
 #define KERNEL_BASE 0xC0000000

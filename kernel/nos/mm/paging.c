@@ -19,8 +19,17 @@ paging_setup()
   kernel_pgdir = (struct page_directory *)boot_pgdir;
   kernel_pgdir_phys = CAST_V2P(kernel_pgdir);
 
-  // 去掉低端 [0, 4MB) 的映射
+  // [4MB, 8MB) 的页表区域清零
+  bzero((void *)KERNEL_PG_1, KERNEL_PG_1_LIM - KERNEL_PG_1);
+
+  // 去掉低端 [0, 16MB) 的对等映射
   kernel_pgdir->entries[0] = 0;
+  kernel_pgdir->entries[1] = 0;
+  kernel_pgdir->entries[2] = 0;
+  kernel_pgdir->entries[3] = 0;
+
+  // FIXME: 清零 .bss 段
+  // bzero((void *)KERNEL_BSS_START, KERNEL_BSS_END - KERNEL_BSS_START);
 
   // [3G, 3G + 16MB) -> [0, 16MB) 按 4M 页大小映射
   // [3G, 3G + 4MB) boot 阶段已经映射过了，跳过之
