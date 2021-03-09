@@ -9,15 +9,26 @@
 #include <nos/mm/kheap.h>
 #include <nos/mm/vaddr_space.h>
 
+// 这里让进程的用户栈和内核栈不在同一个页目录项下
 #define PROCESS_KERNEL_STACK (KERNEL_BASE - (16 * PAGE_SIZE))
 #define PROCESS_USER_STACK (KERNEL_BASE - (1024 * PAGE_SIZE))
 
+extern void sched_add_process(struct process *);
+
 static pid_t next_pid = 0;
 
+// 分配进程 ID
 static pid_t
 alloc_pid()
 {
   return ++next_pid;
+}
+
+// 回收进程 ID
+static void
+free_pid(pid_t pid)
+{
+  UNUSED(pid);
 }
 
 //---------------------------------------------------------------------
@@ -26,34 +37,37 @@ alloc_pid()
 struct process *
 process_alloc()
 {
-  struct process *proc = kmalloc(sizeof(*proc));
-  if (!proc)
+  struct process *process = kmalloc(sizeof(*process));
+  if (!process)
     return NULL;
+  bzero(process, sizeof(*process));
 
-  bzero(proc, sizeof(*proc));
-  proc->pid = alloc_pid();
-
-  if (proc->pid == -1) {
-    process_destory(proc);
+  process->pid = alloc_pid();
+  if (process->pid == INVALID_PID) {
+    process_destory(process);
     return NULL;
   }
 
-  return proc;
+  return process;
 }
 
 //---------------------------------------------------------------------
 // 销毁进程
 //---------------------------------------------------------------------
 void
-process_destory(struct process *proc)
+process_destory(struct process *process)
 {
-  // TODO: free proc
-  kfree(proc);
+  // FIXME: free vaddr_space
+
+  if (process->pid != INVALID_PID)
+    free_pid(process->pid);
+
+  kfree(process);
 }
 
 // 为进程分配用户堆栈和内核堆栈
 static int
-alloc_proc_stacks(struct process *proc)
+alloc_process_stacks(struct process *process)
 {
   phys_addr_t stack = pmm_alloc_block();
   if (!stack)
@@ -66,7 +80,6 @@ alloc_proc_stacks(struct process *proc)
   }
 
   stack = pmm_alloc_block();
-  // FIXME: unmap prev stack
   if (!stack)
     return -1;
 
@@ -76,8 +89,8 @@ alloc_proc_stacks(struct process *proc)
     return -1;
   }
 
-  proc->kernel_stack = (char *)PROCESS_KERNEL_STACK;
-  proc->user_stack = (char *)PROCESS_USER_STACK;
+  process->kernel_stack = (char *)PROCESS_KERNEL_STACK;
+  process->user_stack = (char *)PROCESS_USER_STACK;
 
   return NOS_OK;
 }
@@ -87,14 +100,14 @@ static int
 init_from_elf(struct process *proc, const char *elf, size_t size)
 {
   // TODO: need page_dir's phys_addr
-  proc->page_dir = vaddr_space_create(NULL);
-  if (!proc->page_dir)
+  process->page_dir = vaddr_space_create(NULL);
+  if (!process->page_dir)
     return -1;
 
   if (load_elf_program(proc, elf, size) != NOS_OK)
     return -1;
 
-  if (alloc_proc_stacks(proc) != NOS_OK)
+  if (alloc_process_stacks(proc) != NOS_OK)
     return -1;
 
   return NOS_OK;
@@ -102,9 +115,9 @@ init_from_elf(struct process *proc, const char *elf, size_t size)
 #endif
 
 static int
-load_binary_program(struct process *proc, const char *binary, size_t size)
+load_binary_program(struct process *process, const char *binary, size_t size)
 {
-  // binary must 4KB aligned
+  // Note: binary ptr addr must 4KB aligned
   size_t aligned_size = ALIGN_UP(size, PAGE_SIZE);
   uintptr_t vaddr = (uintptr_t)binary;
   uintptr_t end_vaddr = vaddr + aligned_size;
@@ -114,59 +127,72 @@ load_binary_program(struct process *proc, const char *binary, size_t size)
     vmm_map_page(vaddr, paddr, VMM_WRITABLE | VMM_USER);
   }
 
-  proc->entry = (void *)0x200000;
+  process->entry = (void *)0x200000;
 
   return NOS_OK;
 }
 
 static int
-init_from_binary(struct process *proc, const char *binary, size_t size)
+init_from_binary(struct process *process, const char *binary, size_t size)
 {
-  proc->page_dir = vaddr_space_create(&proc->page_dir_phys);
-  if (!proc->page_dir)
+  process->page_dir = vaddr_space_create(&process->page_dir_phys);
+  if (!process->page_dir)
     return -1;
 
-  vmm_switch_pgdir(proc->page_dir_phys);
+  // TODO: when swith back
+  vmm_switch_pgdir(process->page_dir_phys);
 
-  if (load_binary_program(proc, binary, size) != NOS_OK)
+  // 加载二进制可执行程序到进程的地址空间
+  if (load_binary_program(process, binary, size) != NOS_OK)
     return -1;
 
-  if (alloc_proc_stacks(proc) != NOS_OK)
+  if (alloc_process_stacks(process) != NOS_OK)
     return -1;
 
   return NOS_OK;
 }
 
+//---------------------------------------------------------------------
+// 运行二进制可执行程序
+//---------------------------------------------------------------------
 int
-process_exec(const char *binary, size_t size, struct process **p_proc)
+process_exec_binary(const char *binary, size_t size, struct process **p_process)
 {
-  struct process *proc = process_alloc();
-  if (!proc)
+  struct process *process = process_alloc();
+  if (!process)
     return -1;
 
-  if (init_from_binary(proc, binary, size) != NOS_OK) {
-    process_destory(proc);
+  if (init_from_binary(process, binary, size) != NOS_OK) {
+    process_destory(process);
     return -1;
   }
 
-  proc->state = PROCESS_STATE_RUNNING;
-  if (p_proc) {
-    *p_proc = proc;
+  process->state = PROCESS_STATE_RUNNABLE;
+  if (p_process) {
+    *p_process = process;
   }
 
-  // TODO: add to scheduler
+  // 添加到进程调度队列中，准备执行
+  sched_add_process(process);
+
   return NOS_OK;
 }
 
+//---------------------------------------------------------------------
+// 进程退出
+//---------------------------------------------------------------------
 void
-process_exit(struct process *proc, int exit_code)
+process_exit(struct process *process, int exit_code)
 {
-  proc->exit_code = exit_code;
-  proc->state = PROCESS_STATE_DEAD;
+  process->exit_code = exit_code;
+  process->state = PROCESS_STATE_DEAD;
   // TODO: sched
   // sched()
 }
 
+//---------------------------------------------------------------------
+// 初始化进程子系统
+//---------------------------------------------------------------------
 void
 process_setup()
 {
