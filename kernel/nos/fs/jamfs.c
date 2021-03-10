@@ -2,52 +2,66 @@
 
 #include <nos/nos.h>
 
+#define PATH_MAX 512
+
+struct jamfs_file {
+  struct file base;
+};
+
 static int
-jamfs_open(struct vfs_node *vnode, int flags)
+jamfs_close(struct file *file)
 {
-  UNUSED(vnode);
-  UNUSED(flags);
+  UNUSED(file);
 
   return -1;
 }
 
 static int
-jamfs_close(struct vfs_node *vnode)
+jamfs_read(struct file *file, void *buf, size_t nbytes)
 {
-  UNUSED(vnode);
+  UNUSED(file);
+  UNUSED(buf);
+  UNUSED(nbytes);
 
   return -1;
 }
 
 static int
-jamfs_read(struct vfs_node *vnode, char *buffer, size_t size)
+jamfs_write(struct file *file, const void *buf, size_t nbytes)
 {
-  UNUSED(vnode);
-  UNUSED(buffer);
-  UNUSED(size);
+  UNUSED(file);
+  UNUSED(buf);
+  UNUSED(nbytes);
 
   return -1;
 }
+
+static struct file_meths jamfs_file_meths = {.version = 1,
+                                             .close = jamfs_close,
+                                             .read = jamfs_read,
+                                             .write = jamfs_write};
 
 static int
-jamfs_write(struct vfs_node *vnode, const char *buffer, size_t size)
+jamfs_open(struct vfs *vfs, const char *path, struct file *file, int flags,
+           int *p_out_flags)
 {
-  UNUSED(vnode);
-  UNUSED(buffer);
-  UNUSED(size);
+  UNUSED(vfs);
+  UNUSED(path);
 
-  return -1;
+  struct jamfs_file *p = (struct jamfs_file *)file;
+
+  if (p_out_flags)
+    *p_out_flags = flags;
+
+  p->base.meths = &jamfs_file_meths;
+
+  return NOS_OK;
 }
 
-static void
-jamfs_initialize()
-{
-}
-
-static struct file_operations jamfs_ops = {.open = jamfs_open,
-                                           .close = jamfs_close,
-                                           .read = jamfs_read,
-                                           .write = jamfs_write};
-
-const struct vfs_filesystem jamfs = {
-    .name = "jamfs", .op = &jamfs_ops, .initialize = jamfs_initialize};
+struct vfs jamfs = {.version = 1,
+                    .file_struct_sz = sizeof(struct jamfs_file),
+                    .max_pathname = PATH_MAX,
+                    .next = NULL,
+                    .name = "jamfs",
+                    .opaque = NULL,
+                    .open = jamfs_open};

@@ -8,125 +8,121 @@
 
 #define VFS_ROOT_DIR '/'
 
-static struct mount root;
+struct mount {
+  const char *mount_point;
+  struct vfs *vfs;
+  struct mount *next;
+};
 
-extern const struct vfs_filesystem jamfs;
+extern struct vfs jamfs;
 
-static const struct mount *
-find_mount(const char *path)
-{
-  if (*path != VFS_ROOT_DIR)
-    return NULL;
-
-  return &root;
-}
-
-static inline char *
-dup_path(const char *path)
-{
-  char *dup = kmalloc(strlen(path) + 1);
-  if (!dup)
-    return NULL;
-  // return strcpy(dup, path);
-  return dup;
-}
-
-static inline void
-free_path(char **path)
-{
-  kfree(*path);
-  *path = NULL;
-}
-
-static inline void
-free_inode(struct inode **inode)
-{
-  kfree(*inode);
-  *inode = NULL;
-}
-
-static inline struct inode *
-alloc_inode()
-{
-  struct inode *inode = kmalloc(sizeof(*inode));
-  if (inode) {
-    bzero(inode, sizeof(*inode));
-  }
-  return inode;
-}
+static struct mount *vfs_mount_list = NULL;
 
 void
 vfs_setup()
 {
-  root.device = 1;
-  root.root = "/";
-  root.fs = &jamfs;
-
-  jamfs.initialize();
-}
-
-struct vfs_node *
-vfs_alloc_vnode()
-{
-  struct vfs_node *vnode = kmalloc(sizeof(*vnode));
-  if (vnode) {
-    bzero(vnode, sizeof(*vnode));
-  }
-  return vnode;
-}
-
-void
-vfs_free_vnode(struct vfs_node *vnode)
-{
-  kfree(vnode);
+  vfs_mount("/", &jamfs);
 }
 
 int
-vfs_open(struct vfs_node *vnode, const char *path, int flags)
+vfs_open(struct vfs *vfs, const char *path, struct file *file, int flags,
+         int *p_out_flags)
 {
   int rc;
 
-  vnode->mount = find_mount(path);
-  if (!vnode->mount) {
-    log_panic("Find file mount path '%d' failed.", path);
+  rc = vfs->open(vfs, path, file, flags, p_out_flags);
+  ASSERT(rc == NOS_OK || file->meths == NULL);
+
+  return rc;
+}
+
+void
+vfs_close(struct file *file)
+{
+  if (file->meths) {
+    file->meths->close(file);
+    file->meths = NULL;
+  }
+}
+
+int
+vfs_read(struct file *file, void *buf, size_t nbytes)
+{
+  return file->meths->read(file, buf, nbytes);
+}
+
+int
+vfs_write(struct file *file, const void *buf, size_t nbytes)
+{
+  return file->meths->write(file, buf, nbytes);
+}
+
+int
+vfs_mount(const char *path, struct vfs *vfs)
+{
+  struct mount *mount = kmalloc(sizeof(*mount));
+  if (!mount)
+    return -1;
+
+  mount->mount_point = path;
+  mount->vfs = vfs;
+
+  if (vfs_mount_list == NULL) {
+    mount->next = vfs_mount_list;
+    vfs_mount_list = mount;
+  } else {
+    mount->next = vfs_mount_list->next;
+    vfs_mount_list->next = mount;
   }
 
-  vnode->path = dup_path(path);
-  vnode->inode = alloc_inode();
-  vnode->op = vnode->mount->fs->op;
-  vnode->flags = flags;
+  ASSERT(vfs_mount_list);
+  return NOS_OK;
+}
 
-  if (!vnode->path || !vnode->inode) {
-    log_panic("Alloc vnode failed.");
-  }
+int
+vfs_unmount(const char *path)
+{
+  // TODO:
+  UNUSED(path);
 
-  rc = vnode->op->open(vnode, flags);
-  if (rc != NOS_OK) {
-    free_path(&vnode->path);
-    free_inode(&vnode->inode);
+  return -1;
+}
+
+struct vfs *
+vfs_find(const char *path)
+{
+  if (*path != VFS_ROOT_DIR)
+    return NULL;
+
+  ASSERT(vfs_mount_list && vfs_mount_list->vfs);
+  return vfs_mount_list->vfs;
+}
+
+int
+vfs_open_malloc(struct vfs *vfs, const char *path, struct file **p_file,
+                int flags, int *p_out_flags)
+{
+  int rc;
+  struct file *file = (struct file *)kmalloc(vfs->file_struct_sz);
+  if (file) {
+    rc = vfs_open(vfs, path, file, flags, p_out_flags);
+    if (rc != NOS_OK) {
+      kfree(file);
+    } else {
+      *p_file = file;
+    }
+  } else {
+    rc = -1;
   }
 
   return rc;
 }
 
-int
-vfs_read(struct vfs_node *vnode, char *buffer, size_t nbytes)
+void
+vfs_close_free(struct file *file)
 {
-  return vnode->op->read(vnode, buffer, nbytes);
-}
+  ASSERT(file);
 
-int
-vfs_write(struct vfs_node *vnode, const char *data, size_t nbytes)
-{
-  return vnode->op->write(vnode, data, nbytes);
-}
-
-int
-vfs_close(struct vfs_node *vnode)
-{
-  vnode->op->close(vnode);
-  free_path(&vnode->path);
-  free_inode(&vnode->inode);
-
-  return NOS_OK;
+  vfs_close(file);
+  kfree(file);
 }
