@@ -36,6 +36,8 @@ extern void intr_stub_33(void);
 
 extern void intr_stub_48(void);
 
+extern void sched();
+
 // IDT 表项
 //
 // 大小为 8 字节
@@ -180,6 +182,7 @@ handle_interrupt(struct trap_frame *tf)
     }
     // IRQs [32, 47]
     pic_send_eoi(tf->trap_no - T_IRQ0);
+    sched();
   } else if (tf->trap_no == 0x30) {
     new_tf = syscall(tf);
   } else {

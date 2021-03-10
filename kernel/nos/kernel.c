@@ -63,7 +63,6 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 初始化 GDT
   gdt_setup();
-  // task_setup(mb_info);
   // 初始化异常处理
   exception_setup();
   // 初始化 PIC
@@ -75,6 +74,7 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 初始化进程调度器
   sched_steup();
+  task_setup(mb_info);
 
   // 试下 printk
   printk("Nos 0.1\n");
@@ -124,5 +124,5 @@ kernel_main(unsigned long addr, unsigned long magic)
     }
   }
 
-  // scheduler();
+  scheduler();
 }

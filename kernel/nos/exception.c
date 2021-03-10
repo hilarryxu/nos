@@ -68,5 +68,5 @@ page_fault(struct trap_frame *tf)
     printk("  -> Occurs when the instruction is fetched\n");
   }
 
-  return 0;
+  return -1;
 }

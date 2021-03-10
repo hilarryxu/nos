@@ -65,15 +65,23 @@ init_process_context(struct process *process)
 {
   char *sp = NULL;  // 栈帧
 
-  // FIXME: handle kernel task
+  // TODO: handle kernel task
 
-  init_trap_frame(process);
-  sp = (char *)process->tf;
+  if (1) {
+    sp = (char *)process->kernel_stack;
+  } else {
+    init_trap_frame(process);
+    sp = (char *)process->tf;
+  }
 
   sp -= sizeof(*process->context);
   process->context = (struct kstack_context *)sp;
   bzero(process->context, sizeof(*process->context));
-  process->context->eip = (uint32_t)trapret;
+  if (1) {
+    process->context->eip = (uint32_t)process->entry;
+  } else {
+    process->context->eip = (uint32_t)trapret;
+  }
 }
 
 // 调度器（被 kernel_main 调用）

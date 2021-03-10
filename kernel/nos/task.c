@@ -7,6 +7,10 @@
 #include <nos/mm/pmm.h>
 #include <nos/multiboot.h>
 #include <inc/elf.h>
+#include <nos/mm/kheap.h>
+#include <nos/mm/vaddr_space.h>
+#include <nos/proc/process.h>
+#include <nos/proc/scheduler.h>
 
 struct task {
   struct trap_frame *tf;
@@ -48,35 +52,22 @@ task_d()
   }
 }
 
-struct task *
+void
 task_init(void *entry)
 {
-  uint8_t *kstack = (uint8_t *)pmm_alloc_block();
-  uint8_t *user_stack = (uint8_t *)pmm_alloc_block();
+  struct process *ktask = process_alloc();
 
-  struct trap_frame task_state = {
-      .eax = 0,
-      .ebx = 0,
-      .ecx = 0,
-      .edx = 0,
-      .esi = 0,
-      .edi = 0,
+  ktask->kernel_stack = kmalloc(PAGE_SIZE);
+  ktask->kernel_stack += PAGE_SIZE;
 
-      .cs = USER_CODE_SELECTOR,
-      .eip = (uint32_t)entry,
-      .eflags = 0x200,
-      .ss = USER_DATA_SELECTOR,
-      .esp = (uint32_t)user_stack + 4096,
-  };
+  ktask->page_dir = vaddr_space_create(&ktask->page_dir_phys);
+  if (!ktask->page_dir)
+    log_panic("vaddr_space_create failed");
 
-  struct trap_frame *tf = (void *)(kstack + 4096 - sizeof(task_state));
-  *tf = task_state;
+  ktask->state = PROCESS_STATE_RUNNABLE;
+  ktask->entry = entry;
 
-  struct task *task = (struct task *)pmm_alloc_block();
-  task->tf = tf;
-  task->next = first_task;
-  first_task = task;
-  return task;
+  sched_add_process(ktask);
 }
 
 void
