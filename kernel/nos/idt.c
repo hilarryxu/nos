@@ -179,10 +179,12 @@ handle_interrupt(struct trap_frame *tf)
       //
       // 这个 +1 是必须的，不然会栈溢出
       // tss.esp0 = (uint32_t)(new_tf + 1);
+      pic_send_eoi(tf->trap_no - T_IRQ0);
+      sched();
+    } else {
+      // IRQs [32, 47]
+      pic_send_eoi(tf->trap_no - T_IRQ0);
     }
-    // IRQs [32, 47]
-    pic_send_eoi(tf->trap_no - T_IRQ0);
-    sched();
   } else if (tf->trap_no == 0x30) {
     new_tf = syscall(tf);
   } else {

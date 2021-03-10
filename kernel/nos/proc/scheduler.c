@@ -99,22 +99,22 @@ scheduler()
     int iter_loop = 0;
     p = current_process ? TAILQ_NEXT(current_process, process_link)
                         : TAILQ_FIRST(&run_queue);
-    if (!p) {
-      p = TAILQ_FIRST(&run_queue);
-    }
     while (iter_loop < 2) {
       if (p == NULL) {
+        if (iter_loop == 0) {
+          p = TAILQ_FIRST(&run_queue);
+        }
         iter_loop++;
         continue;
       }
       if (current_process && p == current_process) {
-        ASSERT(iter_loop == 1);
+        ASSERT(iter_loop <= 1);
         break;
       }
 
       // FIXME: handle dead process
 
-      if (p->state == PROCESS_STATE_RUNNABLE) {
+      if (p->state >= PROCESS_STATE_RUNNABLE) {
         // 找到一个可运行进程了
         break;
       }
@@ -144,7 +144,6 @@ scheduler()
     switch_to(&sched_context, p->context);
 
     // TODO: 中断重入问题？
-    current_process = NULL;
     // unlock
   }
 }
