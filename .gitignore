@@ -5,6 +5,7 @@
 *.py[co]
 __pycache__/
 *.idb
+*.sym
 tags
 
 .ninja_deps

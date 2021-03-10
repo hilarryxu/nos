@@ -3,12 +3,13 @@
 
 #include <stddef.h>
 
-#include "nc_sys_queue.h"
-
 #include <nos/mm/vmm.h>
+#include "nc_sys_queue.h"
 
 // 进程 id 类型
 typedef short pid_t;
+
+#define INVALID_PID ((pid_t)-1)
 
 // call switch_to 导致被调用者需要保存这些寄存器（x86 函数调用规范约定的）,
 // 最上面的 eip 就是调用 switch_to 返回后的下一条指令地址。
@@ -45,16 +46,17 @@ struct process {
   void *entry;
   int exit_code;
   size_t flags;
-  TAILQ_ENTRY(process) processes;
+  TAILQ_ENTRY(process) process_link;
   char name[16];
 };
 
 void process_setup();
 
-int process_exec(const char *binary, size_t size, struct process **p_proc);
+struct process *process_alloc();
+void process_destory(struct process *process);
 
-void process_destory(struct process *proc);
-
-void process_exit(struct process *proc, int exit_code);
+int process_exec_binary(const char *binary, size_t size,
+                        struct process **p_process);
+void process_exit(struct process *process, int exit_code);
 
 #endif  // _NOS_PROC_PROCESS_H

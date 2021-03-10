@@ -3,16 +3,18 @@
 
 #include <nos/proc/process.h>
 
-void scheduler_steup();
+#define EFLAGS_IF (1 << 9)
 
-void scheduler_add_process(struct process *);
+void sched_steup();
 
-void scheduler_remove_process(struct process *);
+void sched_add_process(struct process *);
+
+void sched_remove_process(struct process *);
 
 void sched();
 
 void scheduler();
 
-void yield_cpu();
+void yield();
 
 #endif  // _NOS_PROC_SCHEDULER_H

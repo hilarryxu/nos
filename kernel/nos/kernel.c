@@ -74,12 +74,19 @@ kernel_main(unsigned long addr, unsigned long magic)
   idt_setup();
 
   // 初始化进程调度器
-  scheduler_steup();
+  sched_steup();
 
   // 试下 printk
   printk("Nos 0.1\n");
   printk("Kernel is %d KB large\n", ((uint32_t)KERNEL_SIZE) >> 10);
-  printk("\nmagic=0x%X, addr=0x%X\n", magic, addr);
+  printk("\nmagic=0x%X, addr=0x%X\n\n", magic, addr);
+
+  printk("kernel : [0x%X, 0x%X)\n", KERNEL_START, KERNEL_END);
+  printk(".text  : [0x%X, 0x%X)\n", KERNEL_TEXT_START, KERNEL_TEXT_END);
+  printk(".data  : [0x%X, 0x%X)\n", KERNEL_DATA_START, KERNEL_DATA_END);
+  printk(".rodata: [0x%X, 0x%X)\n", KERNEL_RODATA_START, KERNEL_RODATA_END);
+  printk(".bss   : [0x%X, 0x%X)\n", KERNEL_BSS_START, KERNEL_BSS_END);
+  printk("\n");
 
   char *p1 = kmalloc(13);
   char *p2 = kmalloc(13);
@@ -89,6 +96,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   printk("sizeof(struct jamfs_header): %d\n", sizeof(struct jamfs_header));
   printk("sizeof(struct jamfs_file_header): %d\n",
          sizeof(struct jamfs_file_header));
+
+  MAGIC_BREAK();
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);
