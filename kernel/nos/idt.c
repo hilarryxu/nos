@@ -9,6 +9,7 @@
 #include <nos/ioport.h>
 #include <nos/pit.h>
 #include <nos/exception.h>
+#include <nos/proc/scheduler.h>
 
 extern void intr_stub_0(void);
 extern void intr_stub_1(void);
@@ -137,9 +138,6 @@ idt_setup()
 
   // 加载 IDT
   asm volatile("lidt %0" : : "m"(idtp));
-
-  // 开中断
-  asm volatile("sti");
 }
 
 struct trap_frame *
@@ -180,7 +178,9 @@ handle_interrupt(struct trap_frame *tf)
       // 这个 +1 是必须的，不然会栈溢出
       // tss.esp0 = (uint32_t)(new_tf + 1);
       pic_send_eoi(tf->trap_no - T_IRQ0);
-      sched();
+
+      if (current_process && current_process->state == PROCESS_STATE_RUNNING)
+        yield();
     } else {
       // IRQs [32, 47]
       pic_send_eoi(tf->trap_no - T_IRQ0);

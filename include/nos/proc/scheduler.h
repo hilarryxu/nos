@@ -5,6 +5,8 @@
 
 #define EFLAGS_IF (1 << 9)
 
+extern struct process *current_process;
+
 void sched_steup();
 
 void sched_add_process(struct process *);

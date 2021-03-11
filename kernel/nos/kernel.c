@@ -124,5 +124,8 @@ kernel_main(unsigned long addr, unsigned long magic)
     }
   }
 
+  // 开中断
+  asm volatile("sti");
+
   scheduler();
 }

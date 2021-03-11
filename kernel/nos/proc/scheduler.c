@@ -17,7 +17,7 @@ TAILQ_HEAD(run_queue, process);
 static struct kstack_context *sched_context;
 
 // 当前进程
-static struct process *current_process;
+struct process *current_process = NULL;
 
 // 进程队列
 static struct run_queue run_queue;
@@ -122,7 +122,8 @@ scheduler()
       p = TAILQ_NEXT(p, process_link);
     }
 
-    interrupt_disable();
+    // interrupt_disable();
+    // loga("current_process = %x, p = %x", current_process, p);
 
     // TODO: 找不到就运行 idle 进程
     ASSERT(p != NULL);
