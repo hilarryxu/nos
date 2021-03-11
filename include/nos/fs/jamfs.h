@@ -15,4 +15,6 @@ struct jamfs_file_header {
   uint32_t length;
 };
 
+void inird_setup(void *ramdisk_base, size_t ramdisk_size);
+
 #endif  // _NOS_FS_JAMFS_H

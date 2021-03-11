@@ -46,15 +46,15 @@ vfs_close(struct file *file)
 }
 
 int
-vfs_read(struct file *file, void *buf, size_t nbytes)
+vfs_read(struct file *file, void *buf, size_t nbytes, off_t offset)
 {
-  return file->meths->read(file, buf, nbytes);
+  return file->meths->read(file, buf, nbytes, offset);
 }
 
 int
-vfs_write(struct file *file, const void *buf, size_t nbytes)
+vfs_write(struct file *file, const void *buf, size_t nbytes, off_t offset)
 {
-  return file->meths->write(file, buf, nbytes);
+  return file->meths->write(file, buf, nbytes, offset);
 }
 
 int

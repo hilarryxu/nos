@@ -2,12 +2,10 @@
 #define _NOS_PROC_PROCESS_H
 
 #include <stddef.h>
+#include <sys/types.h>
 
 #include <nos/mm/vmm.h>
 #include "nc_sys_queue.h"
-
-// 进程 id 类型
-typedef short pid_t;
 
 #define INVALID_PID ((pid_t)-1)
 

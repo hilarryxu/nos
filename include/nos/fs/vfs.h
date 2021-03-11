@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 struct file_meths;
 
@@ -13,8 +14,8 @@ struct file {
 struct file_meths {
   int version;
   int (*close)(struct file *);
-  int (*read)(struct file *, void *buf, size_t nbytes);
-  int (*write)(struct file *, const void *buf, size_t nbytes);
+  int (*read)(struct file *, void *buf, size_t nbytes, off_t offset);
+  int (*write)(struct file *, const void *buf, size_t nbytes, off_t offset);
 };
 
 struct vfs {
@@ -33,8 +34,8 @@ void vfs_setup();
 int vfs_open(struct vfs *, const char *path, struct file *, int flags,
              int *p_out_flags);
 void vfs_close(struct file *);
-int vfs_read(struct file *, void *buf, size_t nbytes);
-int vsf_write(struct file *, const void *buf, size_t nbytes);
+int vfs_read(struct file *, void *buf, size_t nbytes, off_t p_offset);
+int vsf_write(struct file *, const void *buf, size_t nbytes, off_t p_offset);
 
 int vfs_mount(const char *path, struct vfs *vfs);
 int vfs_unmount(const char *path);
