@@ -7,6 +7,7 @@
 
 typedef int (*exception_handler_pt)(struct trap_frame *);
 
+extern void stacktrace_print();
 int page_fault(struct trap_frame *tf);
 
 exception_handler_pt handlers[32] = {
@@ -66,6 +67,10 @@ page_fault(struct trap_frame *tf)
   // bit 4: 为 1 表示访问代码，为 0 表示数据访问
   if (tf->error_code & 0x10) {
     printk("  -> Occurs when the instruction is fetched\n");
+  }
+
+  if (!(tf->error_code & 0x4)) {
+    stacktrace_print();
   }
 
   return -1;

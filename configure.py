@@ -326,6 +326,7 @@ for name in [
     'drvs/keyboard',
     'fs/vfs',
     'fs/jamfs',
+    'stacktrace',
 ]:
     kernel_objs += kernel_cc(name)
 

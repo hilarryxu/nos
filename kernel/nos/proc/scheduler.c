@@ -122,6 +122,8 @@ scheduler()
       p = TAILQ_NEXT(p, process_link);
     }
 
+    interrupt_disable();
+
     // TODO: 找不到就运行 idle 进程
     ASSERT(p != NULL);
     current_process = p;
