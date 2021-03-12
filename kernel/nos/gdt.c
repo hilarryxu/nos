@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include <nos/debug.h>
+#include <nos/nos.h>
 #include <nos/trap.h>
 
 // GDT 表项

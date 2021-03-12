@@ -10,7 +10,7 @@
 #endif
 
 /* 16KB 大小的栈 */
-#define STACK_SIZE                      0x4000
+#define KSTACK_SIZE                     0x4000
 
 /* 内核的虚拟基址 */
 #define KERNEL_VIRTUAL_BASE             0xC0000000
@@ -110,7 +110,7 @@ _start:
 # 从这里开始在高端虚拟地址空间下运行
 _start_higher_half:
     # 设置栈（栈由高地址往低地址生长）
-    movl $(boot_kstack + STACK_SIZE), %esp
+    movl $(boot_kstack + KSTACK_SIZE), %esp
     mov $0, %ebp
 
     # 重置 eflags 寄存器
@@ -137,4 +137,4 @@ hang_loop:
 
 # boot_kstack 为栈底
 # .comm 定义的符号最后会放到 .bss 段中
-.comm boot_kstack, STACK_SIZE
+.comm boot_kstack, KSTACK_SIZE

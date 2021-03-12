@@ -1,4 +1,4 @@
-#include <nos/debug.h>
+#include <nos/debug/debug.h>
 
 #include <stddef.h>
 #include <stdarg.h>
@@ -91,7 +91,7 @@ nos_assert(const char *cond, const char *file, int line, int panic)
   log_error("assert '%s' failed @ (%s, %d)", cond, file, line);
 
   if (panic) {
-    // nos_stacktrace(1);
+    stacktrace_print();
     abort();
   }
 }

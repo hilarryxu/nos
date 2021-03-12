@@ -295,8 +295,8 @@ n.newline()
 kernel_objs = []
 
 kernel_objs += n.build(
-    kernel_built('start' + objext), 'kernel_asm',
-    kernel_src('start.S')
+    kernel_built('init/entry' + objext), 'kernel_asm',
+    kernel_src('init/entry.S')
 )
 kernel_objs += n.build(
     kernel_built('trap_stub' + objext), 'kernel_asm',
@@ -308,9 +308,9 @@ kernel_objs += n.build(
 )
 
 for name in [
-    'kernel',
+    'init/init',
     'drvs/cga',
-    'printk',
+    'libs/printk',
     'gdt',
     'idt',
     'exception',
@@ -323,14 +323,14 @@ for name in [
     'mm/kheap',
     'mm/vaddr_space',
     'drvs/serial',
-    'debug',
+    'debug/debug',
     'proc/process',
     'sync/spinlock',
     'proc/scheduler',
     'drvs/keyboard',
     'fs/vfs',
     'fs/jamfs',
-    'stacktrace',
+    'debug/stacktrace',
     'libs/printf',
 ]:
     kernel_objs += kernel_cc(name)

@@ -1,5 +1,4 @@
 #include <nos/nos.h>
-#include <nos/debug.h>
 #include <nos/multiboot.h>
 #include <nos/drvs/cga.h>
 #include <nos/gdt.h>

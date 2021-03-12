@@ -1,5 +1,5 @@
-#ifndef _NOS_DEBUG_H
-#define _NOS_DEBUG_H
+#ifndef _NOS_DEBUG_DEBUG_H
+#define _NOS_DEBUG_DEBUG_H
 
 #include <nos/macros.h>
 
@@ -115,4 +115,6 @@ void _log_stderr(const char *fmt, ...);
 void _log_hexdump(const char *file, int line, char *data, int datalen,
                   const char *fmt, ...);
 
-#endif  // !_NOS_DEBUG_H
+void stacktrace_print();
+
+#endif  // !_NOS_DEBUG_DEBUG_H
