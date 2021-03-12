@@ -86,12 +86,16 @@ CC = configure_env.get('CC', 'gcc')
 objext = '.o'
 
 
+def trans_path(s):
+    return s.replace('/', os.sep)
+
+
 def src(filename):
-    return os.path.join('$root', filename)
+    return os.path.join('$root', trans_path(filename))
 
 
 def built(filename):
-    return os.path.join('$builddir', filename)
+    return os.path.join('$builddir', trans_path(filename))
 
 
 def binary(name):
@@ -121,7 +125,7 @@ n.newline()
 
 default_cross_gcc_prefix = ''
 if platform.is_windows():
-    default_cross_gcc_prefix = './Crosstools/bin/i586-elf-'
+    default_cross_gcc_prefix = trans_path('./Crosstools/bin/i586-elf-')
 elif platform.is_mac():
     default_cross_gcc_prefix = 'i686-elf-'
 
@@ -169,17 +173,17 @@ kernel_cflags = [
     '-fno-pic',
     '-DNOS_ASSERT_PANIC',
     '-DNOS_DEBUG_LOG',
-    '-I$root/libk/include',
-    '-I$root/kernel',
-    '-I$root/include',
+    trans_path('-I$root/libk/include'),
+    trans_path('-I$root/kernel'),
+    trans_path('-I$root/include'),
 ]
 kernel_ldflags = [
     '-melf_i386',
 ]
 kernel_asmflags = [
     '-m32',
-    '-I$root/kernel',
-    '-I$root/include',
+    trans_path('-I$root/kernel'),
+    trans_path('-I$root/include'),
 ]
 n.variable(
     'kernel_cflags', ' '.join(shell_escape(flag) for flag in kernel_cflags)
@@ -225,11 +229,11 @@ n.newline()
 
 
 def kernel_built(filename):
-    return os.path.join('$builddir', 'kernel', KERNEL_NAME, filename)
+    return os.path.join('$builddir', 'kernel', KERNEL_NAME, trans_path(filename))
 
 
 def kernel_src(filename):
-    return os.path.join('$root', 'kernel', KERNEL_NAME, filename)
+    return os.path.join('$root', 'kernel', KERNEL_NAME, trans_path(filename))
 
 
 def kernel_cc(name, **kwargs):
@@ -278,7 +282,7 @@ for name in [
         src(name + '.c'),
         variables=dict(
             cflags=
-            '$cflags -D_KERNEL_ -I$root/libk/include'
+            '$cflags -D_KERNEL_ -I' + trans_path('$root/libk/include')
         )
     )
 
@@ -340,7 +344,7 @@ kernel_elf = n.build(
             kernel_src('kernel.ld'),
             built('kernel.map')
         ),
-        libs='-L$builddir/lib -lk'
+        libs='-L{0} -lk'.format(trans_path('$builddir/lib'))
     ),
     implicit=[kernel_src('kernel.ld')] + libk
 )
