@@ -327,6 +327,7 @@ for name in [
     'fs/vfs',
     'fs/jamfs',
     'stacktrace',
+    'libs/printf',
 ]:
     kernel_objs += kernel_cc(name)
 

@@ -78,20 +78,20 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   // 试下 printk
   printk("Nos 0.1\n");
-  printk("Kernel is %d KB large\n", ((uint32_t)KERNEL_SIZE) >> 10);
-  printk("\nmagic=0x%X, addr=0x%X\n\n", magic, addr);
+  printk("Kernel is %u KB large\n", ((uint32_t)KERNEL_SIZE) >> 10);
+  printk("\nmagic=0x%08x, addr=0x%08x\n\n", magic, addr);
 
-  printk("kernel : [0x%X, 0x%X)\n", KERNEL_START, KERNEL_END);
-  printk(".text  : [0x%X, 0x%X)\n", KERNEL_TEXT_START, KERNEL_TEXT_END);
-  printk(".data  : [0x%X, 0x%X)\n", KERNEL_DATA_START, KERNEL_DATA_END);
-  printk(".rodata: [0x%X, 0x%X)\n", KERNEL_RODATA_START, KERNEL_RODATA_END);
-  printk(".bss   : [0x%X, 0x%X)\n", KERNEL_BSS_START, KERNEL_BSS_END);
+  printk("kernel : [0x%08x, 0x%08x)\n", KERNEL_START, KERNEL_END);
+  printk(".text  : [0x%08x, 0x%08x)\n", KERNEL_TEXT_START, KERNEL_TEXT_END);
+  printk(".data  : [0x%08x, 0x%08x)\n", KERNEL_DATA_START, KERNEL_DATA_END);
+  printk(".rodata: [0x%08x, 0x%08x)\n", KERNEL_RODATA_START, KERNEL_RODATA_END);
+  printk(".bss   : [0x%08x, 0x%08x)\n", KERNEL_BSS_START, KERNEL_BSS_END);
   printk("\n");
 
   char *p1 = kmalloc(13);
   char *p2 = kmalloc(13);
-  printk("p1: 0x%X\n", p1);
-  printk("p2: 0x%X\n", p2);
+  printk("p1: %p\n", p1);
+  printk("p2: %p\n", p2);
 
   printk("sizeof(struct jamfs_header): %d\n", sizeof(struct jamfs_header));
   printk("sizeof(struct jamfs_file_header): %d\n",
@@ -127,5 +127,5 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 开中断
   asm volatile("sti");
 
-  scheduler();
+  // scheduler();
 }

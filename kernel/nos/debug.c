@@ -5,114 +5,18 @@
 #include <stdlib.h>
 
 #include <nos/macros.h>
+#include <nos/libs/printf.h>
 #include <nos/drvs/serial.h>
 
-#define MAX_PRINT_INT_BIT_NR 32
+#define LOG_MAX_LEN 256
 
 static int log_level = LOG_WARN;
 
 static void
-kprint_char(char chr)
+debug_print_str(const char *str, int len)
 {
-  serial_write(SERIAL_COM1, chr);
-}
-
-static void
-kprint_str(const char *str)
-{
-  if (str == NULL)
-    str = "(null)";
-  while (*str)
-    kprint_char(*str++);
-}
-
-static void
-kprint_uint(unsigned int value, int radix, int uppercase)
-{
-  const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
-  char buf[MAX_PRINT_INT_BIT_NR + 1];
-  char *p = buf + MAX_PRINT_INT_BIT_NR;
-
-  *p = '\0';
-
-  do {
-    *--p = digits[value % radix];
-    value /= radix;
-  } while (value);
-
-  kprint_str(p);
-}
-
-static void
-kprint_int(int value, int radix, int uppercase)
-{
-  const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
-  char buf[MAX_PRINT_INT_BIT_NR + 1];
-  char *p = buf + MAX_PRINT_INT_BIT_NR;
-  int sign = 0;
-
-  if (value < 0) {
-    value = -value;
-    sign = 1;
-  }
-  *p = '\0';
-
-  do {
-    *--p = digits[value % radix];
-    value /= radix;
-  } while (value);
-
-  if (!sign) {
-    kprint_str(p);
-  } else {
-    *--p = '-';
-    kprint_str(p);
-  }
-}
-
-static void
-log_vakprintf(const char *format, va_list args)
-{
-  while (*format) {
-    if (*format == '%') {
-      format++;
-      if (!*format)
-        return;
-      else if (*format == '%')
-        kprint_char('%');
-      else if (*format == 'b')
-        kprint_uint(va_arg(args, unsigned int), 2, 0);
-      else if (*format == 'c')
-        kprint_char(va_arg(args, unsigned int));
-      else if (*format == 'o')
-        kprint_uint(va_arg(args, unsigned int), 8, 0);
-      else if (*format == 'd')
-        kprint_int(va_arg(args, int), 10, 0);
-      else if (*format == 'x')
-        kprint_uint(va_arg(args, unsigned int), 16, 0);
-      else if (*format == 'X')
-        kprint_uint(va_arg(args, unsigned int), 16, 1);
-      else if (*format == 's')
-        kprint_str(va_arg(args, char *));
-      else {
-        kprint_char('%');
-        kprint_char(*format);
-      }
-    } else {
-      kprint_char(*format);
-    }
-    format++;
-  }
-}
-
-static void
-log_printk(const char *format, ...)
-{
-  va_list args;
-
-  va_start(args, format);
-  log_vakprintf(format, args);
-  va_end(args);
+  while (len-- && *str)
+    serial_write(SERIAL_COM1, *str++);
 }
 
 void
@@ -134,15 +38,21 @@ log_loggable(int level)
 void
 _log(const char *file, int line, int panic, const char *fmt, ...)
 {
+  char buf[4 * LOG_MAX_LEN];
+  int len, size;
   va_list args;
 
-  log_printk("%s:%d ", file, line);
+  len = 0;
+  size = 4 * LOG_MAX_LEN;
+
+  len += snprintf(buf + len, size - len, "%s:%d ", file, line);
 
   va_start(args, fmt);
-  log_vakprintf(fmt, args);
+  len += vsnprintf(buf + len, size - len, fmt, args);
   va_end(args);
 
-  kprint_char('\n');
+  buf[len++] = '\n';
+  debug_print_str(buf, len);
 
   if (panic) {
     abort();
@@ -152,11 +62,18 @@ _log(const char *file, int line, int panic, const char *fmt, ...)
 void
 _log_stderr(const char *fmt, ...)
 {
+  char buf[4 * LOG_MAX_LEN];
+  int len, size;
   va_list args;
 
+  len = 0;
+  size = 4 * LOG_MAX_LEN;
+
   va_start(args, fmt);
-  log_vakprintf(fmt, args);
+  len += vsnprintf(buf, size, fmt, args);
   va_end(args);
+
+  debug_print_str(buf, len);
 }
 
 #if 0
