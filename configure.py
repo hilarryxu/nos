@@ -162,7 +162,7 @@ kernel_cflags = [
     '-std=gnu99',
     '-ffreestanding',
     '-fno-stack-protector',
-    '-g',
+    '-ggdb -gstabs',
     '-Wall',
     '-Wextra',
     '-Werror',
@@ -242,14 +242,14 @@ def kernel_cc(name, **kwargs):
 #: boot
 boot_objs = []
 boot_objs += n.build(
-    built('boot/boot' + objext),
+    built('boot/bootasm' + objext),
     'kernel_asm',
-    src('boot/boot.S')
+    src('boot/bootasm.S')
 )
 boot_objs += n.build(
-    built('boot/main' + objext),
+    built('boot/bootmain' + objext),
     'kernel_cc',
-    src('boot/main.c'),
+    src('boot/bootmain.c'),
     variables=dict(kernel_cflags='$kernel_cflags -Os')
 )
 boot_out = n.build(

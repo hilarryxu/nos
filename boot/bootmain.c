@@ -6,7 +6,7 @@
  * an ELF kernel image from the first IDE hard disk.
  *
  * DISK LAYOUT
- *  * This program(boot.S and main.c) is the bootloader.  It should
+ *  * This program(bootmain.S and bootmain.c) is the bootloader.  It should
  *    be stored in the first sector of the disk.
  *
  *  * The 2nd sector onward holds the kernel image.
@@ -23,7 +23,7 @@
  *  * Assuming this boot loader is stored in the first sector of the
  *    hard-drive, this code takes over...
  *
- *  * control starts in boot.S -- which sets up protected mode,
+ *  * control starts in bootmain.S -- which sets up protected mode,
  *    and a stack so C code then run, then calls bootmain()
  *
  *  * bootmain() in this file takes over, reads in the kernel and jumps to it.
@@ -53,12 +53,13 @@ bootmain(void)
   for (; ph < eph; ph++)
     // p_pa is the load address of this segment (as well
     // as the physical address)
-    readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
+    readseg(ph->p_pa & 0xFFFFFF, ph->p_memsz, ph->p_offset);
 
   // call the entry point from the ELF header
   // note: does not return!
-  // Note: 因为 Higher Half Kernel 设计，这里入口地址需要减去 0xC0000000
-  ((void (*)(void))(ELFHDR->e_entry - 0xC0000000))();
+  // NOTE: 本来因为 Higher Half Kernel 设计，这里入口地址需要减去 0xC0000000
+  // 这里用位运算，兼容了低地址（0x100000）和高地址（0xC0100000）两种情况
+  ((void (*)(void))(ELFHDR->e_entry & 0xFFFFFF))();
 
 bad:
   outw(0x8A00, 0x8A00);
@@ -87,7 +88,7 @@ readseg(uint32_t pa, uint32_t count, uint32_t offset)
   // we load in increasing order.
   while (pa < end_pa) {
     // Since we haven't enabled paging yet and we're using
-    // an identity segment mapping (see boot.S), we can
+    // an identity segment mapping (see bootmain.S), we can
     // use physical addresses directly.  This won't be the
     // case once JOS enables the MMU.
     readsect((uint8_t *)pa, offset);
