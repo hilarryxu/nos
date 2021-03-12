@@ -92,7 +92,7 @@ scheduler()
   current_process = NULL;
 
   for (;;) {
-    interrupt_enable();
+    intr_enable();
 
     // lock
     // 循环遍历一边进程队列，找到下一个可运行进程

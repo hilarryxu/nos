@@ -67,6 +67,12 @@ typedef uint32_t phys_addr_t;
 
 void nos_assert(const char *cond, const char *file, int line, int panic);
 
+#define static_assert(x)                                                       \
+  switch (x) {                                                                 \
+  case 0:                                                                      \
+  case (x):;                                                                   \
+  }
+
 #define bzero(p, sz) memset((p), 0, (sz))
 
 #endif  // !_NOS_MACROS_H

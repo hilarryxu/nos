@@ -2,6 +2,11 @@
 #define _NOS_ARCH_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#define FL_IF 0x00000200  // Interrupt Flag
+
+#define barrier() asm volatile("" ::: "memory")
 
 static inline void
 breakpoint(void)
@@ -48,13 +53,13 @@ read_esp()
 }
 
 static inline void
-interrupt_disable()
+intr_disable()
 {
   asm volatile("cli");
 }
 
 static inline void
-interrupt_enable()
+intr_enable()
 {
   asm volatile("sti");
 }
@@ -65,19 +70,40 @@ cpu_hlt()
   asm volatile("hlt");
 }
 
-#define local_irq_save(x)                                                      \
-  asm volatile("pushfl \n\t"                                                   \
-               "popl %0 \n\t"                                                  \
-               "cli"                                                           \
-               : "=g"(x)                                                       \
-               :                                                               \
-               : "memory")
+static inline void
+ltr(uint16_t sel)
+{
+  asm volatile("ltr %0" ::"r"(sel) : "memory");
+}
 
-#define local_irq_restore(x)                                                   \
-  asm volatile("pushl %0 \n\t"                                                 \
-               "popfl"                                                         \
-               :                                                               \
-               : "g"(x)                                                        \
-               : "memory")
+static inline void
+invlpg(void *addr)
+{
+  asm volatile("invlpg (%0)" ::"r"(addr) : "memory");
+}
+
+static inline bool
+__intr_save(void)
+{
+  if (read_eflags() & FL_IF) {
+    intr_disable();
+    return 1;
+  }
+  return 0;
+}
+
+static inline void
+__intr_restore(bool flag)
+{
+  if (flag) {
+    intr_enable();
+  }
+}
+
+#define local_intr_save(x)                                                     \
+  do {                                                                         \
+    x = __intr_save();                                                         \
+  } while (0)
+#define local_intr_restore(x) __intr_restore(x);
 
 #endif  // !_NOS_ARCH_H
