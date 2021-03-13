@@ -73,8 +73,9 @@ kernel_main(unsigned long addr, unsigned long magic)
   idt_setup();
 
   // 初始化进程调度器
+  process_setup();
   sched_steup();
-  task_setup(mb_info);
+  // task_setup(mb_info);
 
   // 试下 printk
   printk("Nos 0.1\n");

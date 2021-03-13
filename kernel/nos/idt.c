@@ -165,6 +165,9 @@ trap_dispatch(struct trap_frame *tf)
     if (tf->trap_no == T_IRQ0 + IRQ_TIMER) {
       g_ticks++;
       pic_send_eoi(tf->trap_no - T_IRQ0);
+      // 时钟来了就准备进程调度
+      // 后续可以计算时间片来设置是否需要调度
+      current_process->need_resched = true;
     } else {
       // IRQs [32, 47]
       pic_send_eoi(tf->trap_no - T_IRQ0);

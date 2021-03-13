@@ -21,11 +21,17 @@ extern void trapret();
 
 static pid_t next_pid = 0;
 
+// 当前进程
+struct process *current_process = NULL;
+
+// idle 内核线程
+struct process *idle_process = NULL;
+
 // 分配进程 ID
 static pid_t
 alloc_pid()
 {
-  return ++next_pid;
+  return next_pid++;
 }
 
 // 回收进程 ID
@@ -51,6 +57,9 @@ process_alloc()
     process_destory(process);
     return NULL;
   }
+
+  process->state = PROCESS_STATE_UNINIT;
+  process->need_resched = false;
 
   return process;
 }
@@ -85,7 +94,7 @@ init_trap_frame(struct process *process)
   process->tf->ss = USER_DATA_SELECTOR;
 
   process->tf->esp = (uint32_t)process->user_stack;
-  process->tf->eflags = EFLAGS_IF;
+  process->tf->eflags = FL_IF;
   process->tf->eip = (uint32_t)process->entry;
   process->tf->error_code = 0;
 }
@@ -227,6 +236,13 @@ process_exec_binary(const char *binary, size_t size, struct process **p_process)
   return NOS_OK;
 }
 
+char *
+process_set_name(struct process *process, const char *name)
+{
+  bzero(process->name, sizeof(process->name));
+  return strcpy(process->name, name);
+}
+
 //---------------------------------------------------------------------
 // 进程退出
 //---------------------------------------------------------------------
@@ -236,14 +252,6 @@ process_exit(struct process *process, int exit_code)
   process->exit_code = exit_code;
   process->state = PROCESS_STATE_ZOMBIE;
   // TODO: sched
-}
-
-//---------------------------------------------------------------------
-// 初始化进程子系统
-//---------------------------------------------------------------------
-void
-process_setup()
-{
 }
 
 //---------------------------------------------------------------------
@@ -310,4 +318,22 @@ process_run(struct process *process)
     }
     local_intr_restore(intr_flag);
   }
+}
+
+//---------------------------------------------------------------------
+// 初始化进程子系统
+//---------------------------------------------------------------------
+void
+process_setup()
+{
+  // 初始化 idle 内核线程
+  idle_process = process_alloc();
+  ASSERT(idle_process && idle_process->pid == 0);
+
+  idle_process->kernel_stack = (uintptr_t)kmalloc(PAGE_SIZE);
+  idle_process->kernel_stack += PAGE_SIZE;
+  idle_process->need_resched = true;
+  process_set_name(idle_process, "idle");
+
+  current_process = idle_process;
 }

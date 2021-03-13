@@ -59,10 +59,14 @@ struct process {
   uint32_t kstack_magic;
 };
 
+extern struct process *current_process, *idle_process;
+
 void process_setup();
 
 struct process *process_alloc();
 void process_destory(struct process *process);
+
+char *process_set_name(struct process *process, const char *name);
 
 // 调度运行进程
 void process_run(struct process *process);

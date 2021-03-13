@@ -1,19 +1,10 @@
 #include <nos/sched/sched.h>
 
-#include <string.h>
-
 #include <nos/nos.h>
 #include <nos/arch.h>
-#include <nos/gdt.h>
-#include <nos/trap.h>
 #include "nc_sys_queue.h"
 
 TAILQ_HEAD(process_list, process);
-
-// 当前进程
-struct process *current_process = NULL;
-
-struct process *idle_process = NULL;
 
 // 进程队列
 static struct process_list process_list;
@@ -31,22 +22,25 @@ schedule()
   local_intr_save(intr_flag);
   {
     ASSERT(current_process != NULL);
+    current_process->need_resched = false;
 
     // 循环遍历一边进程队列，找到下一个可运行进程
     loop_round = 0;
     p = current_process == idle_process
-            ? TAILQ_NEXT(current_process, process_link)
-            : TAILQ_FIRST(&process_list);
+            ? TAILQ_FIRST(&process_list)
+            : TAILQ_NEXT(current_process, process_link);
     while (loop_round < 2) {
       if (p == NULL) {
+        // 第一次遍历到队列尾端时跳到队头查找
         if (loop_round == 0) {
           p = TAILQ_FIRST(&process_list);
         }
         loop_round++;
         continue;
       }
+
       // 循环遍历一轮没找到其他可运行进程
-      if (current_process && p == current_process) {
+      if (p == current_process) {
         ASSERT(loop_round <= 1);
         p = NULL;
         break;
@@ -86,10 +80,11 @@ scheduler_remove_process(struct process *process)
   TAILQ_REMOVE(&process_list, process, process_link);
 }
 
+//---------------------------------------------------------------------
+// 初始化进程调度子系统
+//---------------------------------------------------------------------
 void
 sched_steup()
 {
   TAILQ_INIT(&process_list);
-
-  // FIXME: ltr, tss
 }

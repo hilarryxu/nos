@@ -3,16 +3,13 @@
 
 #include <nos/proc/process.h>
 
-#define EFLAGS_IF (1 << 9)
-
-extern struct process *current_process;
-
+// 初始化进程调度子系统
 void sched_steup();
 
-void sched_add_process(struct process *);
-
-void sched_remove_process(struct process *);
-
+// 执行进程调度
 void schedule();
+
+void sched_add_process(struct process *);
+void sched_remove_process(struct process *);
 
 #endif  // !_NOS_SCHED_SCHED_H
