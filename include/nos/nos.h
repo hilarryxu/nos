@@ -14,6 +14,4 @@ void printk(char *format, ...);
 
 void task_setup(struct multiboot_info *mb_info);
 
-struct trap_frame *schedule(struct trap_frame *tf);
-
 #endif  // !_NOS_NOS_H

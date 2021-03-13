@@ -73,6 +73,6 @@ struct tss {
 } __attribute__((packed));
 
 // 派发中断
-struct trap_frame *handle_interrupt(struct trap_frame *tf);
+void handle_interrupt(struct trap_frame *tf);
 
 #endif  // _NOS_TRAP_H

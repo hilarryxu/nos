@@ -1,5 +1,5 @@
-#ifndef _NOS_PROC_SCHEDULER_H
-#define _NOS_PROC_SCHEDULER_H
+#ifndef _NOS_SCHED_SCHED_H
+#define _NOS_SCHED_SCHED_H
 
 #include <nos/proc/process.h>
 
@@ -13,10 +13,6 @@ void sched_add_process(struct process *);
 
 void sched_remove_process(struct process *);
 
-void sched();
+void schedule();
 
-void scheduler();
-
-void yield();
-
-#endif  // _NOS_PROC_SCHEDULER_H
+#endif  // !_NOS_SCHED_SCHED_H

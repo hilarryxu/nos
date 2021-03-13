@@ -1,5 +1,6 @@
 #include <nos/nos.h>
 #include <nos/multiboot.h>
+#include <nos/arch.h>
 #include <nos/drvs/cga.h>
 #include <nos/gdt.h>
 #include <nos/exception.h>
@@ -11,7 +12,7 @@
 #include <nos/mm/vmm.h>
 #include <nos/mm/kheap.h>
 #include <nos/drvs/serial.h>
-#include <nos/proc/scheduler.h>
+#include <nos/sched/sched.h>
 #include <nos/fs/jamfs.h>
 
 //---------------------------------------------------------------------
@@ -124,7 +125,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   }
 
   // 开中断
-  asm volatile("sti");
+  intr_enable();
 
-  // scheduler();
+  // 运行 idle
+  cpu_idle();
 }

@@ -3,17 +3,21 @@
 #include <string.h>
 
 #include <nos/nos.h>
+#include <nos/arch.h>
+#include <nos/gdt.h>
 #include <nos/mm/paging.h>
 #include <nos/mm/pmm.h>
 #include <nos/mm/vmm.h>
 #include <nos/mm/kheap.h>
 #include <nos/mm/vaddr_space.h>
+#include <nos/sched/sched.h>
 
 // 这里让进程的用户栈和内核栈不在同一个页目录项下
 #define PROCESS_KERNEL_STACK (KERNEL_BASE - (16 * PAGE_SIZE))
 #define PROCESS_USER_STACK (KERNEL_BASE - (1024 * PAGE_SIZE))
 
-extern void sched_add_process(struct process *);
+extern void switch_to(struct kstack_context **old, struct kstack_context *new);
+extern void trapret();
 
 static pid_t next_pid = 0;
 
@@ -65,6 +69,51 @@ process_destory(struct process *process)
   kfree(process);
 }
 
+static void
+init_trap_frame(struct process *process)
+{
+  char *kstack = (char *)process->kernel_stack;
+  process->tf = (struct trap_frame *)(kstack - sizeof(*process->tf));
+  bzero(process->tf, sizeof(*process->tf));
+
+  process->tf->cs = USER_CODE_SELECTOR;
+
+  process->tf->ds = USER_DATA_SELECTOR;
+  process->tf->gs = USER_DATA_SELECTOR;
+  process->tf->fs = USER_DATA_SELECTOR;
+  process->tf->es = USER_DATA_SELECTOR;
+  process->tf->ss = USER_DATA_SELECTOR;
+
+  process->tf->esp = (uint32_t)process->user_stack;
+  process->tf->eflags = EFLAGS_IF;
+  process->tf->eip = (uint32_t)process->entry;
+  process->tf->error_code = 0;
+}
+
+static void
+init_process_context(struct process *process)
+{
+  char *sp = NULL;  // 栈帧
+
+  // TODO: handle kernel task
+
+  if (1) {
+    sp = (char *)process->kernel_stack;
+  } else {
+    init_trap_frame(process);
+    sp = (char *)process->tf;
+  }
+
+  sp -= sizeof(*process->context);
+  process->context = (struct kstack_context *)sp;
+  bzero(process->context, sizeof(*process->context));
+  if (1) {
+    process->context->eip = (uint32_t)process->entry;
+  } else {
+    process->context->eip = (uint32_t)trapret;
+  }
+}
+
 // 为进程分配用户堆栈和内核堆栈
 static int
 alloc_process_stacks(struct process *process)
@@ -89,8 +138,8 @@ alloc_process_stacks(struct process *process)
     return -1;
   }
 
-  process->kernel_stack = (char *)PROCESS_KERNEL_STACK;
-  process->user_stack = (char *)PROCESS_USER_STACK;
+  process->kernel_stack = (uintptr_t)PROCESS_KERNEL_STACK;
+  process->user_stack = (uintptr_t)PROCESS_USER_STACK;
 
   return NOS_OK;
 }
@@ -135,12 +184,12 @@ load_binary_program(struct process *process, const char *binary, size_t size)
 static int
 init_from_binary(struct process *process, const char *binary, size_t size)
 {
-  process->page_dir = vaddr_space_create(&process->page_dir_phys);
-  if (!process->page_dir)
+  process->pgdir = vaddr_space_create(&process->cr3);
+  if (!process->pgdir)
     return -1;
 
   // TODO: when swith back
-  vmm_switch_pgdir(process->page_dir_phys);
+  vmm_switch_pgdir(process->cr3);
 
   // 加载二进制可执行程序到进程的地址空间
   if (load_binary_program(process, binary, size) != NOS_OK)
@@ -185,9 +234,8 @@ void
 process_exit(struct process *process, int exit_code)
 {
   process->exit_code = exit_code;
-  process->state = PROCESS_STATE_DEAD;
+  process->state = PROCESS_STATE_ZOMBIE;
   // TODO: sched
-  // sched()
 }
 
 //---------------------------------------------------------------------
@@ -196,4 +244,70 @@ process_exit(struct process *process, int exit_code)
 void
 process_setup()
 {
+}
+
+//---------------------------------------------------------------------
+// 唤醒进程
+//---------------------------------------------------------------------
+void
+process_wakeup(struct process *process)
+{
+  ASSERT(process->state != PROCESS_STATE_ZOMBIE);
+
+  bool intr_flag;
+
+  local_intr_save(intr_flag);
+  {
+    if (process->state != PROCESS_STATE_RUNNABLE) {
+      process->state = PROCESS_STATE_RUNNABLE;
+    } else {
+      log_warn("wakeup runnable process");
+    }
+  }
+  local_intr_restore(intr_flag);
+}
+
+//---------------------------------------------------------------------
+// idle 内核线程
+//---------------------------------------------------------------------
+void
+cpu_idle()
+{
+  while (1) {
+    ASSERT(current_process != NULL);
+    if (current_process->need_resched) {
+      // 让出 CPU，调度切换到其他进程
+      schedule();
+    }
+  }
+}
+
+//---------------------------------------------------------------------
+// 调度运行进程
+//---------------------------------------------------------------------
+void
+process_run(struct process *process)
+{
+  if (process != current_process) {
+    bool intr_flag;
+    struct process *prev = current_process;
+    struct process *next = process;
+
+    local_intr_save(intr_flag);
+    {
+      // 设置为当前进程
+      current_process = process;
+      // 更新 TSS
+      tss_set_kstack(next->kernel_stack);
+      // 切换地址空间
+      vmm_switch_pgdir(next->cr3);
+      // 首次运行初始化入口内核栈
+      if (!next->context) {
+        init_process_context(next);
+      }
+      // 切换上下文，运行进程
+      switch_to(&(prev->context), next->context);
+    }
+    local_intr_restore(intr_flag);
+  }
 }

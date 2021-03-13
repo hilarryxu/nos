@@ -326,7 +326,7 @@ for name in [
     'debug/debug',
     'proc/process',
     'sync/spinlock',
-    'proc/scheduler',
+    'sched/sched',
     'drvs/keyboard',
     'fs/vfs',
     'fs/jamfs',

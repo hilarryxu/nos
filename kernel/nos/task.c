@@ -10,7 +10,7 @@
 #include <nos/mm/kheap.h>
 #include <nos/mm/vaddr_space.h>
 #include <nos/proc/process.h>
-#include <nos/proc/scheduler.h>
+#include <nos/sched/sched.h>
 
 struct task {
   struct trap_frame *tf;
@@ -57,11 +57,11 @@ task_init(void *entry)
 {
   struct process *ktask = process_alloc();
 
-  ktask->kernel_stack = kmalloc(PAGE_SIZE);
+  ktask->kernel_stack = (uintptr_t)kmalloc(PAGE_SIZE);
   ktask->kernel_stack += PAGE_SIZE;
 
-  ktask->page_dir = vaddr_space_create(&ktask->page_dir_phys);
-  if (!ktask->page_dir)
+  ktask->pgdir = vaddr_space_create(&ktask->cr3);
+  if (!ktask->pgdir)
     log_panic("vaddr_space_create failed");
 
   ktask->state = PROCESS_STATE_RUNNABLE;
@@ -111,7 +111,7 @@ task_setup(struct multiboot_info *mb_info)
 }
 
 struct trap_frame *
-schedule(struct trap_frame *tf)
+tassk_schedule(struct trap_frame *tf)
 {
   if (current_task != NULL) {
     current_task->tf = tf;

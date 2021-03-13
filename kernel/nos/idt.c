@@ -9,7 +9,7 @@
 #include <nos/ioport.h>
 #include <nos/pit.h>
 #include <nos/exception.h>
-#include <nos/proc/scheduler.h>
+#include <nos/sched/sched.h>
 
 extern void intr_stub_0(void);
 extern void intr_stub_1(void);
@@ -36,8 +36,6 @@ extern void intr_stub_32(void);
 extern void intr_stub_33(void);
 
 extern void intr_stub_48(void);
-
-extern void sched();
 
 // IDT 表项
 //
@@ -152,12 +150,9 @@ syscall(struct trap_frame *tf)
   return tf;
 }
 
-// 派发中断
-struct trap_frame *
-handle_interrupt(struct trap_frame *tf)
+static void
+trap_dispatch(struct trap_frame *tf)
 {
-  struct trap_frame *new_tf = tf;
-
   if (tf->trap_no <= 0x1F) {
     // 异常 [0, 31]
     printk("Exception %d\n", tf->trap_no);
@@ -169,24 +164,13 @@ handle_interrupt(struct trap_frame *tf)
   } else if (tf->trap_no >= T_IRQ0 && tf->trap_no <= 0x2F) {
     if (tf->trap_no == T_IRQ0 + IRQ_TIMER) {
       g_ticks++;
-      // new_tf = schedule(tf);
-      // 每次将 esp0 设为新任务的内核栈底
-      // 下次中断触发就会在这个新任务的内核栈上保存其状态
-      // 然后又切换到另外一个任务的内核堆栈去恢复下一个任务
-      // 如此反复
-      //
-      // 这个 +1 是必须的，不然会栈溢出
-      // tss.esp0 = (uint32_t)(new_tf + 1);
       pic_send_eoi(tf->trap_no - T_IRQ0);
-
-      if (current_process && current_process->state == PROCESS_STATE_RUNNING)
-        yield();
     } else {
       // IRQs [32, 47]
       pic_send_eoi(tf->trap_no - T_IRQ0);
     }
   } else if (tf->trap_no == 0x30) {
-    new_tf = syscall(tf);
+    syscall(tf);
   } else {
     // 其他暂未处理的中断号
     printk("Unkown interrupt %d\n", tf->trap_no);
@@ -194,6 +178,21 @@ handle_interrupt(struct trap_frame *tf)
       asm volatile("cli; hlt");
     }
   }
+}
 
-  return new_tf;
+//---------------------------------------------------------------------
+// 派发中断
+//---------------------------------------------------------------------
+void
+handle_interrupt(struct trap_frame *tf)
+{
+  if (current_process == NULL) {
+    trap_dispatch(tf);
+  } else {
+    trap_dispatch(tf);
+    if (1 /*!in_kernel*/) {
+      if (current_process->need_resched)
+        schedule();
+    }
+  }
 }
