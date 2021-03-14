@@ -17,7 +17,7 @@ paging_setup()
 {
   uint32_t i;
   kernel_pgdir = (struct page_directory *)boot_pgdir;
-  kernel_pgdir_phys = CAST_V2P(kernel_pgdir);
+  kernel_pgdir_phys = CAST_V2P((uintptr_t)kernel_pgdir);
 
   // [4MB, 8MB) 的页表区域清零
   bzero((void *)KERNEL_PG_1, KERNEL_PG_1_LIM - KERNEL_PG_1);

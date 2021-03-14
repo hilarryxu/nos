@@ -12,9 +12,9 @@
 #include <nos/mm/vaddr_space.h>
 #include <nos/sched/sched.h>
 
-// 这里让进程的用户栈和内核栈不在同一个页目录项下
-#define PROCESS_KERNEL_STACK (KERNEL_BASE - (16 * PAGE_SIZE))
 #define PROCESS_USER_STACK (KERNEL_BASE - (1024 * PAGE_SIZE))
+
+extern char boot_kstack[];
 
 extern void switch_to(struct kstack_context **old, struct kstack_context *new);
 extern void trapret();
@@ -212,7 +212,7 @@ init_from_binary(struct process *process, const char *binary, size_t size)
   }
 
 bad:
-  prev_cr3 = CAST_V2P((uintptr_t)kernel_pgdir);
+  prev_cr3 = kernel_pgdir_phys;
   vmm_switch_pgdir(prev_cr3);
 
   return rc;
@@ -339,13 +339,12 @@ process_setup()
   idle_process = process_alloc();
   ASSERT(idle_process && idle_process->pid == 0);
 
-  idle_process->kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_POW2);
-  idle_process->kernel_stack += KERNEL_STACK_SIZE;
+  idle_process->kernel_stack = (uintptr_t)boot_kstack + KERNEL_STACK_SIZE;
   idle_process->need_resched = true;
   process_set_name(idle_process, "idle");
 
   idle_process->pgdir = kernel_pgdir;
-  idle_process->cr3 = CAST_V2P((uintptr_t)kernel_pgdir);
+  idle_process->cr3 = kernel_pgdir_phys;
 
   current_process = idle_process;
 }

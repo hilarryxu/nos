@@ -61,7 +61,7 @@ task_init(void *entry)
   ktask->kernel_stack += KERNEL_STACK_SIZE;
 
   ktask->pgdir = kernel_pgdir;
-  ktask->cr3 = CAST_V2P((uintptr_t)kernel_pgdir);
+  ktask->cr3 = kernel_pgdir_phys;
 
   ktask->state = PROCESS_STATE_RUNNABLE;
   ktask->entry = entry;

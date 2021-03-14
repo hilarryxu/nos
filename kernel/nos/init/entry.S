@@ -9,8 +9,8 @@
 # define EXT_C(sym)                     sym
 #endif
 
-/* 16KB 大小的栈 */
-#define KSTACK_SIZE                     0x4000
+/* 8KB 大小的栈 */
+#define KSTACK_SIZE                     0x2000
 
 /* 内核的虚拟基址 */
 #define KERNEL_VIRTUAL_BASE             0xC0000000
@@ -27,8 +27,8 @@
 /*
  * 定义 multiboot 头部标志
  *
- * MULTIBOOT_PAGE_ALIGN     页对齐 multiboot_info 结构体
- * MULTIBOOT_MEMORY_INFO    multiboot_info 中包含内存信息
+ * MULTIBOOT_PAGE_ALIGN     页对齐 multiboot_info_t 结构体
+ * MULTIBOOT_MEMORY_INFO    multiboot_info_t 中包含内存信息
  */
 #define MULTIBOOT_HEADER_FLAGS          MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | 0
 
@@ -137,4 +137,5 @@ hang_loop:
 
 # boot_kstack 为栈底
 # .comm 定义的符号最后会放到 .bss 段中
+.global boot_kstack
 .comm boot_kstack, KSTACK_SIZE

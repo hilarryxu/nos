@@ -32,6 +32,7 @@ struct page_table {
 };
 
 extern struct page_directory *kernel_pgdir;
+extern phys_addr_t kernel_pgdir_phys;
 
 // 初始化虚拟内存管理
 void vmm_setup();
