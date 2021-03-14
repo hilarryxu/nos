@@ -37,7 +37,7 @@ page_fault(struct trap_frame *tf)
 {
   uint32_t cr2 = read_cr2();
 
-  printk("Page fault exception at EIP: 0x%X, vaddr: 0x%X\n", tf->eip, cr2);
+  printk("Page fault exception at EIP: 0x%08x, vaddr: 0x%08x\n", tf->eip, cr2);
   printk("Error code: %b\n", tf->error_code);
 
   // bit 0: 为 0 表示页面不在内存中
@@ -70,7 +70,7 @@ page_fault(struct trap_frame *tf)
   }
 
   if (!(tf->error_code & 0x4)) {
-    stacktrace_print();
+    // stacktrace_print();
   }
 
   return -1;

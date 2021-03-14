@@ -30,6 +30,21 @@ SECTIONS
         KERNEL_RODATA_END = .;
     }
 
+    /* 把 gstab 调试信息也加载到程序头中 */
+    .stab : {
+        PROVIDE(__STAB_BEGIN__ = .);
+        *(.stab)
+        PROVIDE(__STAB_END__ = .);
+        BYTE(0)  /* 强制连接器分配该节 */
+    }
+
+    .stabstr : {
+        PROVIDE(__STABSTR_BEGIN__ = .);
+        *(.stabstr)
+        PROVIDE(__STABSTR_END__ = .);
+        BYTE(0)  /* 强制连接器分配该节 */
+    }
+
     .bss : AT(ADDR(.bss) - 0xC0000000) ALIGN(4K) {
         KERNEL_BSS_START = .;
         *(COMMON)
@@ -43,4 +58,9 @@ SECTIONS
     KERNEL_END_PHYS = . - 0xC0000000;
     /* 内核镜像 */
     KERNEL_SIZE = KERNEL_END - KERNEL_START;
+
+    /* 忽略一些不需要的节 */
+    /DISCARD/ : {
+        *(.eh_frame .comment)
+    }
 }

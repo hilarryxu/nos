@@ -4,6 +4,10 @@
 #include <stddef.h>  // size_t
 #include <stdint.h>
 
+#define __always_inline inline __attribute__((always_inline))
+#define __noinline __attribute__((noinline))
+#define __noreturn __attribute__((noreturn))
+
 typedef unsigned char u_char;
 typedef uint32_t phys_addr_t;
 

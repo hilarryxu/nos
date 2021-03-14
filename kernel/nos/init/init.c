@@ -125,6 +125,9 @@ kernel_main(unsigned long addr, unsigned long magic)
     }
   }
 
+  // ASSERT(0 == 1);
+  stacktrace_print();
+
   // 开中断
   intr_enable();
 
