@@ -36,7 +36,7 @@ paging_setup()
   for (i = KERNEL_PDE_INDEX + 1; i < KERNEL_PDE_INDEX + NR_IDENTITY_MAP; i++) {
     kernel_pgdir->entries[i] = (pde_t)((i - KERNEL_PDE_INDEX) * SIZE_4MB) |
                                VMM_PG_4M | VMM_WRITABLE | VMM_PRESENT;
-    loga("pde[%d] = 0x%X", i, kernel_pgdir->entries[i]);
+    loga("pde[%d] = 0x%08x", i, kernel_pgdir->entries[i]);
   }
 
   // 将内核页目录与 [4MB, 8MB) 区间预留的内核页表数组关联起来
@@ -51,10 +51,10 @@ paging_setup()
   kernel_pgdir->entries[1023] =
       (pde_t)kernel_pgdir_phys | VMM_WRITABLE | VMM_PRESENT;
 
-  loga("pde[%d] = 0x%X", 0, kernel_pgdir->entries[0]);
-  loga("pde[%d] = 0x%X", KERNEL_PDE_INDEX,
+  loga("pde[%d] = 0x%08x", 0, kernel_pgdir->entries[0]);
+  loga("pde[%d] = 0x%08x", KERNEL_PDE_INDEX,
        kernel_pgdir->entries[KERNEL_PDE_INDEX]);
-  loga("pde[%d] = 0x%X", 1023, kernel_pgdir->entries[1023]);
+  loga("pde[%d] = 0x%08x", 1023, kernel_pgdir->entries[1023]);
 
   // 设置 cr3 寄存器，刷新整个 TLB
   vmm_switch_pgdir(kernel_pgdir_phys);

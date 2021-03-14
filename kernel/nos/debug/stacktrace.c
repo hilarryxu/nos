@@ -4,7 +4,7 @@
 #include <nos/debug/stab.h>
 #include <nos/arch.h>
 
-#define STACKFRAME_DEPTH 20
+#define STACKTRACE_DEPTH 20
 
 extern const struct stab __STAB_BEGIN__[];  // beginning of stabs table
 extern const struct stab __STAB_END__[];    // end of stabs table
@@ -251,6 +251,7 @@ print_debuginfo(uintptr_t eip)
   }
 }
 
+#if 0
 static __noinline uint32_t
 read_eip(void)
 {
@@ -258,6 +259,7 @@ read_eip(void)
   asm volatile("movl 4(%%ebp), %0" : "=r"(eip));
   return eip;
 }
+#endif
 
 /* *
  * stacktrace_print - print a list of the saved eip values from the nested
@@ -296,26 +298,6 @@ read_eip(void)
  * jumping to the kernel entry, the value of ebp has been set to zero, that's
  * the boundary.
  * */
-void
-stacktrace_print()
-{
-  uint32_t ebp = read_ebp(), eip = read_eip();
-
-  int i, j;
-  for (i = 0; ebp != 0 && i < STACKFRAME_DEPTH; i++) {
-    printk("ebp:0x%08x eip:0x%08x args:", ebp, eip);
-    uint32_t *args = (uint32_t *)ebp + 2;
-    for (j = 0; j < 4; j++) {
-      printk("0x%08x ", args[j]);
-    }
-    printk("\n");
-    // print_debuginfo(eip - 1);
-    eip = ((uint32_t *)ebp)[1];
-    ebp = ((uint32_t *)ebp)[0];
-  }
-}
-
-#if 0
 struct stack_frame {
   struct stack_frame *ebp;
   uintptr_t eip;
@@ -329,14 +311,16 @@ stacktrace_print()
 
   asm volatile("movl %%ebp, %0" : "=r"(stack_frame));
 
-  for (int i = 0; i < 10; i++) {
-    if (!stack_frame)
-      break;
-
+  for (int i = 0; stack_frame && i < STACKTRACE_DEPTH; i++) {
     addr = stack_frame->eip;
-    printk("  0x%X: %s\n", addr, "<not found>");
+    printk("ebp:0x%08x eip:0x%08x args:", stack_frame->ebp, addr);
+    uint32_t *args = (uint32_t *)stack_frame + 2;
+    for (int j = 0; j < 4; j++) {
+      printk("0x%08x ", args[j]);
+    }
+    printk("\n");
+    print_debuginfo(addr - 1);
 
     stack_frame = stack_frame->ebp;
   }
 }
-#endif

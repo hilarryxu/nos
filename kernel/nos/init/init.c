@@ -102,13 +102,13 @@ kernel_main(unsigned long addr, unsigned long magic)
 
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
     printk("\nMultiboot:\n", mb_info->flags);
-    printk("flags: 0x%X\n", mb_info->flags);
-    printk("mem_lower: 0x%X\n", mb_info->mem_lower);
-    printk("mem_upper: 0x%X\n", mb_info->mem_upper);
-    printk("mods_addr: 0x%X\n", mb_info->mods_addr);
+    printk("flags: 0x%x\n", mb_info->flags);
+    printk("mem_lower: 0x%x\n", mb_info->mem_lower);
+    printk("mem_upper: 0x%x\n", mb_info->mem_upper);
+    printk("mods_addr: 0x%x\n", mb_info->mods_addr);
     printk("mods_count: %d\n", mb_info->mods_count);
 
-    printk("mmap_addr: 0x%X\n", mb_info->mmap_addr);
+    printk("mmap_addr: 0x%x\n", mb_info->mmap_addr);
     printk("mmap_length: %d\n", mb_info->mmap_length);
     struct multiboot_mmap_entry *mmap_entry =
         (struct multiboot_mmap_entry *)CAST_P2V(mb_info->mmap_addr);
@@ -119,14 +119,11 @@ kernel_main(unsigned long addr, unsigned long magic)
       if (mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
         uint32_t addr = mmap_entry->addr;
         uint32_t end_addr = addr + mmap_entry->len;
-        printk("  [0x%X ~ 0x%X)\n", addr, end_addr);
+        printk("  [0x%08x ~ 0x%08x)\n", addr, end_addr);
       }
       mmap_entry++;
     }
   }
-
-  // ASSERT(0 == 1);
-  stacktrace_print();
 
   // 开中断
   intr_enable();

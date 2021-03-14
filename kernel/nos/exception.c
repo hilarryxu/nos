@@ -70,7 +70,7 @@ page_fault(struct trap_frame *tf)
   }
 
   if (!(tf->error_code & 0x4)) {
-    // stacktrace_print();
+    stacktrace_print();
   }
 
   return -1;

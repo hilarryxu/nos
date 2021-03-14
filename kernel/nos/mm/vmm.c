@@ -22,7 +22,7 @@ pte_t *
 vmm_get_pte_ptr(uintptr_t vaddr, enum vmm_get_pte_ptr_op op, uint32_t flags)
 {
   if (vaddr & 0xFFF) {
-    log_panic("vmm_get_pte_ptr: unaligned vaddr 0x%X", vaddr);
+    log_panic("vmm_get_pte_ptr: unaligned vaddr 0x%08x", vaddr);
   }
 
   uint32_t pde_index = VMM_PDE_INDEX(vaddr);
@@ -55,9 +55,10 @@ vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
     return -1;
 
   if (*pte_ptr & VMM_PRESENT) {
-    log_panic("vmm_map_page: failed to map 0x%X to 0x%X, already has map 0x%X "
-              "to 0x%X",
-              vaddr, paddr, vaddr, *pte_ptr & PAGE_FRAME_MASK);
+    log_panic(
+        "vmm_map_page: failed to map 0x%08x to 0x%08x, already has map 0x%08x "
+        "to 0x%08x",
+        vaddr, paddr, vaddr, *pte_ptr & PAGE_FRAME_MASK);
   }
 
   *pte_ptr = (pte_t)paddr | flags | VMM_PRESENT;
