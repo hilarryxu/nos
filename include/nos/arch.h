@@ -79,9 +79,9 @@ ltr(uint16_t sel)
 }
 
 static __always_inline void
-invlpg(void *addr)
+invlpg(uintptr_t vaddr)
 {
-  asm volatile("invlpg (%0)" ::"r"(addr) : "memory");
+  asm volatile("invlpg (%0)" ::"r"(vaddr) : "memory");
 }
 
 #endif  // !_NOS_ARCH_H

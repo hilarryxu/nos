@@ -3,26 +3,25 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <nos/nos.h>
+#include <nos/arch.h>
 #include <nos/mm/pmm.h>
 #include <nos/mm/kheap.h>
 
+// 页目录的虚拟地址（魔法值）
 #define MAGIC_PAGE_DIR_ADDR 0xFFFFF000
+
+// 页表的虚拟地址基址（魔法值）
 #define MAGIC_PAGE_TABLE_ADDR 0xFFC00000
 
-// static struct page_directory *current_pgdir;
-
-enum vmm_get_pte_ptr_op {
-  VMM_CREATE_PAGE_TABLE_E = 1,
-  VMM_NOT_CREATE_PAGE_TABLE_E
-};
-
-pte_t *
-vmm_get_pte_ptr(uintptr_t vaddr, enum vmm_get_pte_ptr_op op, uint32_t flags)
+// 获取页表项的指针
+static pte_t *
+vmm_get_pte_ptr(uintptr_t vaddr, bool alloc, uint32_t flags)
 {
   if (vaddr & 0xFFF) {
-    log_panic("vmm_get_pte_ptr: unaligned vaddr 0x%08x", vaddr);
+    log_panic("unaligned vaddr 0x%08x", vaddr);
   }
 
   uint32_t pde_index = VMM_PDE_INDEX(vaddr);
@@ -33,10 +32,11 @@ vmm_get_pte_ptr(uintptr_t vaddr, enum vmm_get_pte_ptr_op op, uint32_t flags)
   struct page_table *page_table =
       (struct page_table *)(MAGIC_PAGE_TABLE_ADDR + (pde_index << 12));
 
-  if (!(page_dir->entries[pde_index] & VMM_PRESENT) &&
-      (op == VMM_CREATE_PAGE_TABLE_E)) {
+  if (!(page_dir->entries[pde_index] & VMM_PRESENT) && alloc) {
     phys_addr_t page_table_phys = pmm_alloc_block();
+    // FIXME: 页表的 flags 是否需要也加到函数参数中
     page_dir->entries[pde_index] = (pde_t)page_table_phys | flags | VMM_PRESENT;
+    // 清空页表所占一页内存数据
     bzero((void *)page_table, PAGE_SIZE);
   }
 
@@ -46,32 +46,38 @@ vmm_get_pte_ptr(uintptr_t vaddr, enum vmm_get_pte_ptr_op op, uint32_t flags)
   return NULL;
 }
 
+//---------------------------------------------------------------------
+// 在当前地址空间下建立页映射
+//---------------------------------------------------------------------
 int
 vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
 {
-  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, VMM_CREATE_PAGE_TABLE_E, flags);
+  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, true, flags);
   if (pte_ptr == NULL)
     return -1;
 
   if (*pte_ptr & VMM_PRESENT) {
     log_panic(
-        "vmm_map_page: failed to map 0x%08x to 0x%08x, already has map 0x%08x "
+        "failed to map 0x%08x to 0x%08x, already has map 0x%08x "
         "to 0x%08x",
         vaddr, paddr, vaddr, *pte_ptr & PAGE_FRAME_MASK);
   }
 
   *pte_ptr = (pte_t)paddr | flags | VMM_PRESENT;
 
-  // Note: not support 4MB big pages
-  VMM_INVALIDATE_PAGE(vaddr);
+  // NOTE: not support 4MB big pages
+  invlpg(vaddr);
 
   return NOS_OK;
 }
 
+//---------------------------------------------------------------------
+// 在当前地址空间下取消页映射
+//---------------------------------------------------------------------
 void
 vmm_unmap_page(uintptr_t vaddr)
 {
-  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, VMM_NOT_CREATE_PAGE_TABLE_E, 0);
+  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, false, 0);
 
   if (pte_ptr) {
     pmm_free_block(*pte_ptr & PAGE_FRAME_MASK);
@@ -79,6 +85,7 @@ vmm_unmap_page(uintptr_t vaddr)
   }
 }
 
+// 连续建立映射多页
 void
 vmm_map_pages(uintptr_t vaddr, phys_addr_t paddr, size_t num, uint32_t flags)
 {
@@ -89,6 +96,7 @@ vmm_map_pages(uintptr_t vaddr, phys_addr_t paddr, size_t num, uint32_t flags)
   }
 }
 
+// 连续取消映射多页
 void
 vmm_unmap_pages(uintptr_t vaddr, size_t num)
 {
@@ -98,24 +106,36 @@ vmm_unmap_pages(uintptr_t vaddr, size_t num)
   }
 }
 
+
+//---------------------------------------------------------------------
+// 在当前地址空间下根据虚拟地址获得其映射对应的物理地址
+//---------------------------------------------------------------------
 int
-vmm_v2p(uintptr_t vaddr, phys_addr_t *paddr_ptr)
+vmm_v2p(uintptr_t vaddr, phys_addr_t *p_paddr)
 {
-  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, VMM_NOT_CREATE_PAGE_TABLE_E, 0);
+  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, false, 0);
 
   if (!pte_ptr)
     return -1;
 
-  if (paddr_ptr) {
+  if (p_paddr) {
     return (((uintptr_t)*pte_ptr) & PAGE_FRAME_MASK) + (vaddr & 0xFFF);
   }
 
   return NOS_OK;
 }
 
-void
+//---------------------------------------------------------------------
+// 初始化虚拟内存管理
+//---------------------------------------------------------------------
+int
 vmm_setup()
 {
+  log_debug(LOG_INFO, "[vmm] setup");
+
+  log_debug(LOG_INFO, "[vmm] done");
+
+  return NOS_OK;
 }
 
 //---------------------------------------------------------------------

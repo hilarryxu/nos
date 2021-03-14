@@ -45,6 +45,8 @@ pmm_setup(phys_addr_t free_addr, struct multiboot_info *mb_info)
 {
   UNUSED(mb_info);
 
+  log_debug(LOG_INFO, "[pmm] setup");
+
   // 暂时没用到
   boot_allocator_init(CAST_P2V(free_addr));
 
@@ -59,6 +61,8 @@ pmm_setup(phys_addr_t free_addr, struct multiboot_info *mb_info)
     paddr += PMM_FRAME_SIZE;
     max_frames++;
   }
+
+  log_debug(LOG_INFO, "[pmm] done");
 
   return NOS_OK;
 }

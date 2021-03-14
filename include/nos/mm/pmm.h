@@ -30,4 +30,4 @@ uint32_t pmm_get_total_frames();
 // 获取最大物理内存地址
 uint64_t pmm_get_max_phys_addr(struct multiboot_info *mb_info);
 
-#endif  // _NOS_MM_PMM_H
+#endif  // !_NOS_MM_PMM_H
