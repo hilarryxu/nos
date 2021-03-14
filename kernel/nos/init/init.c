@@ -148,9 +148,11 @@ kernel_main(unsigned long addr, unsigned long magic)
   loga_hexdump(buf, nread, "buf [%p] with %d bytes of data", buf, nread);
   vfs_close_free(file);
 
-  process_exec_binary(buf, bin_len, NULL);
-  process_exec_binary(buf, bin_len, NULL);
-  process_exec_binary(buf, bin_len, NULL);
+  process_exec_image((uintptr_t)buf, bin_len, NULL);
+  process_exec_image((uintptr_t)buf, bin_len, NULL);
+  process_exec_image((uintptr_t)buf, bin_len, NULL);
+  process_exec_image((uintptr_t)buf, bin_len, NULL);
+  process_exec_image((uintptr_t)buf, bin_len, NULL);
 
   printk("[%-8s] success!\n\n", "Entry");
 

@@ -71,11 +71,14 @@ char *process_set_name(struct process *process, const char *name);
 // 调度运行进程
 void process_run(struct process *process);
 
+int alloc_process_stacks(struct process *process);
+
 // 唤醒进程
 void process_wakeup(struct process *process);
 
-int process_exec_binary(const char *binary, size_t size,
-                        struct process **p_process);
+int process_exec_image(uintptr_t image_start, size_t image_size,
+                       struct process **p_process);
+
 void process_exit(struct process *process, int exit_code);
 
 // idle 内核线程（循环跑，不会返回）

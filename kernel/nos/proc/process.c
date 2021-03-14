@@ -11,6 +11,7 @@
 #include <nos/mm/kheap.h>
 #include <nos/mm/vaddr_space.h>
 #include <nos/sched/sched.h>
+#include <nos/bin_loader/loader.h>
 
 #define PROCESS_USER_STACK (KERNEL_BASE - (1024 * PAGE_SIZE))
 
@@ -123,7 +124,7 @@ init_process_context(struct process *process)
 }
 
 // 为进程分配用户堆栈和内核堆栈
-static int
+int
 alloc_process_stacks(struct process *process)
 {
   uintptr_t kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_POW2);
@@ -145,90 +146,18 @@ alloc_process_stacks(struct process *process)
   return NOS_OK;
 }
 
-#if 0
-static int
-init_from_elf(struct process *proc, const char *elf, size_t size)
-{
-  // TODO: need page_dir's phys_addr
-  process->page_dir = vaddr_space_create(NULL);
-  if (!process->page_dir)
-    return -1;
-
-  if (load_elf_program(proc, elf, size) != NOS_OK)
-    return -1;
-
-  if (alloc_process_stacks(proc) != NOS_OK)
-    return -1;
-
-  return NOS_OK;
-}
-#endif
-
-#define BINARY_ENTRY_VADDR 0x200000;
-
-static int
-load_binary_program(struct process *process, const char *binary, size_t size)
-{
-  size_t aligned_size = ALIGN_UP(size, PAGE_SIZE);
-  uintptr_t vaddr_start = (uintptr_t)BINARY_ENTRY_VADDR;
-  uintptr_t vaddr = vaddr_start;
-  uintptr_t end_vaddr = vaddr + aligned_size;
-
-  for (; vaddr < end_vaddr; vaddr += PAGE_SIZE) {
-    phys_addr_t paddr = pmm_alloc_block();
-    vmm_map_page(vaddr, paddr, VMM_WRITABLE | VMM_USER);
-  }
-
-  bzero((void *)vaddr_start, aligned_size);
-  memcpy((void *)vaddr_start, binary, size);
-
-  process->entry = (void *)BINARY_ENTRY_VADDR;
-
-  return NOS_OK;
-}
-
-static int
-init_from_binary(struct process *process, const char *binary, size_t size)
-{
-  int rc = NOS_OK;
-  phys_addr_t prev_cr3;
-
-  process->pgdir = vaddr_space_create(&process->cr3);
-  if (!process->pgdir)
-    return -1;
-
-  // TODO: when swith back
-  vmm_switch_pgdir(process->cr3);
-
-  // 加载二进制可执行程序到进程的地址空间
-  if (load_binary_program(process, binary, size) != NOS_OK) {
-    rc = -1;
-    goto bad;
-  }
-
-  if (alloc_process_stacks(process) != NOS_OK) {
-    rc = -1;
-    goto bad;
-  }
-
-bad:
-  prev_cr3 = kernel_pgdir_phys;
-  vmm_switch_pgdir(prev_cr3);
-
-  return rc;
-}
-
 //---------------------------------------------------------------------
 // 运行二进制可执行程序
 //---------------------------------------------------------------------
 int
-process_exec_binary(const char *binary, size_t size, struct process **p_process)
+process_exec_image(uintptr_t image_start, size_t image_size,
+                   struct process **p_process)
 {
   struct process *process = process_alloc();
   if (!process)
     return -1;
 
-  if (init_from_binary(process, binary, size) != NOS_OK) {
+  if (loader_load_image(process, image_start, image_size) != NOS_OK) {
     process_destory(process);
     return -1;
   }

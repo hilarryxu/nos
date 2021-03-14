@@ -337,6 +337,8 @@ for name in [
     'debug/stacktrace',
     'libs/printf',
     'syscall/syscall',
+    'bin_loader/loader',
+    'bin_loader/flat_loader',
 ]:
     kernel_objs += kernel_cc(name)
 
