@@ -36,7 +36,7 @@ vmm_get_pte_ptr(uintptr_t vaddr, enum vmm_get_pte_ptr_op op, uint32_t flags)
   if (!(page_dir->entries[pde_index] & VMM_PRESENT) &&
       (op == VMM_CREATE_PAGE_TABLE_E)) {
     phys_addr_t page_table_phys = pmm_alloc_block();
-    page_dir->entries[pte_index] = (pde_t)page_table_phys | flags | VMM_PRESENT;
+    page_dir->entries[pde_index] = (pde_t)page_table_phys | flags | VMM_PRESENT;
     bzero((void *)page_table, PAGE_SIZE);
   }
 
@@ -49,8 +49,7 @@ vmm_get_pte_ptr(uintptr_t vaddr, enum vmm_get_pte_ptr_op op, uint32_t flags)
 int
 vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
 {
-  pte_t *pte_ptr =
-      vmm_get_pte_ptr(vaddr, VMM_CREATE_PAGE_TABLE_E, VMM_WRITABLE);
+  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, VMM_CREATE_PAGE_TABLE_E, flags);
   if (pte_ptr == NULL)
     return -1;
 

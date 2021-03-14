@@ -138,11 +138,16 @@ kernel_main(unsigned long addr, unsigned long magic)
   vfs_open_malloc(vfs, "test.bin", &file, 0, NULL);
   printk("file: %p\n", file);
 
-  char buf[64];
-  int nread = vfs_read(file, buf, 8, 0);
+  char buf[120];
+  int bin_len = 120;
+  int nread = vfs_read(file, buf, bin_len, 0);
   printk("nread: %d\n", nread);
   loga_hexdump(buf, nread, "buf [%p] with %d bytes of data", buf, nread);
   vfs_close_free(file);
+
+  process_exec_binary(buf, bin_len, NULL);
+  process_exec_binary(buf, bin_len, NULL);
+  process_exec_binary(buf, bin_len, NULL);
 
   // 开中断
   intr_enable();

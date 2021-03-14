@@ -103,7 +103,7 @@ static void
 init_process_context(struct process *process)
 {
   char *sp = NULL;  // 栈帧
-  bool is_ktask = true;
+  bool is_ktask = false;
 
   if (is_ktask) {
     sp = (char *)process->kernel_stack;
@@ -126,19 +126,12 @@ init_process_context(struct process *process)
 static int
 alloc_process_stacks(struct process *process)
 {
-  phys_addr_t stack = pmm_alloc_block();
-  if (!stack)
-    return -1;
+  uintptr_t kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_POW2);
 
-  if (vmm_map_page((uintptr_t)(PROCESS_KERNEL_STACK - PAGE_SIZE), stack,
-                   VMM_WRITABLE) < 0) {
-    pmm_free_block(stack);
+  phys_addr_t stack = pmm_alloc_block();
+  if (!stack) {
     return -1;
   }
-
-  stack = pmm_alloc_block();
-  if (!stack)
-    return -1;
 
   if (vmm_map_page((uintptr_t)(PROCESS_USER_STACK - PAGE_SIZE), stack,
                    VMM_WRITABLE | VMM_USER) < 0) {
@@ -146,7 +139,7 @@ alloc_process_stacks(struct process *process)
     return -1;
   }
 
-  process->kernel_stack = (uintptr_t)PROCESS_KERNEL_STACK;
+  process->kernel_stack = kernel_stack + KERNEL_STACK_SIZE;
   process->user_stack = (uintptr_t)PROCESS_USER_STACK;
 
   return NOS_OK;
@@ -171,12 +164,14 @@ init_from_elf(struct process *proc, const char *elf, size_t size)
 }
 #endif
 
+#define BINARY_ENTRY_VADDR 0x200000;
+
 static int
 load_binary_program(struct process *process, const char *binary, size_t size)
 {
-  // Note: binary ptr addr must 4KB aligned
   size_t aligned_size = ALIGN_UP(size, PAGE_SIZE);
-  uintptr_t vaddr = (uintptr_t)binary;
+  uintptr_t vaddr_start = (uintptr_t)BINARY_ENTRY_VADDR;
+  uintptr_t vaddr = vaddr_start;
   uintptr_t end_vaddr = vaddr + aligned_size;
 
   for (; vaddr < end_vaddr; vaddr += PAGE_SIZE) {
@@ -184,7 +179,10 @@ load_binary_program(struct process *process, const char *binary, size_t size)
     vmm_map_page(vaddr, paddr, VMM_WRITABLE | VMM_USER);
   }
 
-  process->entry = (void *)0x200000;
+  bzero((void *)vaddr_start, aligned_size);
+  memcpy((void *)vaddr_start, binary, size);
+
+  process->entry = (void *)BINARY_ENTRY_VADDR;
 
   return NOS_OK;
 }
@@ -192,6 +190,9 @@ load_binary_program(struct process *process, const char *binary, size_t size)
 static int
 init_from_binary(struct process *process, const char *binary, size_t size)
 {
+  int rc = NOS_OK;
+  phys_addr_t prev_cr3;
+
   process->pgdir = vaddr_space_create(&process->cr3);
   if (!process->pgdir)
     return -1;
@@ -200,13 +201,21 @@ init_from_binary(struct process *process, const char *binary, size_t size)
   vmm_switch_pgdir(process->cr3);
 
   // 加载二进制可执行程序到进程的地址空间
-  if (load_binary_program(process, binary, size) != NOS_OK)
-    return -1;
+  if (load_binary_program(process, binary, size) != NOS_OK) {
+    rc = -1;
+    goto bad;
+  }
 
-  if (alloc_process_stacks(process) != NOS_OK)
-    return -1;
+  if (alloc_process_stacks(process) != NOS_OK) {
+    rc = -1;
+    goto bad;
+  }
 
-  return NOS_OK;
+bad:
+  prev_cr3 = CAST_V2P((uintptr_t)kernel_pgdir);
+  vmm_switch_pgdir(prev_cr3);
+
+  return rc;
 }
 
 //---------------------------------------------------------------------
@@ -313,6 +322,7 @@ process_run(struct process *process)
         init_process_context(next);
       }
       // 切换上下文，运行进程
+      // loga("switch_to(%d, %d)", prev->pid, next->pid);
       switch_to(&(prev->context), next->context);
     }
     local_intr_restore(intr_flag);
@@ -333,6 +343,9 @@ process_setup()
   idle_process->kernel_stack += KERNEL_STACK_SIZE;
   idle_process->need_resched = true;
   process_set_name(idle_process, "idle");
+
+  idle_process->pgdir = kernel_pgdir;
+  idle_process->cr3 = CAST_V2P((uintptr_t)kernel_pgdir);
 
   current_process = idle_process;
 }

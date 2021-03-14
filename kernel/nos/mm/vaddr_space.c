@@ -23,7 +23,7 @@ vaddr_space_create(phys_addr_t *p_pgdir_phys)
       }
 
       // 递归页目录
-      pgdir[1023] = (pde_t)V2P(vaddr) | VMM_PRESENT | VMM_WRITABLE;
+      pgdir[1023] = (pde_t)V2P(vaddr) | VMM_PRESENT | VMM_WRITABLE | VMM_USER;
 
       // 返回页目录的物理地址
       if (p_pgdir_phys) {
