@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include <nos/nos.h>
-#include <nos/arch.h>
+#include <nos/sync/sync.h>
 #include <nos/gdt.h>
 #include <nos/mm/paging.h>
 #include <nos/mm/pmm.h>

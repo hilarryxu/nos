@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <sys/types.h>
 
 #include <nos/macros.h>
 #include <nos/libs/printf.h>

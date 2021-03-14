@@ -3,8 +3,8 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <sys/types.h>
 
+#include <nos/types.h>
 #include <nos/trap.h>
 #include <nos/mm/vmm.h>
 #include "nc_sys_queue.h"

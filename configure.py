@@ -330,7 +330,6 @@ for name in [
     'drvs/serial',
     'debug/debug',
     'proc/process',
-    'sync/spinlock',
     'sched/sched',
     'drvs/keyboard',
     'fs/vfs',

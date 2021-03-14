@@ -1,5 +1,5 @@
-#ifndef _SYS_TYPES_H
-#define _SYS_TYPES_H
+#ifndef _NOS_TYPES_H
+#define _NOS_TYPES_H
 
 #ifndef _PTRDIFF_T
 #define _PTRDIFF_T
@@ -11,4 +11,4 @@ typedef int ssize_t;
 typedef int pid_t;
 typedef long off_t;
 
-#endif  // _SYS_TYPES_H
+#endif  // _NOS_TYPES_H

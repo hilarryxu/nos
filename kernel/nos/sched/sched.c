@@ -1,7 +1,7 @@
 #include <nos/sched/sched.h>
 
 #include <nos/nos.h>
-#include <nos/arch.h>
+#include <nos/sync/sync.h>
 #include "nc_sys_queue.h"
 
 TAILQ_HEAD(process_list, process);
