@@ -58,10 +58,23 @@ jamfs_write(struct file *file, const void *buf, size_t nbytes, off_t offset)
   return -1;
 }
 
+static int
+jamfs_get_filesize(struct file *file, int64_t *p_size)
+{
+  struct jamfs_file *p = (struct jamfs_file *)file;
+
+  if (p_size)
+    *p_size = p->file_header->length;
+
+  return NOS_OK;
+}
+
 static struct file_meths jamfs_file_meths = {.version = 1,
                                              .close = jamfs_close,
                                              .read = jamfs_read,
-                                             .write = jamfs_write};
+                                             .write = jamfs_write,
+                                             .get_filesize =
+                                                 jamfs_get_filesize};
 
 static int
 jamfs_open(struct vfs *vfs, const char *path, struct file *file, int flags,

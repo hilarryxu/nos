@@ -17,6 +17,7 @@ struct file_meths {
   int (*close)(struct file *);
   int (*read)(struct file *, void *buf, size_t nbytes, off_t offset);
   int (*write)(struct file *, const void *buf, size_t nbytes, off_t offset);
+  int (*get_filesize)(struct file *, int64_t *p_size);
 };
 
 struct vfs {
@@ -37,6 +38,8 @@ int vfs_open(struct vfs *, const char *path, struct file *, int flags,
 void vfs_close(struct file *);
 int vfs_read(struct file *, void *buf, size_t nbytes, off_t p_offset);
 int vsf_write(struct file *, const void *buf, size_t nbytes, off_t p_offset);
+
+int vfs_get_filesize(struct file *, int64_t *p_size);
 
 int vfs_mount(const char *path, struct vfs *vfs);
 int vfs_unmount(const char *path);

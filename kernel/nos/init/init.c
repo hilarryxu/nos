@@ -139,7 +139,10 @@ kernel_main(unsigned long addr, unsigned long magic)
   printk("file: %p\n", file);
 
   char buf[120];
-  int bin_len = 120;
+  int64_t bin_len_b64 = 0;
+  vfs_get_filesize(file, &bin_len_b64);
+  int bin_len = (int)bin_len_b64;
+  printk("filesize: %d\n", bin_len);
   int nread = vfs_read(file, buf, bin_len, 0);
   printk("nread: %d\n", nread);
   loga_hexdump(buf, nread, "buf [%p] with %d bytes of data", buf, nread);

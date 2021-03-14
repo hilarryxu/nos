@@ -58,6 +58,12 @@ vfs_write(struct file *file, const void *buf, size_t nbytes, off_t offset)
 }
 
 int
+vfs_get_filesize(struct file *file, int64_t *p_size)
+{
+  return file->meths->get_filesize(file, p_size);
+}
+
+int
 vfs_mount(const char *path, struct vfs *vfs)
 {
   struct mount *mount = kmalloc(sizeof(*mount));
