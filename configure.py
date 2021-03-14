@@ -308,7 +308,8 @@ kernel_objs += n.build(
 )
 kernel_objs += n.build(
     built('initrd' + objext), 'kernel_asm',
-    'initrd.S'
+    'initrd.S',
+    implicit=[built('initrd')]
 )
 
 for name in [
@@ -376,6 +377,20 @@ user_test_bin = n.build(
 )
 
 all_targets += user_test_bin
+n.newline()
+
+#: initrd
+n.rule(
+    'r_initrd',
+    command='python scripts/build_initrd.py',
+    description='BUILD_INITRD $out'
+)
+initrd = n.build(
+    built('initrd'), 'r_initrd',
+    implicit=[trans_path('scripts/build_initrd.py')] + user_test_bin
+)
+
+all_targets += initrd
 n.newline()
 
 #: nos.img
