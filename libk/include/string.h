@@ -29,4 +29,4 @@ ffs(unsigned long val)
 
 __END_DECLS
 
-#endif /* _STRING_H_ */
+#endif /* !_STRING_H_ */

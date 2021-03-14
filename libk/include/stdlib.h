@@ -2,6 +2,7 @@
 #define _STDLIB_H_
 
 #include <sys/cdefs.h>
+#include <stddef.h>
 
 __BEGIN_DECLS
 
@@ -16,6 +17,9 @@ long int strtol(const char *nptr, char **endptr, int base);
 
 int rand(void);
 
+void qsort(void *base, size_t n, size_t width,
+           int (*compare)(const void *, const void *));
+
 __END_DECLS
 
-#endif /* _STDLIB_H_ */
+#endif /* !_STDLIB_H_ */
