@@ -4,4 +4,4 @@
 // 初始化分页
 void paging_setup();
 
-#endif  // _NOS_MM_PAGING_H
+#endif  // !_NOS_MM_PAGING_H
