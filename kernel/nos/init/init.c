@@ -16,6 +16,9 @@
 #include <nos/fs/jamfs.h>
 #include <nos/fs/vfs.h>
 
+void kernel_main(unsigned long addr, unsigned long magic)
+    __attribute__((noreturn));
+
 extern char initrd_start[];
 extern char initrd_end[];
 
@@ -24,7 +27,7 @@ extern char initrd_end[];
 //
 // addr:
 //   指向 multiboot 信息的结构体指针
-//   multiboot_info_t *
+//   struct multiboot_info *
 //   是处在内存低端的物理地址，所以用 P2V 转换成虚拟地址再访问
 //
 // magic:
@@ -35,12 +38,13 @@ kernel_main(unsigned long addr, unsigned long magic)
 {
   // 计算内核尾部开始的可用物理地址（不得超过 4MB，需要页对齐）
   // TODO: 这里直接用的 KERNEL_END_PHYS，后面考虑 multiboot mods 时需重新计算
-  phys_addr_t free_addr = ALIGN_UP((phys_addr_t)KERNEL_END_PHYS, PAGE_SIZE);
+  phys_addr_t aligned_free_addr =
+      ALIGN_UP((phys_addr_t)KERNEL_END_PHYS, PAGE_SIZE);
 
   // 兼容不用 GRUB（用自带简易 bootloader）启动的方式
-  multiboot_info_t *mb_info = NULL;
+  struct multiboot_info *mb_info = NULL;
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
-    mb_info = (multiboot_info_t *)P2V(addr);
+    mb_info = (struct multiboot_info *)P2V(addr);
   }
 
   // NOTE: 先把串口、日志、屏幕输出等辅助调试的功能初始化好
@@ -59,7 +63,7 @@ kernel_main(unsigned long addr, unsigned long magic)
   paging_setup();
 
   // 初始化物理内存管理子系统
-  pmm_setup(free_addr);
+  pmm_setup(aligned_free_addr, mb_info);
   // 初始化虚拟内存管理子系统
   vmm_setup();
   // 初始化内核堆管理子系统

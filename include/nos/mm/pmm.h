@@ -16,7 +16,7 @@
 #define PMM_MAX_FRAME (PMM_MAX_MEM_SIZE / PMM_FRAME_SIZE)
 
 // 初始化物理内存管理子系统
-void pmm_setup(phys_addr_t free_addr);
+int pmm_setup(phys_addr_t free_addr, struct multiboot_info *mb_info);
 
 // 申请分配一个物理页框
 phys_addr_t pmm_alloc_block();
@@ -25,6 +25,9 @@ phys_addr_t pmm_alloc_block();
 void pmm_free_block(phys_addr_t paddr);
 
 // 获取总的可用物理页框数
-uint32_t get_total_frames();
+uint32_t pmm_get_total_frames();
+
+// 获取最大物理内存地址
+uint64_t pmm_get_max_phys_addr(struct multiboot_info *mb_info);
 
 #endif  // _NOS_MM_PMM_H
