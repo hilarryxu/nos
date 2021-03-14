@@ -103,10 +103,9 @@ static void
 init_process_context(struct process *process)
 {
   char *sp = NULL;  // 栈帧
+  bool is_ktask = true;
 
-  // TODO: handle kernel task
-
-  if (1) {
+  if (is_ktask) {
     sp = (char *)process->kernel_stack;
   } else {
     init_trap_frame(process);
@@ -116,7 +115,7 @@ init_process_context(struct process *process)
   sp -= sizeof(*process->context);
   process->context = (struct kstack_context *)sp;
   bzero(process->context, sizeof(*process->context));
-  if (1) {
+  if (is_ktask) {
     process->context->eip = (uint32_t)process->entry;
   } else {
     process->context->eip = (uint32_t)trapret;
@@ -310,7 +309,7 @@ process_run(struct process *process)
       // 切换地址空间
       vmm_switch_pgdir(next->cr3);
       // 首次运行初始化入口内核栈
-      if (!next->context) {
+      if (next->pid != 0 && !next->context) {
         init_process_context(next);
       }
       // 切换上下文，运行进程
@@ -330,8 +329,8 @@ process_setup()
   idle_process = process_alloc();
   ASSERT(idle_process && idle_process->pid == 0);
 
-  idle_process->kernel_stack = (uintptr_t)kmalloc(PAGE_SIZE);
-  idle_process->kernel_stack += PAGE_SIZE;
+  idle_process->kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_POW2);
+  idle_process->kernel_stack += KERNEL_STACK_SIZE;
   idle_process->need_resched = true;
   process_set_name(idle_process, "idle");
 

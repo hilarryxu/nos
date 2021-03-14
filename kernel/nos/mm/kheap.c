@@ -73,3 +73,20 @@ kfree(void *p)
 {
   UNUSED(p);
 }
+
+void *
+kmalloc_ap(uint32_t order)
+{
+  size_t size = (2 << order) * PAGE_SIZE;
+
+  allocator.free_addr = PTR_ALIGN_UP(allocator.free_addr, PAGE_SIZE);
+  return kmalloc(size);
+}
+
+// TODO: 待实现
+void
+kfree_ap(void *p, uint32_t order)
+{
+  UNUSED(p);
+  UNUSED(order);
+}

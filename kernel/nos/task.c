@@ -57,12 +57,11 @@ task_init(void *entry)
 {
   struct process *ktask = process_alloc();
 
-  ktask->kernel_stack = (uintptr_t)kmalloc(PAGE_SIZE);
-  ktask->kernel_stack += PAGE_SIZE;
+  ktask->kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_POW2);
+  ktask->kernel_stack += KERNEL_STACK_SIZE;
 
-  ktask->pgdir = vaddr_space_create(&ktask->cr3);
-  if (!ktask->pgdir)
-    log_panic("vaddr_space_create failed");
+  ktask->pgdir = kernel_pgdir;
+  ktask->cr3 = CAST_V2P((uintptr_t)kernel_pgdir);
 
   ktask->state = PROCESS_STATE_RUNNABLE;
   ktask->entry = entry;

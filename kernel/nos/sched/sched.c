@@ -54,6 +54,9 @@ schedule()
       p = TAILQ_NEXT(p, process_link);
     }
 
+    // loga("current_process: %d, next: %d", current_process->pid, p ? p->pid :
+    // 0);
+
     // 找不到就运行 idle
     if (p == NULL || p->state != PROCESS_STATE_RUNNABLE) {
       p = idle_process;

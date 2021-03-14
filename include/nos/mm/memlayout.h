@@ -40,6 +40,11 @@ extern char KERNEL_BSS_END[];
 // 内核堆栈栈底
 #define KERNEL_STACK 0x9FC00
 
+#define KERNEL_STACK_POW2 1
+
+// 内核栈大小
+#define KERNEL_STACK_SIZE ((2 << KERNEL_STACK_POW2) * PAGE_SIZE)
+
 // [1MB, 4MB) 为内核可执行文件加载至内存区域
 
 // 内核的 4MB 页表存放位置 [4MB, 8MB)
