@@ -336,6 +336,7 @@ for name in [
     'fs/jamfs',
     'debug/stacktrace',
     'libs/printf',
+    'syscall/syscall',
 ]:
     kernel_objs += kernel_cc(name)
 

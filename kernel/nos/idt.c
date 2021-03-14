@@ -10,6 +10,7 @@
 #include <nos/pit.h>
 #include <nos/exception.h>
 #include <nos/sched/sched.h>
+#include <nos/syscall/syscall.h>
 
 extern void intr_stub_0(void);
 extern void intr_stub_1(void);
@@ -138,18 +139,6 @@ idt_setup()
   asm volatile("lidt %0" : : "m"(idtp));
 }
 
-struct trap_frame *
-syscall(struct trap_frame *tf)
-{
-  switch (tf->eax) {
-  case 0:
-    printk("%c", tf->ebx);
-    break;
-  }
-
-  return tf;
-}
-
 static void
 trap_dispatch(struct trap_frame *tf)
 {
@@ -175,7 +164,7 @@ trap_dispatch(struct trap_frame *tf)
       pic_send_eoi(tf->trap_no - T_IRQ0);
     }
   } else if (tf->trap_no == 0x30) {
-    syscall(tf);
+    syscall_dispatch(tf);
   } else {
     // 其他暂未处理的中断号
     printk("Unkown interrupt %d\n", tf->trap_no);
