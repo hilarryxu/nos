@@ -14,6 +14,10 @@
 #include <nos/drvs/serial.h>
 #include <nos/sched/sched.h>
 #include <nos/fs/jamfs.h>
+#include <nos/fs/vfs.h>
+
+extern char initrd_start[];
+extern char initrd_end[];
 
 //---------------------------------------------------------------------
 // 内核主函数
@@ -72,10 +76,13 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 初始化 IDT
   idt_setup();
 
+  inird_setup(initrd_start, initrd_end - initrd_start);
+  vfs_setup();
+
   // 初始化进程调度器
   process_setup();
   sched_steup();
-  task_setup(mb_info);
+  // task_setup(mb_info);
 
   // 试下 printk
   printk("Nos 0.1\n");
@@ -124,6 +131,18 @@ kernel_main(unsigned long addr, unsigned long magic)
       mmap_entry++;
     }
   }
+
+  struct vfs *vfs = vfs_find("/");
+  printk("vfs: %p\n", vfs);
+  struct file *file;
+  vfs_open_malloc(vfs, "test.bin", &file, 0, NULL);
+  printk("file: %p\n", file);
+
+  char buf[64];
+  int nread = vfs_read(file, buf, 8, 0);
+  printk("nread: %d\n", nread);
+  loga_hexdump(buf, nread, "buf [%p] with %d bytes of data", buf, nread);
+  vfs_close_free(file);
 
   // 开中断
   intr_enable();

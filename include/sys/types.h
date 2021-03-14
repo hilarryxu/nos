@@ -6,6 +6,8 @@
 typedef long ptrdiff_t;
 #endif
 
+typedef int ssize_t;
+
 typedef int pid_t;
 typedef long off_t;
 

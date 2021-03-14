@@ -306,6 +306,10 @@ kernel_objs += n.build(
     kernel_built('proc/switch_to' + objext), 'kernel_asm',
     kernel_src('proc/switch_to.S')
 )
+kernel_objs += n.build(
+    built('initrd' + objext), 'kernel_asm',
+    'initrd.S'
+)
 
 for name in [
     'init/init',
@@ -367,7 +371,8 @@ user_test_bin = n.build(
         kernel_ldflags='$kernel_ldflags -T{0}'.format(
             src('user/test/test.ld'),
         )
-    )
+    ),
+    implicit=[src('user/test/test.ld')]
 )
 
 all_targets += user_test_bin

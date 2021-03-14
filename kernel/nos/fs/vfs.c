@@ -91,7 +91,7 @@ vfs_unmount(const char *path)
 struct vfs *
 vfs_find(const char *path)
 {
-  if (*path != VFS_ROOT_DIR)
+  if (0 && *path != VFS_ROOT_DIR)
     return NULL;
 
   ASSERT(vfs_mount_list && vfs_mount_list->vfs);

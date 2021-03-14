@@ -11,15 +11,15 @@ struct jamfs_file {
   struct jamfs_file_header *file_header;
 };
 
-struct ramdisk {
-  char *ramdisk_base;
-  size_t ramdisk_size;
+struct initrd {
+  char *initrd_base;
+  size_t initrd_size;
   uint32_t nfiles;
   struct jamfs_file_header *file_headers;
 };
 
-static struct ramdisk ramdisk = {
-    .ramdisk_base = NULL, .ramdisk_size = 0, .nfiles = 0, .file_headers = NULL};
+static struct initrd initrd = {
+    .initrd_base = NULL, .initrd_size = 0, .nfiles = 0, .file_headers = NULL};
 
 static int
 jamfs_close(struct file *file)
@@ -35,12 +35,12 @@ static int
 jamfs_read(struct file *file, void *buf, size_t nbytes, off_t offset)
 {
   struct jamfs_file *p = (struct jamfs_file *)file;
-  void *src = ramdisk.ramdisk_base + p->file_header->offset + offset;
-  void *start = ramdisk.ramdisk_base + p->file_header->offset;
+  void *src = initrd.initrd_base + p->file_header->offset + offset;
+  void *start = initrd.initrd_base + p->file_header->offset;
   void *end =
-      ramdisk.ramdisk_base + p->file_header->offset + p->file_header->length;
+      initrd.initrd_base + p->file_header->offset + p->file_header->length;
   ASSERT(src >= start && src + nbytes <= end);
-  int nread = offset;
+  int nread = nbytes;
 
   memcpy(buf, src, nbytes);
 
@@ -75,9 +75,9 @@ jamfs_open(struct vfs *vfs, const char *path, struct file *file, int flags,
     return -1;
 
   bzero(p, sizeof(*p));
-  for (uint32_t i = 0; i < ramdisk.nfiles; i++) {
-    if (strcmp(path, ramdisk.file_headers[i].name) == 0) {
-      p->file_header = ramdisk.file_headers + i;
+  for (uint32_t i = 0; i < initrd.nfiles; i++) {
+    if (strcmp(path, initrd.file_headers[i].name) == 0) {
+      p->file_header = initrd.file_headers + i;
     }
   }
   if (!p->file_header)
@@ -99,13 +99,13 @@ struct vfs jamfs = {.version = 1,
                     .open = jamfs_open};
 
 void
-inird_setup(void *ramdisk_base, size_t ramdisk_size)
+inird_setup(void *initrd_base, size_t initrd_size)
 {
-  struct jamfs_header *fs_header = (struct jamfs_header *)ramdisk_base;
+  struct jamfs_header *fs_header = (struct jamfs_header *)initrd_base;
 
-  ramdisk.ramdisk_base = ramdisk_base;
-  ramdisk.ramdisk_size = ramdisk_size;
-  ramdisk.nfiles = fs_header->nfiles;
-  ramdisk.file_headers =
-      (struct jamfs_file_header *)(ramdisk_base + sizeof(*fs_header));
+  initrd.initrd_base = initrd_base;
+  initrd.initrd_size = initrd_size;
+  initrd.nfiles = fs_header->nfiles;
+  initrd.file_headers =
+      (struct jamfs_file_header *)(initrd_base + sizeof(*fs_header));
 }
