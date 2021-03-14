@@ -43,14 +43,15 @@ kernel_main(unsigned long addr, unsigned long magic)
     mb_info = (multiboot_info_t *)P2V(addr);
   }
 
-  // Note: 先把串口、日志、屏幕输出等辅助调试的功能初始化好
+  // NOTE: 先把串口、日志、屏幕输出等辅助调试的功能初始化好
 
   // 初始化串口
   serial_setup();
-  // 初始化调试日志输出
-  debug_setup(LOG_DEBUG);
   // 初始化 CGA
   cga_setup();
+  // 初始化调试日志输出
+  // FIXME: 从启动参数中读取日志级别
+  debug_setup(LOG_DEBUG);
 
   // 重新初始化内核页目录
   // 去掉 [0, 4MB) -> [0, 4MB) 的映射
@@ -63,7 +64,7 @@ kernel_main(unsigned long addr, unsigned long magic)
   vmm_setup();
   // 初始化内核堆管理子系统
   kheap_setup();
-  // Note: 内核代码可以使用 kmalloc 动态分配内存了
+  // NOTE: 现在内核代码可以使用 kmalloc 动态分配内存了
 
   // 初始化 GDT
   gdt_setup();
@@ -76,13 +77,15 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 初始化 IDT
   idt_setup();
 
+  // 初始化 initrd 只读内存存储介质
   inird_setup(initrd_start, initrd_end - initrd_start);
+  // 初始化 vfs
   vfs_setup();
 
-  // 初始化进程调度器
+  // 初始化进程子系统
   process_setup();
+  // 初始化进程调度器
   sched_steup();
-  // task_setup(mb_info);
 
   // 试下 printk
   printk("Nos 0.1\n");
@@ -96,14 +99,11 @@ kernel_main(unsigned long addr, unsigned long magic)
   printk(".bss   : [0x%08x, 0x%08x)\n", KERNEL_BSS_START, KERNEL_BSS_END);
   printk("\n");
 
+  // 试下 kmalloc
   char *p1 = kmalloc(13);
   char *p2 = kmalloc(13);
   printk("p1: %p\n", p1);
   printk("p2: %p\n", p2);
-
-  printk("sizeof(struct jamfs_header): %d\n", sizeof(struct jamfs_header));
-  printk("sizeof(struct jamfs_file_header): %d\n",
-         sizeof(struct jamfs_file_header));
 
   MAGIC_BREAK();
 
@@ -148,6 +148,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   process_exec_binary(buf, bin_len, NULL);
   process_exec_binary(buf, bin_len, NULL);
   process_exec_binary(buf, bin_len, NULL);
+
+  printk("[%-8s] success!\n\n", "Entry");
 
   // 开中断
   intr_enable();

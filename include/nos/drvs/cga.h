@@ -40,9 +40,14 @@ struct cga_cursor {
 
 // 初始化 CGA 子系统
 void cga_setup();
+
 // 清屏
 void cga_clear_screen();
+
 // 输出字符到屏幕
 void cga_putchar(char chr);
+
+// 更新光标位置
+void cga_update_cursor();
 
 #endif  // !_NOS_DRVS_CGA_H_

@@ -85,3 +85,9 @@ cga_putchar(char chr)
     cga_cursor.y = CGA_LINE - 1;
   }
 }
+
+void
+cga_update_cursor()
+{
+  set_hw_cursor(cga_cursor.x, cga_cursor.y);
+}

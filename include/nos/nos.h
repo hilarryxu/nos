@@ -10,7 +10,7 @@
 #include <nos/multiboot.h>
 
 // 打印输出函数
-void printk(char *format, ...);
+void printk(char *fmt, ...);
 
 void task_setup(struct multiboot_info *mb_info);
 
