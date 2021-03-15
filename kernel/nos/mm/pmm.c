@@ -1,5 +1,7 @@
 #include <nos/mm/pmm.h>
 
+#include <string.h>
+
 // boot 阶段的简易内存分配器
 struct boot_allocator {
   // 起始地址
@@ -8,17 +10,25 @@ struct boot_allocator {
   char *free_addr;
 };
 
+// 空闲页框头部
+struct pmm_block {
+  struct pmm_block *next;
+};
+
+// 物理内存分配器
+struct pmm_allocator {
+  // 空闲页框链表
+  struct pmm_block *freelist;
+};
+
 // boot 内存分配器
 static struct boot_allocator boot_allocator;
 
-// 用栈记录未分配的物理页框
-static uint32_t pmm_stack[PMM_MAX_FRAME];
-
-// 栈顶索引值
-static uint32_t pmm_stack_top = 0;
+// 物理内存分配器
+static struct pmm_allocator pmm_allocator;
 
 // 总页框数
-static uint32_t max_frames = 0;
+static unsigned long max_frames = 0;
 
 static void
 boot_allocator_init(void *start_addr)
@@ -41,14 +51,14 @@ boot_alloc(size_t size)
 // 初始化物理内存管理子系统
 //---------------------------------------------------------------------
 int
-pmm_setup(phys_addr_t free_addr, struct multiboot_info *mb_info)
+pmm_setup(phys_addr_t page_aligned_free, struct multiboot_info *mb_info)
 {
   UNUSED(mb_info);
 
   log_debug(LOG_INFO, "[pmm] setup");
 
   // 暂时没用到
-  boot_allocator_init(CAST_P2V(free_addr));
+  boot_allocator_init(CAST_P2V(page_aligned_free));
 
   // [16MB, 32MB)
   uint32_t mem_start_addr = DEFAULT_PHYS_ADDR_START;
@@ -62,6 +72,8 @@ pmm_setup(phys_addr_t free_addr, struct multiboot_info *mb_info)
     max_frames++;
   }
 
+  loga("max_frames = %d", max_frames);
+
   log_debug(LOG_INFO, "[pmm] done");
 
   return NOS_OK;
@@ -73,9 +85,15 @@ pmm_setup(phys_addr_t free_addr, struct multiboot_info *mb_info)
 phys_addr_t
 pmm_alloc_block()
 {
-  ASSERT(pmm_stack_top > 0);
-  // 物理地址出栈
-  return pmm_stack[pmm_stack_top--];
+  struct pmm_block *block;
+
+  block = pmm_allocator.freelist;
+  if (block) {
+    pmm_allocator.freelist = block->next;
+    return CAST_V2P((uintptr_t)block);
+  } else {
+    return 0;
+  }
 }
 
 //---------------------------------------------------------------------
@@ -84,15 +102,20 @@ pmm_alloc_block()
 void
 pmm_free_block(phys_addr_t paddr)
 {
-  ASSERT(pmm_stack_top <= max_frames);
-  // 物理地址压栈
-  pmm_stack[++pmm_stack_top] = paddr;
+  if (paddr % PAGE_SIZE)
+    log_panic("paddr %08x is not page aligned", paddr);
+
+  uint32_t vaddr = P2V(paddr);
+  // memset((void *)vaddr, 1, PAGE_SIZE);
+  struct pmm_block *block = (struct pmm_block *)vaddr;
+  block->next = pmm_allocator.freelist;
+  pmm_allocator.freelist = block;
 }
 
 //---------------------------------------------------------------------
 // 获取总的可用物理页框数
 //---------------------------------------------------------------------
-uint32_t
+unsigned long
 pmm_get_total_frames()
 {
   return max_frames;

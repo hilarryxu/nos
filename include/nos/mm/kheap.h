@@ -1,6 +1,17 @@
 #ifndef _NOS_MM_KHEAP_H
 #define _NOS_MM_KHEAP_H
 
+//=====================================================================
+// 内核堆管理
+//
+// 有如下特点：
+//   分配的空间物理地址连续
+//   利用了预先映射好的页映射
+//   虚拟地址 = 物理地址 + KERNEL_BASE
+//
+// 分配速度相对较块，不用修改页映射，不用管 TLB 缓存。
+//=====================================================================
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -13,10 +24,10 @@ void *kmalloc(size_t size);
 // 内核堆释放
 void kfree(void *p);
 
-// 按页对齐分配 2^order 页面
-void *kmalloc_ap(uint32_t order);
+// 按页对齐分配 npage 个页面
+void *kmalloc_ap(int npage);
 
 // 按页对齐释放
-void kfree_ap(void *p, uint32_t order);
+void kfree_ap(void *p, int npage);
 
 #endif  // !_NOS_MM_KHEAP_H
