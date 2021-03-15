@@ -20,9 +20,8 @@
 static pte_t *
 vmm_get_pte_ptr(uintptr_t vaddr, bool alloc, uint32_t flags)
 {
-  if (vaddr & 0xFFF) {
+  if (vaddr & 0xFFF)
     log_panic("unaligned vaddr 0x%08x", vaddr);
-  }
 
   uint32_t pde_index = VMM_PDE_INDEX(vaddr);
   uint32_t pte_index = VMM_PTE_INDEX(vaddr);
@@ -84,6 +83,7 @@ vmm_unmap_page(uintptr_t vaddr)
   }
 }
 
+#if 0
 // 连续建立映射多页
 void
 vmm_map_pages(uintptr_t vaddr, phys_addr_t paddr, size_t num, uint32_t flags)
@@ -104,6 +104,7 @@ vmm_unmap_pages(uintptr_t vaddr, size_t num)
     vaddr += PAGE_SIZE;
   }
 }
+#endif
 
 //---------------------------------------------------------------------
 // 在当前地址空间下根据虚拟地址获得其映射对应的物理地址

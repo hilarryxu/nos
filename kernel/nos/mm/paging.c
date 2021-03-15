@@ -21,7 +21,6 @@ phys_addr_t kernel_pgdir_phys;
 phys_addr_t
 paging_setup(phys_addr_t page_aligned_free, struct multiboot_info *mb_info)
 {
-  uint32_t i;
   kernel_pgdir = (struct page_directory *)boot_pgdir;
   kernel_pgdir_phys = CAST_V2P((uintptr_t)kernel_pgdir);
 
@@ -59,20 +58,9 @@ paging_setup(phys_addr_t page_aligned_free, struct multiboot_info *mb_info)
     page_aligned_free += PAGE_SIZE;
   }
 
-  for (i = KERNEL_PDE_INDEX + 1; i < KERNEL_PDE_INDEX + 10; i++) {
-    kernel_pgdir->entries[i] = (pde_t)((i - KERNEL_PDE_INDEX) * SIZE_4MB) |
-                               VMM_PG_4M | VMM_WRITABLE | VMM_PRESENT;
-    // loga("pde[%d] = 0x%08x", i, kernel_pgdir->entries[i]);
-  }
-
   // 递归页目录
   kernel_pgdir->entries[1023] =
       (pde_t)kernel_pgdir_phys | VMM_WRITABLE | VMM_PRESENT;
-
-  // loga("pde[%d] = 0x%08x", 0, kernel_pgdir->entries[0]);
-  // loga("pde[%d] = 0x%08x", KERNEL_PDE_INDEX,
-  //      kernel_pgdir->entries[KERNEL_PDE_INDEX]);
-  // loga("pde[%d] = 0x%08x", 1023, kernel_pgdir->entries[1023]);
 
   // 设置 cr3 寄存器，刷新整个 TLB
   vmm_switch_pgdir(kernel_pgdir_phys);

@@ -127,7 +127,7 @@ init_process_context(struct process *process)
 int
 alloc_process_stacks(struct process *process)
 {
-  uintptr_t kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_POW2);
+  uintptr_t kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_NPAGE);
 
   phys_addr_t stack = pmm_alloc_block();
   if (!stack) {

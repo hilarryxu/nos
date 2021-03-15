@@ -72,8 +72,6 @@ pmm_setup(phys_addr_t page_aligned_free, struct multiboot_info *mb_info)
     max_frames++;
   }
 
-  loga("max_frames = %d", max_frames);
-
   log_debug(LOG_INFO, "[pmm] done");
 
   return NOS_OK;
@@ -102,8 +100,8 @@ pmm_alloc_block()
 void
 pmm_free_block(phys_addr_t paddr)
 {
-  if (paddr % PAGE_SIZE)
-    log_panic("paddr %08x is not page aligned", paddr);
+  if (paddr & 0xFFF)
+    log_panic("unaligned paddr 0x%08x", paddr);
 
   uint32_t vaddr = P2V(paddr);
   // memset((void *)vaddr, 1, PAGE_SIZE);

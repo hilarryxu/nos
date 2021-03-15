@@ -57,7 +57,7 @@ task_init(void *entry)
 {
   struct process *ktask = process_alloc();
 
-  ktask->kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_POW2);
+  ktask->kernel_stack = (uintptr_t)kmalloc_ap(KERNEL_STACK_NPAGE);
   ktask->kernel_stack += KERNEL_STACK_SIZE;
 
   ktask->pgdir = kernel_pgdir;
