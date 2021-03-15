@@ -34,7 +34,7 @@
 // {4095, 4096, 4097} = {0, 4096, 4096}
 #define ALIGN_DOWN(base, size) ((base) & -((__typeof__(base))(size)))
 // {4095, 4096, 4097} = {4096, 4096, 8192}
-// Note: 这里 size 会被展开两次，可能有副作用
+// NOTE: 这里 size 会被展开两次，可能有副作用
 #define ALIGN_UP(base, size) ALIGN_DOWN((base) + (size)-1, (size))
 
 #define PTR_ALIGN_DOWN(base, size)                                             \

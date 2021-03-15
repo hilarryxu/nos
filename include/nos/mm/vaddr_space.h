@@ -14,4 +14,4 @@ int vaddr_space_destroy(struct page_directory *vaddr_space);
 // 拷贝内核地址空间
 void copy_kernel_space(struct page_directory *vaddr_space);
 
-#endif  // _NOS_MM_VADDR_SPACE_H
+#endif  // !_NOS_MM_VADDR_SPACE_H
