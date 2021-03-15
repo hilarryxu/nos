@@ -2,6 +2,15 @@
 
 #include <nos/mm/pmm.h>
 
+#define SIZE_ALIGNMENT NOS_ALIGNMENT
+
+struct kheap_allocator {
+  char *alloc_ptr;
+  size_t remaining_bytes;
+};
+
+static struct kheap_allocator kheap_allocator;
+
 //---------------------------------------------------------------------
 // 初始化内核堆管理
 //---------------------------------------------------------------------
@@ -9,6 +18,10 @@ int
 kheap_setup()
 {
   log_debug(LOG_INFO, "[kheap] setup");
+
+  phys_addr_t paddr = pmm_alloc_block();
+  kheap_allocator.alloc_ptr = CAST_P2V(paddr);
+  kheap_allocator.remaining_bytes = PAGE_SIZE;
 
   log_debug(LOG_INFO, "[kheap] done");
 
@@ -22,10 +35,30 @@ void *
 kmalloc(size_t size)
 {
   ASSERT(size <= PAGE_SIZE);
-  UNUSED(size);
 
-  phys_addr_t paddr = pmm_alloc_block();
-  return CAST_P2V(paddr);
+  if (size == 0)
+    return NULL;
+
+  int align = SIZE_ALIGNMENT;
+  size_t current_mod = (uintptr_t)(kheap_allocator.alloc_ptr) & (align - 1);
+  size_t slop = (current_mod == 0 ? 0 : align - current_mod);
+  size_t needed = size + slop;
+  char *result;
+
+  if (needed <= kheap_allocator.remaining_bytes) {
+    result = kheap_allocator.alloc_ptr + slop;
+    kheap_allocator.alloc_ptr += needed;
+    kheap_allocator.remaining_bytes -= needed;
+  } else {
+    phys_addr_t paddr = pmm_alloc_block();
+    kheap_allocator.alloc_ptr = CAST_P2V(paddr);
+    kheap_allocator.remaining_bytes = PAGE_SIZE;
+
+    return kmalloc(size);
+  }
+
+  ASSERT(((uintptr_t)result & (align - 1)) == 0);
+  return result;
 }
 
 //---------------------------------------------------------------------
@@ -34,8 +67,7 @@ kmalloc(size_t size)
 void
 kfree(void *p)
 {
-  phys_addr_t paddr = CAST_V2P(p);
-  pmm_free_block(paddr);
+  UNUSED(p);
 }
 
 //---------------------------------------------------------------------
@@ -46,7 +78,7 @@ kmalloc_ap(int npage)
 {
   UNUSED(npage);
 
-  return kmalloc(0);
+  return kmalloc(npage * PAGE_SIZE);
 }
 
 //---------------------------------------------------------------------
