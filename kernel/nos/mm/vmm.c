@@ -57,10 +57,9 @@ vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
     return -1;
 
   if (*pte_ptr & VMM_PRESENT) {
-    log_panic(
-        "failed to map 0x%08x to 0x%08x, already has map 0x%08x "
-        "to 0x%08x",
-        vaddr, paddr, vaddr, *pte_ptr & PAGE_FRAME_MASK);
+    log_panic("failed to map 0x%08x to 0x%08x, already has map 0x%08x "
+              "to 0x%08x",
+              vaddr, paddr, vaddr, *pte_ptr & PAGE_FRAME_MASK);
   }
 
   *pte_ptr = (pte_t)paddr | flags | VMM_PRESENT;
@@ -105,7 +104,6 @@ vmm_unmap_pages(uintptr_t vaddr, size_t num)
     vaddr += PAGE_SIZE;
   }
 }
-
 
 //---------------------------------------------------------------------
 // 在当前地址空间下根据虚拟地址获得其映射对应的物理地址

@@ -4,12 +4,23 @@
 #include <stddef.h>  // size_t
 #include <stdint.h>
 
+#include <nos/types.h>
+
 #define __always_inline inline __attribute__((always_inline))
 #define __noinline __attribute__((noinline))
 #define __noreturn __attribute__((noreturn))
 
-typedef unsigned char u_char;
-typedef uint32_t phys_addr_t;
+#define likely(x) __builtin_expect((x), 1)
+#define unlikely(x) __builtin_expect((x), 0)
+
+#if (__GNUC__ == 3 && __GNUC_MINOR__ > 0) || __GNUC__ > 3
+#define __deprecated __attribute__((deprecated))
+#else
+#define __deprecated
+#endif
+
+#define __stringify_1(x) #x
+#define __stringify(x) __stringify_1(x)
 
 #define UNUSED(param) (void)param
 

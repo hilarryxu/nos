@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(_KERNEL_)
+#if defined(__KERNEL__)
 #include <nos/nos.h>
 #endif
 
 __attribute__((__noreturn__)) void
 abort(void)
 {
-#if defined(_KERNEL_)
+#if defined(__KERNEL__)
   printk("\nkernel: panic: abort()\n");
 #endif
 

@@ -282,7 +282,7 @@ for name in [
         src(name + '.c'),
         variables=dict(
             cflags=
-            '$cflags -D_KERNEL_ -I' + trans_path('$root/libk/include')
+            '$cflags -D__KERNEL__ -I' + trans_path('$root/libk/include')
         )
     )
 
