@@ -30,8 +30,10 @@ struct cga_cursor {
 
 // 该模式下的显存地址（虚拟地址空间下）
 #define CGA_ADDRESS (KERNEL_BASE + 0xB8000)
+
 // 总共 80 列
 #define CGA_COLUMN 80
+
 // 总共 25 行
 #define CGA_LINE 25
 

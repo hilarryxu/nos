@@ -22,7 +22,7 @@ phys_addr_t
 paging_setup(phys_addr_t page_aligned_free, struct multiboot_info *mb_info)
 {
   kernel_pgdir = (struct page_directory *)boot_pgdir;
-  kernel_pgdir_phys = CAST_V2P((uintptr_t)kernel_pgdir);
+  kernel_pgdir_phys = CAST_V2P(kernel_pgdir);
 
   // [4MB, 8MB) 的页表区域清零
   bzero((void *)KERNEL_PG_1, KERNEL_PG_1_LIM - KERNEL_PG_1);
@@ -38,6 +38,7 @@ paging_setup(phys_addr_t page_aligned_free, struct multiboot_info *mb_info)
 
   // [3G, 3G + mem_end) -> [0, mem_end) 按 4M 页大小映射
   // [3G, 3G + 4MB) boot 阶段已经映射过了，跳过之
+  // FIXME(xcc): 改用 KERNEL_PG_1 区域当作内核页表区
   phys_addr_t paddr = SIZE_4MB;
   phys_addr_t max_phys_addr = (phys_addr_t)pmm_get_max_phys_addr(mb_info);
   while (paddr < max_phys_addr) {

@@ -6,6 +6,7 @@
 
 // 显存首地址
 struct cga_char *cga_video;
+
 // 光标
 struct cga_cursor cga_cursor = {.x = 0, .y = 0, .color = CGA_COLOR_DEFAULT};
 

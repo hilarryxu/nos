@@ -60,9 +60,11 @@ kernel_main(unsigned long addr, unsigned long magic)
   // 重新初始化内核页目录
   // 去掉 [0, 4MB) -> [0, 4MB) 的映射
   // 页目录的 1023 项设置为递归页目录方式（这个特性可以简化不少代码）
+  ASSERT(aligned_free_addr <= SIZE_4MB);
   aligned_free_addr = paging_setup(aligned_free_addr, mb_info);
 
   // 初始化物理内存管理子系统
+  ASSERT(aligned_free_addr <= SIZE_4MB);
   pmm_setup(aligned_free_addr, mb_info);
   // 初始化虚拟内存管理子系统
   vmm_setup();
