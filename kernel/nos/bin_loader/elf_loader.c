@@ -70,7 +70,6 @@ load_from_prog_headers(uintptr_t image_start, size_t image_size,
                        uint32_t num, struct process *proc)
 {
   for (uint32_t i = 0; i < num; i++, ph += ph_struct_size) {
-    loga("num=%d, [%d] type=%d", num, i, ph->p_type);
     if (ph->p_type == ELF_PROG_LOAD) {
       if (load_from_prog_header(image_start, image_size, ph, proc) != NOS_OK)
         return -1;
@@ -103,23 +102,6 @@ load_elf_program(struct process *proc, uintptr_t image_start, size_t image_size)
 
   proc->entry = (void *)(header->e_entry);
   return NOS_OK;
-
-#if 0
-  size_t aligned_size = ALIGN_UP(image_size, PAGE_SIZE);
-  uintptr_t vaddr_start = (uintptr_t)BINARY_ENTRY_VADDR;
-  uintptr_t vaddr = vaddr_start;
-  uintptr_t end_vaddr = vaddr + aligned_size;
-
-  for (; vaddr < end_vaddr; vaddr += PAGE_SIZE) {
-    phys_addr_t paddr = pmm_alloc_block();
-    vmm_map_page(process->pgdir, vaddr, paddr, VMM_WRITABLE | VMM_USER);
-  }
-
-  bzero((void *)vaddr_start, aligned_size);
-  memcpy((void *)vaddr_start, (void *)image_start, image_size);
-
-  process->entry = (void *)vaddr_start;
-#endif
 }
 
 int
