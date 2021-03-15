@@ -339,6 +339,7 @@ for name in [
     'syscall/syscall',
     'bin_loader/loader',
     'bin_loader/flat_loader',
+    'bin_loader/elf_loader',
 ]:
     kernel_objs += kernel_cc(name)
 
