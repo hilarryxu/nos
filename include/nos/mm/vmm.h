@@ -45,13 +45,15 @@ extern phys_addr_t kernel_pgdir_phys;
 int vmm_setup();
 
 // 在当前地址空间下建立页映射
-int vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags);
+int vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
+                 phys_addr_t paddr, uint32_t flags);
 
 // 在当前地址空间下取消页映射
-void vmm_unmap_page(uintptr_t vaddr);
+void vmm_unmap_page(struct page_directory *page_dir, uintptr_t vaddr);
 
 // 在当前地址空间下根据虚拟地址获得其映射对应的物理地址
-int vmm_v2p(uintptr_t vaddr, phys_addr_t *p_paddr);
+int vmm_v2p(struct page_directory *page_dir, uintptr_t vaddr,
+            phys_addr_t *p_paddr);
 
 // 切换地址空间（修改 cr3 寄存器）
 void vmm_switch_pgdir(phys_addr_t pgdir);

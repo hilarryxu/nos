@@ -18,28 +18,28 @@
 
 // 获取页表项的指针
 static pte_t *
-vmm_get_pte_ptr(uintptr_t vaddr, bool alloc, uint32_t flags)
+vmm_get_pte_ptr(struct page_directory *page_dir, uintptr_t vaddr, bool alloc,
+                uint32_t flags)
 {
   if (vaddr & 0xFFF)
     log_panic("unaligned vaddr 0x%08x", vaddr);
 
   uint32_t pde_index = VMM_PDE_INDEX(vaddr);
   uint32_t pte_index = VMM_PTE_INDEX(vaddr);
-
-  struct page_directory *page_dir =
-      (struct page_directory *)MAGIC_PAGE_DIR_ADDR;
-  struct page_table *page_table =
-      (struct page_table *)(MAGIC_PAGE_TABLE_ADDR + (pde_index << 12));
+  phys_addr_t page_table_phys =
+      (phys_addr_t)(page_dir->entries[pde_index] & PAGE_FRAME_MASK);
 
   if (!(page_dir->entries[pde_index] & VMM_PRESENT) && alloc) {
-    phys_addr_t page_table_phys = pmm_alloc_block();
+    page_table_phys = pmm_alloc_block();
     // FIXME: 页表的 flags 是否需要也加到函数参数中
     page_dir->entries[pde_index] = (pde_t)page_table_phys | flags | VMM_PRESENT;
     // 清空页表所占一页内存数据
-    bzero((void *)page_table, PAGE_SIZE);
+    bzero((void *)CAST_P2V(page_table_phys), PAGE_SIZE);
   }
 
   if (page_dir->entries[pde_index] & VMM_PRESENT) {
+    struct page_table *page_table =
+        (struct page_table *)CAST_P2V(page_table_phys);
     return &(page_table->entries[pte_index]);
   }
   return NULL;
@@ -49,9 +49,10 @@ vmm_get_pte_ptr(uintptr_t vaddr, bool alloc, uint32_t flags)
 // 在当前地址空间下建立页映射
 //---------------------------------------------------------------------
 int
-vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
+vmm_map_page(struct page_directory *page_dir, uintptr_t vaddr,
+             phys_addr_t paddr, uint32_t flags)
 {
-  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, true, flags);
+  pte_t *pte_ptr = vmm_get_pte_ptr(page_dir, vaddr, true, flags);
   if (pte_ptr == NULL)
     return -1;
 
@@ -73,9 +74,9 @@ vmm_map_page(uintptr_t vaddr, phys_addr_t paddr, uint32_t flags)
 // 在当前地址空间下取消页映射
 //---------------------------------------------------------------------
 void
-vmm_unmap_page(uintptr_t vaddr)
+vmm_unmap_page(struct page_directory *page_dir, uintptr_t vaddr)
 {
-  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, false, 0);
+  pte_t *pte_ptr = vmm_get_pte_ptr(page_dir, vaddr, false, 0);
 
   if (pte_ptr) {
     pmm_free_block(*pte_ptr & PAGE_FRAME_MASK);
@@ -110,9 +111,9 @@ vmm_unmap_pages(uintptr_t vaddr, size_t num)
 // 在当前地址空间下根据虚拟地址获得其映射对应的物理地址
 //---------------------------------------------------------------------
 int
-vmm_v2p(uintptr_t vaddr, phys_addr_t *p_paddr)
+vmm_v2p(struct page_directory *page_dir, uintptr_t vaddr, phys_addr_t *p_paddr)
 {
-  pte_t *pte_ptr = vmm_get_pte_ptr(vaddr, false, 0);
+  pte_t *pte_ptr = vmm_get_pte_ptr(page_dir, vaddr, false, 0);
 
   if (!pte_ptr)
     return -1;

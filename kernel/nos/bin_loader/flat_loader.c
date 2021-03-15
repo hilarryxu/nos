@@ -28,7 +28,7 @@ load_binary_program(struct process *process, uintptr_t image_start,
 
   for (; vaddr < end_vaddr; vaddr += PAGE_SIZE) {
     phys_addr_t paddr = pmm_alloc_block();
-    vmm_map_page(vaddr, paddr, VMM_WRITABLE | VMM_USER);
+    vmm_map_page(process->pgdir, vaddr, paddr, VMM_WRITABLE | VMM_USER);
   }
 
   bzero((void *)vaddr_start, aligned_size);

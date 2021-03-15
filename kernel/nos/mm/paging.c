@@ -59,10 +59,6 @@ paging_setup(phys_addr_t page_aligned_free, struct multiboot_info *mb_info)
     page_aligned_free += PAGE_SIZE;
   }
 
-  // 递归页目录
-  kernel_pgdir->entries[1023] =
-      (pde_t)kernel_pgdir_phys | VMM_WRITABLE | VMM_PRESENT;
-
   // 设置 cr3 寄存器，刷新整个 TLB
   vmm_switch_pgdir(kernel_pgdir_phys);
 

@@ -19,12 +19,9 @@ vaddr_space_create(phys_addr_t *p_pgdir_phys)
   bzero(pgdir, PAGE_SIZE);
 
   // 拷贝内核地址空间
-  for (int i = KERNEL_PDE_INDEX; i < PAGES_PER_DIR - 1; i++) {
+  for (int i = KERNEL_PDE_INDEX; i < PAGES_PER_DIR; i++) {
     pgdir[i] = kernel_pgdir->entries[i];
   }
-
-  // 递归页目录
-  pgdir[1023] = (pde_t)paddr | VMM_PRESENT | VMM_WRITABLE | VMM_USER;
 
   // 返回页目录的物理地址
   if (p_pgdir_phys) {

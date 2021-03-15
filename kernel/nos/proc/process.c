@@ -134,8 +134,8 @@ alloc_process_stacks(struct process *process)
     return -1;
   }
 
-  if (vmm_map_page((uintptr_t)(PROCESS_USER_STACK - PAGE_SIZE), stack,
-                   VMM_WRITABLE | VMM_USER) < 0) {
+  if (vmm_map_page(process->pgdir, (uintptr_t)(PROCESS_USER_STACK - PAGE_SIZE),
+                   stack, VMM_WRITABLE | VMM_USER) < 0) {
     pmm_free_block(stack);
     return -1;
   }
