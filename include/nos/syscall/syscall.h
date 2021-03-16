@@ -21,7 +21,7 @@
 // #define __NR_break 17
 // #define __NR_stat 18
 // #define __NR_lseek 19
-// #define __NR_getpid 20
+#define __NR_getpid 20
 // #define __NR_mount 21
 // #define __NR_umount 22
 // #define __NR_setuid 23

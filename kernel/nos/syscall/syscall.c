@@ -1,17 +1,27 @@
 #include <nos/syscall/syscall.h>
 
 #include <nos/nos.h>
+#include <nos/current.h>
 #include <nos/trap.h>
 #include <nos/proc/process.h>
 
-static int
+static long
 sys_demo(char ch)
 {
   printk("%c", ch);
   return NOS_OK;
 }
 
-static void *syscall_table[] = {[0] = sys_demo};
+static long
+sys_getpid()
+{
+  return current->pid;
+}
+
+static void *syscall_table[] = {
+    [0] = sys_demo,
+    [__NR_getpid] = sys_getpid,
+};
 
 #define NR_SYSCALLS NELEMS(syscall_table)
 
