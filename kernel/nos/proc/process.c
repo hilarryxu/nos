@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <nos/nos.h>
+#include <nos/current.h>
 #include <nos/sync/sync.h>
 #include <nos/gdt.h>
 #include <nos/mm/paging.h>
@@ -188,7 +189,9 @@ process_exit(struct process *process, int exit_code)
 {
   process->exit_code = exit_code;
   process->state = PROCESS_STATE_ZOMBIE;
-  // TODO: sched
+
+  schedule();
+  log_panic("exit never return!!! pid=%d", current->pid);
 }
 
 //---------------------------------------------------------------------

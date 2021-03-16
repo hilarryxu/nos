@@ -2,7 +2,7 @@
 #define _NOS_SYSCALL_SYSCALL_H
 
 // #define __NR_setup 0
-// #define __NR_exit 1
+#define __NR_exit 1
 // #define __NR_fork 2
 #define __NR_read 3
 #define __NR_write 4
@@ -88,6 +88,8 @@
 // #define __NR_lstat 84
 // #define __NR_readlink 85
 // #define __NR_uselib 86
+
+#define __NR_nos_prints 1000
 
 struct trap_frame;
 

@@ -18,6 +18,13 @@ sys_demo(char ch)
 }
 
 static long
+sys_nos_prints(const char *str)
+{
+  printk("%s", str);
+  return NOS_OK;
+}
+
+static long
 sys_open(const char *pathname, int flags)
 {
   int rc;
@@ -127,10 +134,22 @@ sys_getpid()
   return current->pid;
 }
 
+static long
+sys_exit(int exit_code)
+{
+  process_exit(current, exit_code);
+  return NOS_OK;
+}
+
 static void *syscall_table[] = {
-    [0] = sys_demo,           [__NR_read] = sys_read,
-    [__NR_write] = sys_write, [__NR_open] = sys_open,
-    [__NR_close] = sys_close, [__NR_getpid] = sys_getpid,
+    [0] = sys_demo,
+    [__NR_exit] = sys_exit,
+    [__NR_read] = sys_read,
+    [__NR_write] = sys_write,
+    [__NR_open] = sys_open,
+    [__NR_close] = sys_close,
+    [__NR_getpid] = sys_getpid,
+    [__NR_nos_prints] = sys_nos_prints,
 };
 
 #define NR_SYSCALLS NELEMS(syscall_table)
