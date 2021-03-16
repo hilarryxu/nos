@@ -9,6 +9,9 @@
 // 可编程间隔计时器 Timer
 #define IRQ_TIMER 0
 
+// 键盘
+#define IRQ_KEYBOARD 1
+
 // 中断栈帧结构
 struct trap_frame {
   // 压入的通用寄存器组

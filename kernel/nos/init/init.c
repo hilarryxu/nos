@@ -15,6 +15,7 @@
 #include <nos/sched/sched.h>
 #include <nos/fs/jamfs.h>
 #include <nos/fs/vfs.h>
+#include <nos/drvs/keyboard.h>
 
 void kernel_main(unsigned long addr, unsigned long magic)
     __attribute__((noreturn));
@@ -82,6 +83,8 @@ kernel_main(unsigned long addr, unsigned long magic)
   pit_setup();
   // 初始化 IDT
   idt_setup();
+
+  keyboard_setup();
 
   // 初始化 initrd 只读内存存储介质
   inird_setup(initrd_start, initrd_end - initrd_start);

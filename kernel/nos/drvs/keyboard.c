@@ -1,5 +1,7 @@
 #include <nos/drvs/keyboard.h>
 
+#include <ctype.h>
+
 #include <nos/nos.h>
 #include <nos/ioport.h>
 #include <nos/trap.h>
@@ -371,6 +373,10 @@ keyboard_interrupt(struct trap_frame *tf)
     if (key_code >= KEY_KP_0 && key_code <= KEY_KP_DOT &&
         !keyboard_is_key_state_set(key_states, KEY_STATE_NUM_LOCK))
       is_break = true;
+
+    if (!is_break && isprint(key_code)) {
+      printk("%c", key_code);
+    }
 
     // 按下的 make 码时才调用回调函数
     if (!is_break && key_code_handler)

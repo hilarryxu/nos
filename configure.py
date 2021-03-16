@@ -321,6 +321,7 @@ for name in [
     'exception',
     'pic',
     'pit',
+    'trap',
     'task',
     'mm/paging',
     'mm/pmm',

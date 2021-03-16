@@ -6,6 +6,8 @@
 
 #include <nos/nos.h>
 
+struct trap_frame;
+
 enum key_code {
   /* Alphabet keys */
   KEY_A = 'a',
@@ -182,5 +184,7 @@ keyboard_is_alt_set(uint32_t key_states)
 {
   return keyboard_is_key_state_set(key_states, KEY_STATE_LALT | KEY_STATE_RALT);
 }
+
+int keyboard_interrupt(struct trap_frame *tf);
 
 #endif  // _NOS_DRVS_KEYBOARD_H_
