@@ -37,7 +37,7 @@ int vfs_open(struct vfs *, const char *path, struct file *, int flags,
              int *p_out_flags);
 void vfs_close(struct file *);
 int vfs_read(struct file *, void *buf, size_t nbytes, off_t p_offset);
-int vsf_write(struct file *, const void *buf, size_t nbytes, off_t p_offset);
+int vfs_write(struct file *, const void *buf, size_t nbytes, off_t p_offset);
 
 int vfs_get_filesize(struct file *, int64_t *p_size);
 
@@ -49,4 +49,4 @@ int vfs_open_malloc(struct vfs *, const char *path, struct file **, int flags,
                     int *p_out_flags);
 void vfs_close_free(struct file *);
 
-#endif  // _NOS_FS_VFS_H
+#endif  // !_NOS_FS_VFS_H

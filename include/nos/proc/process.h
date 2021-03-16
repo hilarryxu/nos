@@ -7,6 +7,7 @@
 #include <nos/types.h>
 #include <nos/trap.h>
 #include <nos/mm/vmm.h>
+#include <nos/fs/osfile.h>
 #include "nc_sys_queue.h"
 
 #define INVALID_PID ((pid_t)-1)
@@ -55,6 +56,7 @@ struct process {
   int exit_code;                      // 进程退出码（发给父进程）
   uint32_t flags;                     // 标志位
   TAILQ_ENTRY(process) process_link;  // 关联进程列表
+  struct osfile *files[NR_PROCESS_FILES];
   char name[MAX_PROCESS_NAME_LEN + 1];  // 进程名
   uint32_t kstack_magic;
 };
