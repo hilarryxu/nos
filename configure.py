@@ -342,6 +342,7 @@ for name in [
     'bin_loader/flat_loader',
     'bin_loader/elf_loader',
     'drvs/console',
+    'sync/spinlock',
 ]:
     kernel_objs += kernel_cc(name)
 
