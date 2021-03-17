@@ -173,7 +173,7 @@ kernel_cflags = [
     '-fno-pic',
     '-DNOS_ASSERT_PANIC',
     '-DNOS_DEBUG_LOG',
-    trans_path('-I$root/libk/include'),
+    trans_path('-I$root/libc/include'),
     trans_path('-I$root/kernel'),
     trans_path('-I$root/include'),
 ]
@@ -272,23 +272,45 @@ n.newline()
 #: libk
 libk_objs = []
 for name in [
-    'libk/src/stdlib',
-    'libk/src/string',
-    'libk/src/ctype',
+    'libc/src/stdlib',
+    'libc/src/string',
+    'libc/src/ctype',
 ]:
     libk_objs += n.build(
-        built(name + objext),
+        built((name + objext).replace('libc', 'libk')),
         'kernel_cc',
         src(name + '.c'),
         variables=dict(
             cflags=
-            '$cflags -D__KERNEL__ -I' + trans_path('$root/libk/include')
+            '$cflags -D__KERNEL__ -I' + trans_path('$root/libc/include')
         )
     )
 
 libk = n.build(built('lib/libk.a'), 'kernel_ar', libk_objs)
 
 all_targets += libk
+n.newline()
+
+#: libc
+libc_objs = []
+for name in [
+    'libc/src/stdlib',
+    'libc/src/string',
+    'libc/src/ctype',
+]:
+    libc_objs += n.build(
+        built(name + objext),
+        'kernel_cc',
+        src(name + '.c'),
+        variables=dict(
+            cflags=
+            '$cflags -I' + trans_path('$root/libc/include')
+        )
+    )
+
+libc = n.build(built('lib/libc.a'), 'kernel_ar', libc_objs)
+
+all_targets += libc
 n.newline()
 
 #: kernel

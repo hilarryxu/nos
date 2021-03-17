@@ -4,10 +4,10 @@ if [ -z $MSYSTEM ]; then
   rg --files kernel/ --type c | xargs clang-format -i
   rg --files include/nos/ --type c | xargs clang-format -i
   rg --files user/ --type c | xargs clang-format -i
-  rg --files libk/ --type c | xargs clang-format -i
+  rg --files libc/ --type c | xargs clang-format -i
 else
   rg --path-separator '//' --files kernel/ --type c | xargs clang-format -i
   rg --path-separator '//' --files include/nos/ --type c | xargs clang-format -i
   rg --path-separator '//' --files user/ --type c | xargs clang-format -i
-  rg --path-separator '//' --files libk/ --type c | xargs clang-format -i
+  rg --path-separator '//' --files libc/ --type c | xargs clang-format -i
 fi
