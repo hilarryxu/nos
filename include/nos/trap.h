@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+// 系统调用中断号
+#define T_SYSCALL 0x80
+
 // IRQ 起始编号
 #define T_IRQ0 32
 

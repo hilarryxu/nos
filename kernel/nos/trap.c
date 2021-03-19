@@ -42,7 +42,7 @@ trap_dispatch(struct trap_frame *tf)
     } else if (tf->trap_no == T_IRQ0 + IRQ_KEYBOARD) {
       keyboard_interrupt(tf);
     }
-  } else if (tf->trap_no == 0x30) {
+  } else if (tf->trap_no == T_SYSCALL) {
     syscall_dispatch(tf);
   } else {
     // 其他暂未处理的中断号

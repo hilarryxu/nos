@@ -9,10 +9,9 @@ _start(void)
   int j = i + 5;
 
   for (; i < j; i++) {
-    asm("int $0x30" : : "a"(1000), "b"('0' + i));
+    cputc('0' + i);
   }
-  // cprints("hello\n");
-  nos_putc('A');
+  cprints("hello\n");
 
   while (1)
     ;

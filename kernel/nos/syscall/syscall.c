@@ -142,14 +142,10 @@ sys_exit(int exit_code)
 }
 
 static void *syscall_table[] = {
-    [__NR_exit] = sys_exit,
-    [__NR_read] = sys_read,
-    [__NR_write] = sys_write,
-    [__NR_open] = sys_open,
-    [__NR_close] = sys_close,
-    [__NR_getpid] = sys_getpid,
-    [__NR_nos_putc] = sys_nos_putc,
-    [__NR_nos_prints] = sys_nos_prints,
+    [__NR_exit] = sys_exit,         [__NR_read] = sys_read,
+    [__NR_write] = sys_write,       [__NR_open] = sys_open,
+    [__NR_close] = sys_close,       [__NR_getpid] = sys_getpid,
+    [__NR_nos_putc] = sys_nos_putc, [__NR_nos_prints] = sys_nos_prints,
 };
 
 #define NR_SYSCALLS NELEMS(syscall_table)

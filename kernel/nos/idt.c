@@ -4,6 +4,7 @@
 
 #include <nos/nos.h>
 #include <nos/gdt.h>
+#include <nos/trap.h>
 
 extern void intr_stub_0(void);
 extern void intr_stub_1(void);
@@ -29,7 +30,7 @@ extern void intr_stub_19(void);
 extern void intr_stub_32(void);
 extern void intr_stub_33(void);
 
-extern void intr_stub_48(void);
+extern void intr_stub_128(void);
 
 // IDT 表项
 //
@@ -115,8 +116,8 @@ idt_setup()
   set_intr_handler(33, intr_stub_33);
 
   // syscall
-  idt_set_entry(48, KERNEL_CODE_SELECTOR, intr_stub_48, IDT_INTERRUPT_GATE,
-                DPL_3);
+  idt_set_entry(T_SYSCALL, KERNEL_CODE_SELECTOR, intr_stub_128,
+                IDT_INTERRUPT_GATE, DPL_3);
 
   struct {
     uint16_t limit;

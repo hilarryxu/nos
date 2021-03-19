@@ -69,7 +69,7 @@ intr_stub 32
 intr_stub 33
 
 # syscall
-intr_stub 48
+intr_stub 128
 
 # 通用中断处理流程
 .extern handle_interrupt
