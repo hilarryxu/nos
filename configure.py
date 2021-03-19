@@ -367,7 +367,10 @@ for name in [
     'drvs/console',
     'sync/spinlock',
 ]:
-    kernel_objs += kernel_cc(name)
+    kernel_objs += kernel_cc(
+        name,
+        variables=dict(kernel_cflags='$kernel_cflags -D__KERNEL__')
+    )
 
 kernel_elf = n.build(
     built('kernel.bin'),

@@ -89,10 +89,13 @@
 // #define __NR_readlink 85
 // #define __NR_uselib 86
 
-#define __NR_nos_prints 1000
+#define __NR_nos_putc 1000
+#define __NR_nos_prints 1001
 
+#if defined(__KERNEL__)
 struct trap_frame;
 
 void syscall_dispatch(struct trap_frame *tf);
+#endif  // __KERNEL__
 
 #endif  // !_NOS_SYSCALL_SYSCALL_H

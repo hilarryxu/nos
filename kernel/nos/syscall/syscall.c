@@ -11,9 +11,9 @@
 #include <nos/mm/kheap.h>
 
 static long
-sys_demo(char ch)
+sys_nos_putc(int c)
 {
-  printk("%c", ch);
+  printk("%c", c);
   return NOS_OK;
 }
 
@@ -142,13 +142,13 @@ sys_exit(int exit_code)
 }
 
 static void *syscall_table[] = {
-    [0] = sys_demo,
     [__NR_exit] = sys_exit,
     [__NR_read] = sys_read,
     [__NR_write] = sys_write,
     [__NR_open] = sys_open,
     [__NR_close] = sys_close,
     [__NR_getpid] = sys_getpid,
+    [__NR_nos_putc] = sys_nos_putc,
     [__NR_nos_prints] = sys_nos_prints,
 };
 
