@@ -31,6 +31,9 @@ extern char KERNEL_BSS_END[];
 // 页大小 4KB
 #define PAGE_SIZE 0x1000
 
+// 取得页框号的右移位数
+#define PAGE_SHIFT 12
+
 // 页掩码，用于 4KB 对齐
 #define PAGE_FRAME_MASK 0xFFFFF000
 

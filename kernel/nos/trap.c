@@ -33,10 +33,10 @@ trap_dispatch(struct trap_frame *tf)
     pic_send_eoi(tf->trap_no - T_IRQ0);
 
     if (tf->trap_no == T_IRQ0 + IRQ_TIMER) {
-      g_ticks++;
+      jiffies++;
       // 时钟来了就准备进程调度
       // 后续可以计算时间片来设置是否需要调度
-      if (g_ticks % 100 == 0) {
+      if (jiffies % 100 == 0) {
         current->need_resched = true;
       }
     } else if (tf->trap_no == T_IRQ0 + IRQ_KEYBOARD) {

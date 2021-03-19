@@ -2,9 +2,10 @@
 
 #include <stdint.h>
 
+#include <nos/param.h>
 #include <nos/ioport.h>
 
-uint32_t g_ticks = 0;
+unsigned long volatile jiffies = 0;
 
 static uint32_t frequency = PIT_BASE_FREQUENCY / HZ;
 

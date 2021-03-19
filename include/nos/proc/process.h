@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <nos/types.h>
+#include <nos/param.h>
 #include <nos/trap.h>
 #include <nos/mm/vmm.h>
 #include <nos/fs/osfile.h>

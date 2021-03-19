@@ -9,8 +9,6 @@
 #include <nos/debug/debug.h>
 #include <nos/multiboot.h>
 
-#define NR_PROCESS_FILES 16
-
 // 打印输出函数
 void printk(char *fmt, ...);
 
