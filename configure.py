@@ -297,6 +297,7 @@ for name in [
     'libc/src/stdlib',
     'libc/src/string',
     'libc/src/ctype',
+    'libc/src/ulib',
 ]:
     libc_objs += n.build(
         built(name + objext),
@@ -399,9 +400,10 @@ user_test_bin = n.build(
     variables=dict(
         kernel_ldflags='$kernel_ldflags -T{0}'.format(
             src('user/test/test.ld'),
-        )
+        ),
+        libs='-L{0} -lc'.format(trans_path('$builddir/lib'))
     ),
-    implicit=[src('user/test/test.ld')]
+    implicit=[src('user/test/test.ld')] + libc
 )
 
 all_targets += user_test_bin

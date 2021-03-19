@@ -2,6 +2,9 @@
 #define _UNISTD_H_
 
 #include <sys/cdefs.h>
+#include <sys/types.h>
+
+extern int errno;
 
 #define __NR_restart_syscall 0
 #define __NR_exit 1
@@ -90,6 +93,8 @@
 #define __NR_oldlstat 84
 #define __NR_readlink 85
 #define __NR_uselib 86
+
+#define __NR_nos_prints 1000
 
 #define __syscall_return(type, res)                                            \
   do {                                                                         \

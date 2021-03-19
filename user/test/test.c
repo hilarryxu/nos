@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 
 int i = 0;
 
@@ -10,6 +11,7 @@ _start(void)
   for (; i < j; i++) {
     asm("int $0x30" : : "a"(0), "b"('0' + i));
   }
+  cprints("hello\n");
 
   while (1)
     ;
