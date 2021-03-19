@@ -3,8 +3,9 @@
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
+#include <errno.h>
 
-extern int errno;
+__BEGIN_DECLS
 
 #define __NR_restart_syscall 0
 #define __NR_exit 1
@@ -186,6 +187,25 @@ extern int errno;
     __syscall_return(type, __res);                                             \
   }
 
+/* clang-format off */
+
+/* void exit(int status); */
+static inline _syscall1(void, exit, int, status)
+
+/* ssize_t read(int fd, void *buf, size_t count); */
+static inline _syscall3(ssize_t, read, int, fd, void *, buf, size_t, count)
+
+/* ssize_t write(int fd, const void *buf, size_t count); */
+static inline _syscall3(ssize_t, write, int, fd, const void *, buf, size_t, count)
+
+/* int close(int fd); */
+static inline _syscall1(int, close, int, fd)
+
+/* pid_t getpid(); */
 static inline _syscall0(pid_t, getpid)
+
+__END_DECLS
+
+/* clang-format on */
 
 #endif /* !_UNISTD_H_ */
