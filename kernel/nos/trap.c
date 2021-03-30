@@ -64,10 +64,12 @@ handle_interrupt(struct trap_frame *tf)
   } else {
     bool in_kernel = is_trap_in_kernel(tf);
     trap_dispatch(tf);
+    // NOTE: 不支持内核抢占
+    // 因为那样很多内核数据访问都需要考虑同步问题，增加不少复杂度。
     if (!in_kernel) {
-      // FIXME: check current exit flag
-      if (current->need_resched)
+      if (current->need_resched) {
         schedule();
+      }
     }
   }
 }
