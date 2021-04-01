@@ -15,6 +15,17 @@
 #include <stddef.h>
 #include <stdint.h>
 
+struct kmem_cache;
+
+struct kmem_cache *kmem_cache_create(const char *name, size_t object_size,
+                                     size_t align, unsigned long flags);
+
+void kmem_cache_destroy(struct kmem_cache *cache);
+
+void *kmem_cache_alloc(struct kmem_cache *cache);
+
+void kmem_cache_free(struct kmem_cache *cache, void *object);
+
 // 初始化内核堆管理
 int kheap_setup();
 
